@@ -9,9 +9,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
  * Provider-agnostic newsletter signup.
  *
- * With no EMAIL_API_KEY (or no EMAIL_PROVIDER), this logs the address and
- * reports success so the form works in local dev and on a fresh Vercel
- * project. Set both variables to deliver mail. See README.
+ * EMAIL_PROVIDER and EMAIL_API_KEY, when both are set, take precedence.
+ * Otherwise BUTTONDOWN_API_KEY sends the address to Buttondown.
+ * With no key at all, this logs the address and reports success so the form
+ * works in local dev. See README.
  */
 export async function subscribeEmail(emailRaw: string, interest: EmailInterest = "daily"): Promise<SubscribeResult> {
   const email = emailRaw.trim().toLowerCase();
@@ -21,24 +22,34 @@ export async function subscribeEmail(emailRaw: string, interest: EmailInterest =
 
   const provider = (process.env.EMAIL_PROVIDER || "").trim().toLowerCase();
   const key = (process.env.EMAIL_API_KEY || "").trim();
+  const buttondownKey = (process.env.BUTTONDOWN_API_KEY || "").trim();
 
-  if (!provider || !key) {
-    if (provider || key) {
-      console.warn("[email] Set both EMAIL_PROVIDER and EMAIL_API_KEY to deliver mail. Logging only.");
+  if (provider && key) {
+    try {
+      if (provider === "buttondown") return await subscribeButtondown(email, key, interest);
+      if (provider === "beehiiv") return await subscribeBeehiiv(email, key, interest);
+      if (provider === "resend") return await subscribeResend(email, key);
+      return { ok: false, error: `Unknown email provider "${provider}". Use buttondown, beehiiv, or resend.` };
+    } catch (error) {
+      console.error("[email] provider request failed", error);
+      return { ok: false, error: "We couldn't add you just now. Please try again in a minute." };
     }
-    console.log(`[email] signup logged (no provider key) interest=${interest} address=${email}`);
-    return { ok: true, mode: "logged" };
   }
 
-  try {
-    if (provider === "buttondown") return await subscribeButtondown(email, key, interest);
-    if (provider === "beehiiv") return await subscribeBeehiiv(email, key, interest);
-    if (provider === "resend") return await subscribeResend(email, key);
-    return { ok: false, error: `Unknown email provider "${provider}". Use buttondown, beehiiv, or resend.` };
-  } catch (error) {
-    console.error("[email] provider request failed", error);
-    return { ok: false, error: "We couldn't add you just now. Please try again in a minute." };
+  if (buttondownKey) {
+    try {
+      return await subscribeButtondown(email, buttondownKey);
+    } catch (error) {
+      console.error("[email] buttondown request failed", error);
+      return { ok: false, error: "We couldn't add you just now. Please try again in a minute." };
+    }
   }
+
+  if (provider || key) {
+    console.warn("[email] Set both EMAIL_PROVIDER and EMAIL_API_KEY to deliver mail. Logging only.");
+  }
+  console.log(`[email] signup logged (no provider key) interest=${interest} address=${email}`);
+  return { ok: true, mode: "logged" };
 }
 
 async function postJson(url: string, keyHeader: string, body: unknown): Promise<Response> {
@@ -59,18 +70,35 @@ async function postJson(url: string, keyHeader: string, body: unknown): Promise<
   }
 }
 
-async function subscribeButtondown(email: string, key: string, interest: EmailInterest): Promise<SubscribeResult> {
-  const response = await postJson("https://api.buttondown.com/v1/subscribers", `Token ${key}`, {
-    email_address: email,
-    tags: [interest],
-  });
+async function subscribeButtondown(
+  email: string,
+  key: string,
+  interest?: EmailInterest,
+): Promise<SubscribeResult> {
+  const body: { email_address: string; tags?: string[] } = { email_address: email };
+  if (interest) body.tags = [interest];
+
+  const response = await postJson("https://api.buttondown.com/v1/subscribers", `Token ${key}`, body);
   if (response.ok) return { ok: true, mode: "provider" };
   const text = await response.text();
-  if (response.status === 400 || response.status === 409) {
-    if (/already/i.test(text)) return { ok: true, mode: "provider" };
-  }
+  if (isAlreadySubscribed(response.status, text)) return { ok: true, mode: "provider" };
   console.error("[email] buttondown", response.status, text.slice(0, 300));
-  return { ok: false, error: "The email list didn't accept that address." };
+  return { ok: false, error: "The email list didn't accept that address. Please try again." };
+}
+
+function isAlreadySubscribed(status: number, text: string): boolean {
+  if (status !== 400 && status !== 409) return false;
+  if (/already/i.test(text)) return true;
+  try {
+    const data = JSON.parse(text) as { code?: unknown; detail?: unknown };
+    const code = typeof data.code === "string" ? data.code : "";
+    if (code === "email_already_exists" || /already/i.test(code)) return true;
+    const detail = typeof data.detail === "string" ? data.detail : "";
+    if (/already/i.test(detail)) return true;
+  } catch {
+    return false;
+  }
+  return false;
 }
 
 async function subscribeBeehiiv(email: string, key: string, interest: EmailInterest): Promise<SubscribeResult> {

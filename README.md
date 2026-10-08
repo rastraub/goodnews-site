@@ -42,24 +42,27 @@ See [ADDING_STORIES.md](ADDING_STORIES.md). Short version: add `stories/your-slu
 
 Copy `.env.example` to `.env.local`.
 
-With **no** `EMAIL_API_KEY`, the signup form still succeeds and the address is written to the server log. That is the local and preview behavior.
+With **no** email key, the signup form still succeeds and the address is written to the server log. That is the local and preview behavior.
 
-To deliver mail, set both:
+To send signups to Buttondown, set `BUTTONDOWN_API_KEY` to the newsletter API key (this is the variable on the Vercel project). The adapter posts to `https://api.buttondown.com/v1/subscribers` with `Authorization: Token <key>` and `{"email_address": "..."}`. An address that is already subscribed is treated as success. Any other failure is returned to the form as an error. The form does not show success when Buttondown rejects the request.
+
+`EMAIL_PROVIDER` and `EMAIL_API_KEY` still work, and they take precedence when **both** are set:
 
 | Variable | Purpose |
 | --- | --- |
+| `BUTTONDOWN_API_KEY` | Buttondown API key. Used when the pair below is not set. |
 | `EMAIL_PROVIDER` | `buttondown`, `beehiiv`, or `resend` |
 | `EMAIL_API_KEY` | That provider's API key |
 | `EMAIL_PUBLICATION_ID` | Beehiiv publication id |
 | `EMAIL_AUDIENCE_ID` | Resend audience id |
 
-Buttondown uses `Authorization: Token` and `POST https://api.buttondown.com/v1/subscribers` with `email_address` and a tag for `daily` or `membership`.
+When `EMAIL_PROVIDER` is `buttondown`, the same subscribers endpoint and `Token` header are used. That path also sends a tag, `daily` or `membership`.
 
 Beehiiv uses `Authorization: Bearer` and `POST https://api.beehiiv.com/v2/publications/{EMAIL_PUBLICATION_ID}/subscriptions`.
 
 Resend uses `Authorization: Bearer` and `POST https://api.resend.com/audiences/{EMAIL_AUDIENCE_ID}/contacts`.
 
-If the provider rejects an address, the form shows an error. If the key is missing, it logs and shows success.
+If the provider rejects an address, the form shows an error. If no key is set, it logs and shows success.
 
 ## Story tips
 
@@ -74,7 +77,7 @@ Persistent storage is still a TODO. See below.
 ## Deploy on Vercel
 
 1. Import this GitHub repo in Vercel. Framework preset: Next.js. Build command: `npm run build`. Install command: `npm install`.
-2. Add the email variables above if you want real delivery. Leave them empty and signups still succeed and log.
+2. For Buttondown, set `BUTTONDOWN_API_KEY`. Or set `EMAIL_PROVIDER` and `EMAIL_API_KEY` together; that pair takes precedence. Leave every email key empty and signups still succeed and log.
 3. Add `SUBMISSION_WEBHOOK_URL` if tips should reach an editor inbox. The filesystem on Vercel does not keep `inbox.jsonl`.
 4. Deploy. `main` (or a merged pull request) publishes the site.
 5. Add `tazzora.com` as the custom domain in the Vercel project settings. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
