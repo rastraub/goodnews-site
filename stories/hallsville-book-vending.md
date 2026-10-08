@@ -21,7 +21,6 @@ howToHelp:
     url: "https://www.longviewunitedway.org/readtosucceed"
     kind: learn
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

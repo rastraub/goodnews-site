@@ -21,7 +21,6 @@ howToHelp:
     url: "https://gcpetpals.org/donate-today/"
     kind: donate
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

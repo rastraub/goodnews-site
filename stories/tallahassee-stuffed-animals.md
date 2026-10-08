@@ -20,8 +20,7 @@ howToHelp:
   - label: "Support Taunton Family Children's Home"
     url: "https://www.tauntonhome.net/support-us"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true
