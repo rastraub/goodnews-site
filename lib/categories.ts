@@ -23,6 +23,12 @@ export const CATEGORIES = [
     color: "#C98612",
     description: "Neighbors, towns, and small decisions that change a life.",
   },
+  {
+    slug: "health-tech",
+    label: "Health & Tech",
+    color: "#1A6F86",
+    description: "Medical advances and useful technology already helping people, or shown in human trials.",
+  },
 ] as const;
 
 export type CategorySlug = (typeof CATEGORIES)[number]["slug"];

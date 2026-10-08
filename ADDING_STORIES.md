@@ -69,7 +69,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `state` | yes | Two-letter USPS code, including `DC`. |
 | `alsoStates` | no | Other states this story should appear in. Do not repeat `state`. |
 | `place` | no | Overrides the default "City, State" label. |
-| `category` | yes | `heroes`, `animals`, `science`, or `community`. |
+| `category` | yes | `heroes`, `animals`, `science`, `community`, or `health-tech`. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
 | `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. |
@@ -98,7 +98,7 @@ Store images in `public/images/stories/` as WebP. Each story needs the full phot
 
 A morning batch is new story files. Verify each one, then rotate the homepage so the freshest news is what people see first.
 
-1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`.
+1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`. For `health-tech`, also follow the rules in the next section.
 2. Add `stories/some-new-slug.md`, the full WebP, and the `-sm` thumbnail. Write an original summary of at least 40 words. Do not paste the article.
 3. Set `cheers: 0` on every new story. Do not invent a cheer count.
 4. Set `editorApproved: true` and `draft: false` only after that check. Until then, keep `draft: true`.
@@ -107,3 +107,12 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
 6. Run `npm run validate-stories` and `npm run build`. Both have to pass.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
+
+## Health & Tech
+
+`health-tech` is displayed as "Health & Tech". It is for medical advances, longevity research with real human results, and technology that is already helping people. The bar is stricter than the other categories.
+
+- Publish a result that is already helping people, or that a human trial has shown. A single mouse or cell study is out. So is a "could someday" claim, an IND clearance, a first dose whose safety and benefit are not yet known, or a trial that has not started.
+- The source has to be highly respected: a major newsroom, a peer-reviewed journal, a university, or a public-health authority such as the NIH, FDA, or CDC. A company press release is not enough on its own.
+- Skip a story that is essentially marketing for a product, a supplement, or a clinic. Skip anti-aging miracle claims.
+- The summary has to say plainly what was shown and where the evidence stops. If survival was not measured, say so. If follow-up is short, or only a few patients have had the next step, say so.

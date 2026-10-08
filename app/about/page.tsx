@@ -22,7 +22,7 @@ export default function AboutPage() {
           <p>
             <strong>No candidates, parties, elections, or culture-war topics.</strong> A bill, a campaign, or a protest is out, even when the outcome feels happy to someone. If a story&apos;s goodness depends on who you voted for, it does not belong here.
           </p>
-          <p>Kindness, science, neighbors, animals, and local comebacks are in.</p>
+          <p>Kindness, science, neighbors, animals, health advances already helping people, and local comebacks are in.</p>
         </section>
         <h2>How a story gets published</h2>
         <div className="steps">

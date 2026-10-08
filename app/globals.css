@@ -36,7 +36,7 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 .logo svg{width:44px;height:44px}
 .logo .name{font-family:var(--font-serif);font-weight:650;font-size:23px;letter-spacing:-.01em;line-height:1}
 .logo .name small{display:block;max-width:220px;font-family:var(--font-sans);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d);margin-top:5px;line-height:1.35}
-.links{display:flex;gap:22px;font-size:15px;font-weight:500;color:var(--ink2);margin-left:auto}
+.links{display:flex;gap:14px;font-size:15px;font-weight:500;color:var(--ink2);margin-left:auto}
 .links a{position:relative;padding:6px 0}
 .links a.on{color:var(--ink)}
 .links a.on:after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:3px;border-radius:3px;background:var(--gold)}
@@ -261,7 +261,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .t5{grid-template-columns:repeat(3,1fr)}
   .grid{grid-template-columns:repeat(2,1fr)}
 }
-@media (max-width:1040px){
+@media (max-width:1260px){
   .links,.nav-right .iconbtn{display:none}
   .menu{display:grid;width:36px;height:36px;border-radius:50%;place-items:center;border:1px solid var(--line);background:#fff}
   .catbar{display:flex}
