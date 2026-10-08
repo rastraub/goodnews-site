@@ -21,7 +21,6 @@ howToHelp:
     url: "https://www.roysecity.com/169/Volunteers"
     kind: volunteer
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
