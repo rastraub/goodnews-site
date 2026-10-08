@@ -96,9 +96,14 @@ Store images in `public/images/stories/` as WebP. Each story needs the full phot
 
 ## What the daily job does
 
-1. Add `stories/some-new-slug.md` and the image file.
-2. Run `npm run validate-stories`.
-3. Commit both files.
-4. The site rebuilds on the next deploy. No other edit is required.
+A morning batch is new story files. Verify each one, then rotate the homepage so the freshest news is what people see first.
 
-Set `draft: true` while a story is still being checked. Remove it, or set it to `false`, only when `editorApproved: true`.
+1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`.
+2. Add `stories/some-new-slug.md`, the full WebP, and the `-sm` thumbnail. Write an original summary of at least 40 words. Do not paste the article.
+3. Set `cheers: 0` on every new story. Do not invent a cheer count.
+4. Set `editorApproved: true` and `draft: false` only after that check. Until then, keep `draft: true`.
+5. Rotate the homepage. Ranks live in front matter. Each `top5` number can be used only once.
+   - **Featured.** The hero is the newest story with `featured: true` (newest date wins). Set `featured: true` on the single best story of the day, and set `featured: false` on every other story, including older ones. If an older story is left featured and no newer story is featured, it keeps the hero spot.
+   - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
+6. Run `npm run validate-stories` and `npm run build`. Both have to pass.
+7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.

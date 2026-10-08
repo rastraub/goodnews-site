@@ -20,7 +20,6 @@ howToHelp:
     url: "https://www.fws.gov/refuge/great-meadows"
     kind: learn
 featured: false
-top5: 2
 cheers: 3207
 editorApproved: true
 ---

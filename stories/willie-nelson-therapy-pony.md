@@ -20,8 +20,7 @@ howToHelp:
   - label: "Support Akron Children's Hospital"
     url: "https://www.akronchildrens.org/"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 4812
 editorApproved: true
 ---

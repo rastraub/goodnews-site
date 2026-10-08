@@ -23,7 +23,6 @@ howToHelp:
     url: "https://hospital.vetmed.wsu.edu/"
     kind: learn
 featured: false
-top5: 5
 cheers: 4155
 editorApproved: true
 ---

@@ -20,7 +20,6 @@ howToHelp:
     url: "https://www.organdonor.gov/"
     kind: learn
 featured: false
-top5: 4
 cheers: 6388
 editorApproved: true
 ---
