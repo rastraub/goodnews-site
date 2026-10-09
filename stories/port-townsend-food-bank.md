@@ -20,8 +20,7 @@ howToHelp:
   - label: "Give to the Jefferson County Food Bank"
     url: "https://www.jcfba.org/donate"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

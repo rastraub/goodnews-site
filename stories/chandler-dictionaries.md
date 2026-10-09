@@ -21,7 +21,6 @@ howToHelp:
     url: "https://sunlakesrotary.com/stories/the-dictionary-project"
     kind: learn
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true
