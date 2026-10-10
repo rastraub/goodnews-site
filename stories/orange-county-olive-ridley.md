@@ -21,6 +21,7 @@ howToHelp:
   - label: "Support the Aquarium of the Pacific"
     url: "https://www.aquariumofpacific.org/give"
     kind: donate
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

@@ -20,6 +20,7 @@ howToHelp:
   - label: "Read the National Cancer Institute on targeted therapy for breast cancer"
     url: "https://www.cancer.gov/types/breast/treatment/targeted-therapy"
     kind: learn
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

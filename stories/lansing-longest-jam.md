@@ -20,6 +20,7 @@ howToHelp:
   - label: "Read about the Longest Jam"
     url: "https://www.micharts.org/longestjam"
     kind: learn
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

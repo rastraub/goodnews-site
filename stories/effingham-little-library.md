@@ -20,6 +20,7 @@ howToHelp:
   - label: "Learn about Little Free Library"
     url: "https://littlefreelibrary.org/"
     kind: learn
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

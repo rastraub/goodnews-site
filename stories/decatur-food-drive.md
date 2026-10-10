@@ -20,6 +20,7 @@ howToHelp:
   - label: "Give to the WSOY Community Food Drive"
     url: "https://uwdecatur.harnessgiving.org/donate/?campaign_id=21415&checkout=14225"
     kind: donate
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

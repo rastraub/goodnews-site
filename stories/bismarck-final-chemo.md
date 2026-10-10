@@ -21,7 +21,6 @@ howToHelp:
     url: "https://www.cancer.gov/types/leukemia/patient/child-all-treatment-pdq"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

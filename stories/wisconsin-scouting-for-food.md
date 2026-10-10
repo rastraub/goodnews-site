@@ -21,6 +21,7 @@ howToHelp:
   - label: "Learn about Scouting for Food"
     url: "https://baylakesbsa.org/sff/"
     kind: learn
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

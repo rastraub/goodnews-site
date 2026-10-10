@@ -20,6 +20,7 @@ howToHelp:
   - label: "Support Community Paws of Wisconsin"
     url: "https://communitypaws.ngo/donate"
     kind: donate
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

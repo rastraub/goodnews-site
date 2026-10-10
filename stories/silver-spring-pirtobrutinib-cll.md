@@ -20,6 +20,7 @@ howToHelp:
   - label: "Read MedlinePlus on chronic lymphocytic leukemia"
     url: "https://medlineplus.gov/chroniclymphocyticleukemia.html"
     kind: learn
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

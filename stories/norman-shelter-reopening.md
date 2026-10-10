@@ -20,6 +20,7 @@ howToHelp:
   - label: "Volunteer with Second Chance Animal Rescue"
     url: "https://new.shelterluv.com/form/volunteer/OKSC/16733-volunteer-application"
     kind: volunteer
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

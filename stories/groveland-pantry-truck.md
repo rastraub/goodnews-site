@@ -20,6 +20,7 @@ howToHelp:
   - label: "Support the Neighborhood Center of South Lake"
     url: "https://www.tncsl.org/"
     kind: donate
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

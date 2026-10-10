@@ -22,7 +22,6 @@ howToHelp:
     url: "https://bestfriends.org/adopt"
     kind: learn
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

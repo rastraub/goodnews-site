@@ -22,6 +22,7 @@ howToHelp:
   - label: "Follow tagged monarchs on Project Monarch"
     url: "https://www.projectmonarch.org/"
     kind: learn
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

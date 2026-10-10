@@ -20,6 +20,7 @@ howToHelp:
   - label: "Read the CDC page on pulmonary atresia"
     url: "https://www.cdc.gov/heart-defects/about/pulmonary-atresia.html"
     kind: learn
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

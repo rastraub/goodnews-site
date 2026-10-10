@@ -20,8 +20,7 @@ howToHelp:
   - label: "Donate shoes through Soles4Souls"
     url: "https://soles4souls.org/"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

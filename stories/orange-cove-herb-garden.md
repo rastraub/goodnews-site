@@ -20,6 +20,7 @@ howToHelp:
   - label: "Support the Fresno County Public Library"
     url: "https://www.fresnolibrary.org/support/index.html"
     kind: donate
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

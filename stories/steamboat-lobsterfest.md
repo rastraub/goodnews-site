@@ -21,7 +21,6 @@ howToHelp:
     url: "https://liftuprc.org/ways-to-give/donate/"
     kind: donate
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
