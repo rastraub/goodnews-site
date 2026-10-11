@@ -23,8 +23,7 @@ howToHelp:
   - label: "Support the Smithsonian's National Zoo"
     url: "https://nationalzoo.si.edu/support"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true
