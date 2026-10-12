@@ -20,8 +20,7 @@ howToHelp:
   - label: "Frerichs Farm"
     url: "https://frerichsfarm.com/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

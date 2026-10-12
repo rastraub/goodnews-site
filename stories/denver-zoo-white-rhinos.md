@@ -21,7 +21,6 @@ howToHelp:
     url: "https://denverzoo.org/ways-to-give/"
     kind: donate
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
