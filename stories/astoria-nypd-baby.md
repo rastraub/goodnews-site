@@ -22,7 +22,6 @@ howToHelp:
     url: "https://www.redcross.org/take-a-class/cpr"
     kind: learn
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

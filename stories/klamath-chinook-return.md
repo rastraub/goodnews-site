@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.fisheries.noaa.gov/west-coast/habitat-conservation/klamath-river-basin"
     kind: learn
 featured: false
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
