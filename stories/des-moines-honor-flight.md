@@ -20,8 +20,7 @@ howToHelp:
   - label: "Support Honor Flight"
     url: "https://www.honorflight.org/"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true
