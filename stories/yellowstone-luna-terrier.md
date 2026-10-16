@@ -21,8 +21,7 @@ howToHelp:
   - label: "Yellowstone National Park"
     url: "https://www.nps.gov/yell/index.htm"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

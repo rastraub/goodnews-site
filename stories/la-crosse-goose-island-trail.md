@@ -1,0 +1,32 @@
+---
+title: "A new trail links Goose Island Park to La Crosse"
+shortTitle: "Goose Island's new connector"
+emphasis: "Goose Island"
+dek: "The 1.3-mile Goose Island Connector Trail opened with a ribbon cutting. Most of the $365,000 cost came from a state transportation grant."
+date: "2026-10-15"
+city: "La Crosse"
+state: "WI"
+place: "La Crosse and the Town of Shelby, Wisconsin"
+category: "community"
+sourceName: "WIZM"
+sourceUrl: "https://www.wizmnews.com/2026/10/15/goose-island-connector-trail-now-opens-up-safer-ride-walk/"
+image: "/images/stories/la-crosse-goose-island-trail.webp"
+imageAlt: "A paved trail beside a levee construction zone, with a white truck and no people close to the camera"
+imageCaption: "Illustrative photo of a trail beside a California levee project. This is not the Goose Island Connector Trail, and the truck is not part of the La Crosse ribbon cutting."
+imageCredit: "U.S. Army Corps of Engineers Sacramento District / Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:American_River_Bike_Trail_remains_open_near_H_Street_Bridge_during_levee_improvements_%2815701364787%29.jpg"
+imageLicense: "Public domain"
+imageLicenseUrl: "https://creativecommons.org/publicdomain/mark/1.0/"
+howToHelp:
+  - label: "Wisconsin DOT"
+    url: "https://wisconsindot.gov/"
+    kind: learn
+featured: false
+cheers: 0
+draft: false
+editorApproved: true
+---
+
+La Crosse and the Town of Shelby cut the ribbon on the Goose Island Connector Trail. The path is 1.3 miles long and 10 feet wide, and it links Goose Island Park to La Crosse. It cost $365,000. The Wisconsin Department of Transportation's Transportation Alternatives Program paid most of that bill, and La Crosse County covered the 20 percent match.
+
+Town of Shelby Chairman Timothy Candahl said people can bike and hike without mixing with traffic, and that users can now connect 26.3 miles north to Holmen. Two nearby elementary schools can use the trail for field trips. Shelby and the U.S. Fish and Wildlife Service are sponsoring a nature overlook along the route, with construction expected to start next year on federal dollars.
