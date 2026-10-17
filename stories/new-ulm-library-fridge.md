@@ -21,7 +21,6 @@ howToHelp:
     url: "https://www.newulmmn.gov/513/Library"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

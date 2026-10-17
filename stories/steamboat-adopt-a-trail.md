@@ -20,8 +20,7 @@ howToHelp:
   - label: "City of Steamboat Springs"
     url: "https://www.steamboatsprings.net/"
     kind: volunteer
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

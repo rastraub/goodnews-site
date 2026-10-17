@@ -21,7 +21,6 @@ howToHelp:
     url: "https://cvhonorflight.org/"
     kind: donate
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true
