@@ -21,7 +21,6 @@ howToHelp:
     url: "https://animasvalleyballoonrally.com/"
     kind: learn
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

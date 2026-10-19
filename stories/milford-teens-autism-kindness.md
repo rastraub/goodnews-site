@@ -20,8 +20,7 @@ howToHelp:
   - label: "Learn about autism from the Autism Society"
     url: "https://autismsociety.org/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

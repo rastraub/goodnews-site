@@ -20,7 +20,6 @@ howToHelp:
     url: "https://www.salvationarmyusa.org/usa-central-territory/indiana/"
     kind: donate
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
