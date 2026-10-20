@@ -86,6 +86,17 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 .world-spot p{color:var(--ink2);max-width:62ch}
 .world-spot .more{margin-top:14px}
 
+.week-promo{position:relative;z-index:1;margin-top:36px}
+.week-promo-card{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:12px 18px 12px 12px;box-shadow:var(--shadow);color:inherit}
+.week-promo-img,.week-row-img{position:relative;display:block;overflow:hidden;border-radius:14px;aspect-ratio:4/3;background:#F6F1E8}
+.week-promo h2{font-family:var(--font-serif);font-weight:600;font-size:26px;letter-spacing:-.02em;line-height:1.15;margin:4px 0 6px}
+.week-promo p{color:var(--ink2);font-size:15.5px}
+.week-promo .more{margin-top:8px}
+.week-index{display:grid;gap:16px}
+.week-row{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:12px;box-shadow:var(--shadow);color:inherit}
+.week-row h2{font-family:var(--font-serif);font-weight:600;font-size:28px;letter-spacing:-.02em;line-height:1.15;margin:4px 0 8px}
+.week-row p{color:var(--ink2);font-size:15.5px;line-height:1.5}
+
 .top5{background:linear-gradient(180deg,var(--sky) 0%,#F1F7FC 100%);padding:64px 0 68px;position:relative;overflow:hidden}
 .top5:before{content:"";position:absolute;right:-120px;top:-160px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,211,110,.45),rgba(255,211,110,0) 70%)}
 .pill-time{display:inline-flex;align-items:center;gap:7px;background:#fff;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--blue-d);box-shadow:var(--shadow)}
@@ -324,6 +335,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .world-spot{padding:4px 0 28px}
   .world-spot-card{grid-template-columns:1fr;padding:12px}
   .world-spot h2{font-size:24px}
+  .week-promo-card,.week-row{grid-template-columns:1fr}
+  .week-row h2,.week-promo h2{font-size:24px}
   .t5{grid-template-columns:1fr;gap:12px}
   .t5 a{flex-direction:row;align-items:center;gap:14px;padding:10px;border-radius:16px}
   .t5 .thumb{width:92px;height:92px;flex:none;aspect-ratio:auto;border-radius:12px}

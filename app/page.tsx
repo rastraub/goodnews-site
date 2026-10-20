@@ -5,6 +5,7 @@ import { LocalExplorer } from "@/components/local-explorer";
 import { CheerButton } from "@/components/cheer-button";
 import { EmphaticTitle } from "@/components/story-body";
 import { TopFiveCard } from "@/components/story-card";
+import { WeekPromo } from "@/components/week-promo";
 import { WorldSpotlight } from "@/components/world-spotlight";
 import { StoryImage } from "@/components/story-image";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -73,6 +74,7 @@ export default function HomePage() {
               <TopFiveCard key={story.slug} story={toCard(story)} n={index + 1} />
             ))}
           </div>
+          <WeekPromo />
         </div>
       </section>
       <WorldSpotlight />
