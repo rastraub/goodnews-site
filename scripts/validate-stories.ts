@@ -1,15 +1,17 @@
 import fs from "fs";
 import path from "path";
 import { parseEmailInterest } from "../lib/email";
+import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
+import { feedImageReport } from "../lib/feed-image";
 import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import { storySchema } from "../lib/story-schema";
-import { loadAllStories } from "../lib/stories";
+import { getPublishedStories, loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
-import { siteConfig } from "../site.config";
+import { siteConfig, socialLinks } from "../site.config";
 
 const REQUIRED_SOURCES = [
   "https://www.ideastream.org/health/2026-10-06/mane-attraction-therapy-pony-brings-smiles-and-healing-to-local-hospitals",
@@ -420,6 +422,53 @@ function assertBrandLivesInOneFile() {
   }
 }
 
+function decodeXml(value: string) {
+  return value.replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", '"');
+}
+
+function assertFeeds() {
+  const links = socialLinks();
+  const expected = `https://x.com/${siteConfig.social.x}`;
+  if (links.length !== 1 || links[0]?.href !== expected) {
+    throw new Error("Footer and structured data should list only confirmed social accounts.");
+  }
+
+  const rss = renderRss();
+  if (rss.includes("xmlns:snf") || rss.includes("<snf:") || rss.includes("xmlns:nb")) {
+    throw new Error("Section RSS feeds must not carry the SmartNews or NewsBreak namespaces.");
+  }
+  const main = renderRss({ newsBreak: true });
+  if (!main.includes('xmlns:nb="https://www.newsbreak.com/"')) {
+    throw new Error("The main RSS feed must declare the NewsBreak namespace.");
+  }
+  if (/<item>[\s\S]*?<author>/.test(main)) {
+    throw new Error("RSS items should use dc:creator and not author.");
+  }
+  const descriptions = [...main.matchAll(/<description>([^<]*)<\/description>/g)].slice(1).map((match) => decodeXml(match[1] ?? ""));
+  const short = descriptions.filter((text) => text.length < 300);
+  if (short.length) throw new Error(`${short.length} RSS descriptions are under 300 characters.`);
+  const dates = [...main.matchAll(/<pubDate>([^<]+)<\/pubDate>/g)].map((match) => match[1]);
+  if (new Set(dates).size !== dates.length) throw new Error("RSS pubDates must be unique.");
+
+  const smart = renderSmartNews();
+  if (!smart.includes("<snf:logo>") || !smart.includes("<snf:darkModeLogo>")) {
+    throw new Error("The SmartNews feed needs the light and dark logos.");
+  }
+  if (smart.includes("<author>") || smart.includes("xmlns:nb")) {
+    throw new Error("The SmartNews feed should not include item author or the NewsBreak namespace.");
+  }
+  if (SMARTNEWS_DESCRIPTION.length > 30) throw new Error("SmartNews channel description must be 30 characters or less.");
+  const channel = smart.match(/<description>([^<]*)<\/description>/);
+  if (channel?.[1] !== SMARTNEWS_DESCRIPTION) throw new Error("SmartNews channel description does not match the short line.");
+
+  const sample = getPublishedStories()[0];
+  if (sample) {
+    const html = storyHtml(sample);
+    if (!html.includes("<strong>How to help:</strong>")) throw new Error("Feed bodies need a How to help paragraph.");
+    if (html.includes("More good news")) throw new Error("Feed bodies must not add a related-stories list.");
+  }
+}
+
 const stories = loadAllStories();
 assertSchemaRejectsGarbage();
 assertCountryRules();
@@ -432,4 +481,7 @@ assertSeedSources(stories);
 assertTipMail();
 assertOnlyMailbox();
 assertBrandLivesInOneFile();
-console.log(`Validated ${stories.length} stories.`);
+assertFeeds();
+const published = stories.filter((story) => !story.draft);
+const images = feedImageReport(published.map((story) => story.image));
+console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);

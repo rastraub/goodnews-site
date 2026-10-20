@@ -1,6 +1,6 @@
 import { getCategory } from "@/lib/categories";
 import { countryName } from "@/lib/countries";
-import { absoluteUrl, isWithinHours, publishedIso } from "@/lib/seo";
+import { absoluteUrl, isWithinHours, storyPublishedIso } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { stateName } from "@/lib/states";
 import { siteConfig } from "@/site.config";
@@ -28,7 +28,7 @@ export function GET() {
         <news:name>${escapeXml(siteConfig.name)}</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>${publishedIso(story.date)}</news:publication_date>
+      <news:publication_date>${storyPublishedIso(story)}</news:publication_date>
       <news:title>${escapeXml(story.title)}</news:title>
       ${keywords ? `<news:keywords>${escapeXml(keywords)}</news:keywords>` : ""}
     </news:news>

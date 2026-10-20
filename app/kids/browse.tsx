@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { getKidStories, kidPlaces } from "@/lib/kids";
 import { pageCount, pageSlice } from "@/lib/paging";
+import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 
 const TITLE = "Good news for kids";
@@ -22,7 +23,8 @@ export function kidsPageMetadata(page: number): Metadata {
     base: "/kids",
     page,
     total: stories.length,
-    image: image ? { url: image.image, alt: image.imageAlt } : undefined,
+    feedPath: "/kids/rss.xml",
+    image: image ? openGraphImage(image) : undefined,
   });
 }
 

@@ -93,8 +93,13 @@ Sitemaps and feeds:
 - `https://www.tazzora.com/news-sitemap.xml` (stories from the last 48 hours)
 - `https://www.tazzora.com/rss.xml`
 - `https://www.tazzora.com/atom.xml`
+- `https://www.tazzora.com/smartnews.xml` (SmartNews only; the other feeds do not use the SmartNews namespace)
 - `https://www.tazzora.com/world/rss.xml` (stories from outside the United States)
-- `https://www.tazzora.com/country/japan/rss.xml` (same pattern for every country slug)
+- `https://www.tazzora.com/kids/rss.xml`
+- `https://www.tazzora.com/category/animals/rss.xml` (same pattern for every section)
+- `https://www.tazzora.com/state/colorado/rss.xml` (same pattern for every state, including an empty channel)
+- `https://www.tazzora.com/country/japan/rss.xml` (same pattern for every country slug; not listed on `/feeds`)
+- `https://www.tazzora.com/feeds` (copy links, plus Feedly and Inoreader, for the feeds above except country feeds)
 
 English stays at the site root. `lib/i18n.ts` is the hreflang list for a future translated edition. Adding a locale there, with a path prefix such as `/es`, is the extension point. Current URLs do not move.
 

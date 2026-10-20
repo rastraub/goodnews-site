@@ -1,15 +1,56 @@
 import type { Metadata } from "next";
+import { SQUARE_LOGO } from "./brand";
 import { getCategory } from "./categories";
 import { getCountry } from "./countries";
+import { storyFeedImage } from "./feed-image";
 import { hreflangAlternates } from "./i18n";
 import { pageCount, pagePath } from "./paging";
 import { getStateByCode } from "./states";
-import type { Story } from "./stories";
+import { compareStories, getPublishedStories, type Story } from "./stories";
 import { siteConfig, socialLinks } from "@/site.config";
 
 /** About 3:00 a.m. Mountain Daylight Time, when the morning edition goes out. */
 export function publishedIso(date: string): string {
   return `${date}T09:00:00.000Z`;
+}
+
+/**
+ * Stories filed on the same calendar day share one edition time.
+ * The batch is staggered by one second so two items never share atom:updated.
+ * A correction has no clock time in the file, so dateModified is 12 hours later.
+ */
+export function storyPublishedIso(story: Pick<Story, "date" | "slug">): string {
+  const base = Date.parse(publishedIso(story.date));
+  return new Date(base + editionIndex(story.slug) * 1000).toISOString();
+}
+
+export function storyModifiedIso(story: Pick<Story, "date" | "slug" | "correction">): string {
+  const published = Date.parse(storyPublishedIso(story));
+  if (!story.correction) return new Date(published).toISOString();
+  return new Date(published + 12 * 60 * 60 * 1000).toISOString();
+}
+
+let editionStories: Story[] | undefined;
+let editionIndexes: Map<string, number> | undefined;
+
+function editionIndex(slug: string): number {
+  const stories = getPublishedStories();
+  if (stories !== editionStories || !editionIndexes) {
+    const map = new Map<string, number>();
+    const groups = new Map<string, Story[]>();
+    for (const story of stories) {
+      const list = groups.get(story.date);
+      if (list) list.push(story);
+      else groups.set(story.date, [story]);
+    }
+    for (const list of groups.values()) {
+      list.sort(compareStories);
+      list.forEach((story, index) => map.set(story.slug, index));
+    }
+    editionStories = stories;
+    editionIndexes = map;
+  }
+  return editionIndexes.get(slug) ?? 0;
 }
 
 export function isWithinHours(date: string, hours: number, now = Date.now()): boolean {
@@ -63,7 +104,7 @@ export function listingMeta(options: {
   page: number;
   total: number;
   feedPath?: string;
-  image?: { url: string; alt: string };
+  image?: { url: string; alt: string; width?: number; height?: number; type?: "image/jpeg" | "image/webp" };
 }): Metadata {
   const path = pagePath(options.base, options.page);
   const pages = pageCount(options.total);
@@ -82,7 +123,16 @@ export function listingMeta(options: {
             url: path,
             title,
             description: options.description,
-            images: [{ url: options.image.url, alt: options.image.alt, type: "image/webp" as const }],
+            images: [
+              {
+                url: options.image.url,
+                alt: options.image.alt,
+                type: options.image.type ?? "image/webp",
+                ...(options.image.width && options.image.height
+                  ? { width: options.image.width, height: options.image.height }
+                  : {}),
+              },
+            ],
           },
           twitter: {
             card: "summary_large_image" as const,
@@ -121,12 +171,20 @@ export function siteGraphJsonLd() {
         url: siteConfig.url,
         description: siteConfig.description,
         email: siteConfig.contactEmail,
-        logo: {
-          "@type": "ImageObject",
-          url: absoluteUrl(PUBLISHER_LOGO.path),
-          width: PUBLISHER_LOGO.width,
-          height: PUBLISHER_LOGO.height,
-        },
+        logo: [
+          {
+            "@type": "ImageObject",
+            url: absoluteUrl(SQUARE_LOGO.path),
+            width: SQUARE_LOGO.width,
+            height: SQUARE_LOGO.height,
+          },
+          {
+            "@type": "ImageObject",
+            url: absoluteUrl(PUBLISHER_LOGO.path),
+            width: PUBLISHER_LOGO.width,
+            height: PUBLISHER_LOGO.height,
+          },
+        ],
         sameAs: socialLinks().map((social) => social.href),
         publishingPrinciples: absoluteUrl("/editorial-standards"),
         correctionsPolicy: absoluteUrl("/corrections"),
@@ -174,8 +232,10 @@ export function storyJsonLd(story: Story) {
   const state = getStateByCode(story.state);
   const country = getCountry(story.country);
   const url = absoluteUrl(`/story/${story.slug}`);
-  const image = absoluteUrl(story.image);
-  const published = publishedIso(story.date);
+  const served = storyFeedImage(story.image);
+  const image = absoluteUrl(served.path);
+  const published = storyPublishedIso(story);
+  const modified = storyModifiedIso(story);
   const crumbs: Crumb[] = [{ name: "Today", path: "/" }];
   if (category) crumbs.push({ name: category.label, path: `/category/${category.slug}` });
   if (story.country !== "US" && country) crumbs.push({ name: country.name, path: `/country/${country.slug}` });
@@ -191,10 +251,14 @@ export function storyJsonLd(story: Story) {
         "@id": `${url}#article`,
         headline: story.title,
         description: story.dek,
-        image: [image],
+        image: [
+          served.width > 0
+            ? { "@type": "ImageObject", url: image, width: served.width, height: served.height }
+            : image,
+        ],
         thumbnailUrl: image,
         datePublished: published,
-        dateModified: published,
+        dateModified: modified,
         inLanguage: "en-US",
         isAccessibleForFree: true,
         articleSection: category?.label,

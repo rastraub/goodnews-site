@@ -8,6 +8,7 @@ import { UsMap } from "@/components/us-map";
 import { WorldSpotlight } from "@/components/world-spotlight";
 import { CATEGORIES } from "@/lib/categories";
 import { pageCount, pageSlice } from "@/lib/paging";
+import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { getHubIndex } from "@/lib/hubs";
 import { kidStoriesInState } from "@/lib/kids";
@@ -44,7 +45,8 @@ export function statePageMetadata(slug: string, page: number): Metadata {
     base: `/state/${state.slug}`,
     page,
     total: stories.length,
-    image: image ? { url: image.image, alt: image.imageAlt } : undefined,
+    feedPath: `/state/${state.slug}/rss.xml`,
+    image: image ? openGraphImage(image) : undefined,
   });
 }
 

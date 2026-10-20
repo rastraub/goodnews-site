@@ -6,6 +6,7 @@ import { StoryGrid } from "@/components/story-grid";
 import { getCountryBySlug } from "@/lib/countries";
 import { kidStoriesInCountry, kidStoriesInState } from "@/lib/kids";
 import { pageCount, pageSlice } from "@/lib/paging";
+import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { getStateBySlug } from "@/lib/states";
 import type { Story } from "@/lib/stories";
@@ -41,7 +42,7 @@ export function kidPlaceMetadata(kind: KidPlaceKind, slug: string, page: number)
     base: place.path,
     page,
     total: place.stories.length,
-    image: image ? { url: image.image, alt: image.imageAlt } : undefined,
+    image: image ? openGraphImage(image) : undefined,
   });
 }
 
