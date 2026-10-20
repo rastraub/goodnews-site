@@ -20,7 +20,7 @@ howToHelp:
   - label: "American Lung Association"
     url: "https://www.lung.org/"
     kind: learn
-featured: true
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

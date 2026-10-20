@@ -22,7 +22,6 @@ howToHelp:
     url: "https://dnr.wisconsin.gov/"
     kind: learn
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
