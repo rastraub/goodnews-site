@@ -1,8 +1,7 @@
 import { handleStorySubmission } from "@/lib/submissions";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { getStateByCode } from "@/lib/states";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { TIP_LIMITS, cleanHttpUrl, isSafeMailbox, multiLine, singleLine } from "@/lib/tip-mail";
 
 export async function POST(request: Request) {
   if (!rateLimit(clientKey(request, "submit"), 5)) {
@@ -13,40 +12,63 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "That tip was empty." }, { status: 400 });
   }
   const data = body as Record<string, unknown>;
+  // Honeypot. Real people never see this field. Pretend it worked.
   if (typeof data.company === "string" && data.company.trim()) {
     return Response.json({ ok: true });
   }
-  const name = typeof data.name === "string" ? data.name.trim() : "";
-  const email = typeof data.email === "string" ? data.email.trim() : "";
-  const city = typeof data.city === "string" ? data.city.trim() : "";
-  const state = typeof data.state === "string" ? data.state.trim().toUpperCase() : "";
-  const summary = typeof data.summary === "string" ? data.summary.trim() : "";
-  const sourceUrl = typeof data.sourceUrl === "string" ? data.sourceUrl.trim() : "";
 
-  if (name.length < 2 || name.length > 120) {
+  const name = singleLine(data.name, TIP_LIMITS.name);
+  const email = singleLine(data.email, TIP_LIMITS.email);
+  const city = singleLine(data.city, TIP_LIMITS.city);
+  const state = singleLine(data.state, 8);
+  const summary = multiLine(data.summary, TIP_LIMITS.summary);
+  const source = singleLine(data.sourceUrl, TIP_LIMITS.sourceUrl);
+  const page = singleLine(data.pageUrl, TIP_LIMITS.pageUrl);
+  const referer = singleLine(request.headers.get("referer"), TIP_LIMITS.pageUrl);
+
+  if (name.tooLong) {
+    return Response.json({ ok: false, error: "That name is too long." }, { status: 400 });
+  }
+  if (name.value.length < 2) {
     return Response.json({ ok: false, error: "Add your name." }, { status: 400 });
   }
-  if (!EMAIL_RE.test(email)) {
+  if (email.tooLong || !isSafeMailbox(email.value)) {
     return Response.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });
   }
-  if (!city || !getStateByCode(state)) {
+  if (city.tooLong) {
+    return Response.json({ ok: false, error: "That city name is too long." }, { status: 400 });
+  }
+  const stateCode = state.value.toUpperCase();
+  if (!city.value || state.tooLong || !getStateByCode(stateCode)) {
     return Response.json({ ok: false, error: "Add a city and a state." }, { status: 400 });
   }
-  if (summary.length < 40 || summary.length > 5000) {
+  if (summary.tooLong) {
+    return Response.json({ ok: false, error: "That story is too long to send." }, { status: 400 });
+  }
+  if (summary.value.length < TIP_LIMITS.summaryMin) {
     return Response.json({ ok: false, error: "Tell us a little more about what happened (at least a few sentences)." }, { status: 400 });
   }
-  if (sourceUrl && !/^https:\/\/\S+$/.test(sourceUrl)) {
+  if (source.tooLong) {
+    return Response.json({ ok: false, error: "That source link is too long." }, { status: 400 });
+  }
+  const sourceUrl = source.value ? cleanHttpUrl(source.value, TIP_LIMITS.sourceUrl) : "";
+  if (source.value && !sourceUrl.startsWith("https://")) {
     return Response.json({ ok: false, error: "Source links need to start with https://." }, { status: 400 });
   }
+  const pageUrl =
+    (!page.tooLong && cleanHttpUrl(page.value, TIP_LIMITS.pageUrl)) ||
+    (!referer.tooLong && cleanHttpUrl(referer.value, TIP_LIMITS.pageUrl)) ||
+    "";
 
   try {
     await handleStorySubmission({
-      name,
-      email,
-      city,
-      state,
-      summary,
+      name: name.value,
+      email: email.value,
+      city: city.value,
+      state: stateCode,
+      summary: summary.value,
       sourceUrl: sourceUrl || undefined,
+      pageUrl: pageUrl || undefined,
       receivedAt: new Date().toISOString(),
     });
   } catch (error) {

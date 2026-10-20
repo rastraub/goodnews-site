@@ -12,6 +12,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // nodemailer talks to SMTP from the submit route. Leave it unbundled.
+  serverExternalPackages: ["nodemailer"],
   images: {
     // Story photos are already sized WebP files in /public (about 840px, plus a 360px card file).
     // Cards use a plain <img> and srcSet. Leave this on: the image optimizer is a separate

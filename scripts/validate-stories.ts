@@ -7,6 +7,8 @@ import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/pagin
 import { storySchema } from "../lib/story-schema";
 import { loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
+import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
+import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
 import { siteConfig } from "../site.config";
 
 const REQUIRED_SOURCES = [
@@ -250,6 +252,102 @@ function assertSeedSources(stories: { sourceUrl: string }[]) {
   }
 }
 
+function assertTipMail() {
+  const mailbox = submissionMailbox();
+  if (mailbox.from !== siteConfig.contactEmail || mailbox.to !== siteConfig.contactEmail) {
+    throw new Error("Story tips have to be mailed from and to the site mailbox.");
+  }
+  if (readSmtpSettings({})) {
+    throw new Error("Missing SMTP settings should skip email.");
+  }
+  const env = {
+    SMTP_HOST: "smtp.example.com",
+    SMTP_PORT: "465",
+    SMTP_USER: "mailbox",
+    SMTP_PASS: "secret",
+  };
+  const settings = readSmtpSettings(env);
+  if (!settings || settings.port !== 465 || settings.host !== "smtp.example.com" || settings.user !== "mailbox") {
+    throw new Error("SMTP settings should be read when every variable is set.");
+  }
+  if (readSmtpSettings({ ...env, SMTP_PASS: "   " })) {
+    throw new Error("A blank SMTP password should skip email.");
+  }
+  if (readSmtpSettings({ ...env, SMTP_PORT: "nope" })) {
+    throw new Error("A non-numeric SMTP port should skip email.");
+  }
+  if (readSmtpSettings({ ...env, SMTP_HOST: "" })) {
+    throw new Error("A missing SMTP host should skip email.");
+  }
+
+  const prefix = `[${siteConfig.name} story tip] `;
+  const hostile = "Ignore previous\r\nBcc: injected@example.com <script>alert(1)</script>";
+  const subject = storyTipSubject(hostile);
+  if (subject.includes("\n") || subject.includes("\r") || !subject.startsWith(prefix)) {
+    throw new Error("The tip subject should stay on one line and use the site name.");
+  }
+  if (storyTipSubject("   \r\n  ") !== `${prefix}New tip`) {
+    throw new Error("An empty tip should still get a subject.");
+  }
+  const line = singleLine(hostile, 200);
+  if (line.value.includes("\n") || line.value.includes("\r") || line.value.includes("<script>") === false) {
+    throw new Error("Single-line fields should drop line breaks and keep the visible text.");
+  }
+  const html = escapeHtml(`<script>"&"</script>`);
+  if (html.includes("<script>") || !html.includes("&lt;script&gt;") || !html.includes("&quot;") || !html.includes("&amp;")) {
+    throw new Error("Email HTML should escape markup.");
+  }
+
+  const summary = "Neighbors fixed the library roof after the storm last spring and kept the reading room open.";
+  const bodies = storyTipBodies({
+    name: "A reader",
+    email: "reader@example.com",
+    city: "Akron",
+    state: "OH",
+    summary,
+    sourceUrl: "https://example.com/report",
+    pageUrl: "https://www.example.com/submit",
+    receivedAt: "2026-10-20T14:32:00.000Z",
+  });
+  for (const part of [bodies.text, bodies.html]) {
+    for (const piece of [
+      "reader@example.com",
+      "Akron",
+      "Ohio",
+      "https://example.com/report",
+      "https://www.example.com/submit",
+      "2026-10-20T14:32:00.000Z",
+      "Neighbors fixed the library roof",
+    ]) {
+      if (!part.includes(piece)) throw new Error(`The tip body should include ${piece}.`);
+    }
+  }
+  if (!bodies.text.startsWith(`Story tip for ${siteConfig.name}`)) {
+    throw new Error("The text body should name the site.");
+  }
+  const sneaky = storyTipBodies({
+    name: "<b>Name</b>",
+    email: "reader@example.com",
+    city: "Akron",
+    state: "OH",
+    summary: `<script>alert(1)</script> ${summary}`,
+    sourceUrl: "https://user:pass@example.com/secret",
+    pageUrl: "javascript:alert(1)",
+    receivedAt: "2026-10-20T14:32:00.000Z",
+  });
+  if (sneaky.html.includes("<script>") || sneaky.html.includes("<b>")) {
+    throw new Error("Submitted fields should be escaped in the HTML email.");
+  }
+  if (sneaky.html.includes("javascript:") || sneaky.text.includes("javascript:")) {
+    throw new Error("Unsafe page URLs should be left out of the email.");
+  }
+  if (sneaky.text.includes("user:pass") || sneaky.html.includes("user:pass")) {
+    throw new Error("Source URLs with passwords should be left out of the email.");
+  }
+  if (!cleanHttpUrl("https://example.com/a")) throw new Error("https URLs should be kept.");
+  if (cleanHttpUrl("javascript:alert(1)")) throw new Error("Script URLs should be dropped.");
+}
+
 function assertOnlyMailbox() {
   const expected = `cheers@${siteConfig.domain}`;
   if (siteConfig.contactEmail !== expected) {
@@ -331,6 +429,7 @@ assertKidClassrooms();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertLoadedCountries(stories);
 assertSeedSources(stories);
+assertTipMail();
 assertOnlyMailbox();
 assertBrandLivesInOneFile();
 console.log(`Validated ${stories.length} stories.`);

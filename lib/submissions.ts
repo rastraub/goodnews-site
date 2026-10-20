@@ -1,27 +1,31 @@
 import fs from "fs";
 import path from "path";
+import { sendStoryTipEmail } from "@/lib/smtp";
+import { prepareStoryTip, storyTipBodies, storyTipSubject, type StoryTip } from "@/lib/tip-mail";
 
-export type StoryTip = {
-  name: string;
-  email: string;
-  city: string;
-  state: string;
-  summary: string;
-  sourceUrl?: string;
-  receivedAt: string;
-};
+export type { StoryTip };
 
 /**
- * Pluggable reader-tip handler.
+ * Reader-tip handler.
  *
- * TODO(production): persist tips in a database so they survive serverless
- * isolates and deploys. Until then we append JSON lines when the filesystem
- * is writable and, if SUBMISSION_WEBHOOK_URL is set, POST the same payload
- * there. Every tip is also logged.
+ * Every tip is logged. When SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS
+ * are set, the tip is emailed to the site mailbox. Missing SMTP settings are
+ * not an error: the tip is still logged and, when SUBMISSION_WEBHOOK_URL is
+ * set, posted there. A writable disk also gets a JSON line in
+ * data/submissions/inbox.jsonl. A database is still a later step.
  */
 export async function handleStorySubmission(tip: StoryTip): Promise<void> {
-  const line = JSON.stringify(tip);
+  const clean = prepareStoryTip(tip);
+  const line = JSON.stringify(clean);
   console.log(`[submit] ${line}`);
+
+  const { text, html } = storyTipBodies(clean);
+  await sendStoryTipEmail({
+    subject: storyTipSubject(clean.summary),
+    text,
+    html,
+    replyTo: clean.email,
+  });
 
   const webhook = (process.env.SUBMISSION_WEBHOOK_URL || "").trim();
   if (webhook) {
