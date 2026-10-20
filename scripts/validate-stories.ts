@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
 import { parseEmailInterest } from "../lib/email";
-import { buildHubs, getHubIndex, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
+import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
+import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import { storySchema } from "../lib/story-schema";
 import { loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
@@ -213,6 +214,27 @@ function assertKidClassrooms() {
   console.log(`Kid-friendly stories: ${getKidStories().length}. Places: ${places.length}.`);
 }
 
+function assertPrerenderCoversArchive(storyCount: number) {
+  if (STATIC_STORY_CAP < 10_000) {
+    throw new Error(`STATIC_STORY_CAP is ${STATIC_STORY_CAP}. Keep it at or above 10000 so a 10k archive stays static.`);
+  }
+  if (storyCount > STATIC_STORY_CAP) {
+    throw new Error(
+      `${storyCount} stories exceed the prerender cap of ${STATIC_STORY_CAP}. Raise STATIC_STORY_CAP. Do not switch the overflow to on-demand rendering; each crawler would invoke a function after every deploy.`,
+    );
+  }
+  const pages = pageCount(storyCount);
+  if (pages > MAX_PRERENDERED_PAGES) {
+    throw new Error(`The archive is ${pages} listing pages and the cap is ${MAX_PRERENDERED_PAGES}. Raise MAX_PRERENDERED_PAGES.`);
+  }
+  const index = getHubIndex();
+  const hubCount = index.stateCategories.length + index.cities.length + index.topics.length;
+  if (hubCount > MAX_PRERENDERED_HUBS) {
+    throw new Error(`${hubCount} hub pages exceed the prerender cap of ${MAX_PRERENDERED_HUBS}. Raise MAX_PRERENDERED_HUBS.`);
+  }
+  console.log(`Prerender: ${storyCount} stories, ${pages} archive pages, ${hubCount} hubs. Caps ${STATIC_STORY_CAP} / ${MAX_PRERENDERED_PAGES} / ${MAX_PRERENDERED_HUBS}.`);
+}
+
 function assertLoadedCountries(stories: { slug: string; country: string; state?: string }[]) {
   for (const story of stories) {
     if (!story.country) throw new Error(`${story.slug} is missing a country`);
@@ -306,6 +328,7 @@ assertCountryRules();
 assertWorldSpotlight();
 assertHubs();
 assertKidClassrooms();
+assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertLoadedCountries(stories);
 assertSeedSources(stories);
 assertOnlyMailbox();

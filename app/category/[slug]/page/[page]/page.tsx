@@ -7,7 +7,7 @@ import { getByCategory } from "@/lib/stories";
 
 type Props = { params: Promise<{ slug: string; page: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return listingPageParams(CATEGORIES.map((category) => ({ slug: category.slug, total: getByCategory(category.slug).length })));

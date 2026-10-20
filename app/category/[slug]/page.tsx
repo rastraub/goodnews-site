@@ -4,6 +4,8 @@ import { CATEGORIES } from "@/lib/categories";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return CATEGORIES.map((category) => ({ slug: category.slug }));
 }

@@ -4,7 +4,7 @@ import { getHubIndex, hubsToPrerender } from "@/lib/hubs";
 
 type Props = { params: Promise<{ slug: string; category: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return hubsToPrerender(getHubIndex().stateCategories).map((hub) => ({

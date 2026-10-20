@@ -6,13 +6,13 @@ import { parsePageParam } from "@/lib/paging";
 
 type Props = { params: Promise<{ slug: string; city: string; page: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return hubPageParams(getHubIndex().cities.filter((hub) => hub.countrySlug)).map((hub) => ({
+  return hubPageParams(getHubIndex().cities.filter((hub) => hub.countrySlug)).map(({ hub, page }) => ({
     slug: hub.params.slug,
     city: hub.params.city,
-    page: "2",
+    page,
   }));
 }
 

@@ -4,6 +4,8 @@ import { STATES } from "@/lib/states";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return STATES.map((state) => ({ slug: state.slug }));
 }

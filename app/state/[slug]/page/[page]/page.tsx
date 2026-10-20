@@ -7,7 +7,7 @@ import { STATES } from "@/lib/states";
 
 type Props = { params: Promise<{ slug: string; page: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return listingPageParams(STATES.map((state) => ({ slug: state.slug, total: getByState(state.code).length })));

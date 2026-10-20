@@ -96,7 +96,7 @@ English stays at the site root. `lib/i18n.ts` is the hreflang list for a future 
 
 State-and-category pages (`/state/colorado/animals`), city pages, and topic pages are added to the sitemap only after at least three stories support them. Country pages with fewer stories stay on `/world` and are left out of the sitemap.
 
-The project is the App Router. No extra Vercel config file is required.
+The project is the App Router. No extra Vercel config file is required. Do not add `middleware.ts`: it runs on every request. Story photos stay as plain images (`images.unoptimized`) because they are already sized WebP files. Pages, feeds, and sitemaps are static build output with long cache headers; the only functions are the forms (`/api/subscribe`, `/api/submit`, `/api/cheer`) and a search query.
 
 ## What's left
 

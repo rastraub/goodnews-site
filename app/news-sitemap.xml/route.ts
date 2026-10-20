@@ -5,7 +5,7 @@ import { getPublishedStories } from "@/lib/stories";
 import { stateName } from "@/lib/states";
 import { siteConfig } from "@/site.config";
 
-export const revalidate = 3600;
+export const dynamic = "force-static";
 
 function escapeXml(value: string) {
   return value
@@ -44,7 +44,6 @@ ${urls}
   return new Response(xml, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=3600",
     },
   });
 }

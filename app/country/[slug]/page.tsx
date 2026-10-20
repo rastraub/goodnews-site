@@ -4,6 +4,8 @@ import { COUNTRIES } from "@/lib/countries";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return COUNTRIES.map((country) => ({ slug: country.slug }));
 }

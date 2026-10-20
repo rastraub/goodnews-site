@@ -1,11 +1,16 @@
-import { getCountryBySlug } from "@/lib/countries";
+import { COUNTRIES, getCountryBySlug } from "@/lib/countries";
 import { renderRss } from "@/lib/feed";
 import { getByCountry } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
 
-export const revalidate = 3600;
+export const dynamic = "force-static";
+export const dynamicParams = false;
 
 type Props = { params: Promise<{ slug: string }> };
+
+export function generateStaticParams() {
+  return COUNTRIES.map((country) => ({ slug: country.slug }));
+}
 
 export async function GET(_request: Request, { params }: Props) {
   const { slug } = await params;
@@ -21,7 +26,6 @@ export async function GET(_request: Request, { params }: Props) {
   return new Response(xml, {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=3600",
     },
   });
 }

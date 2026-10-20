@@ -8,10 +8,11 @@ import { getStateByCode, type StateInfo } from "./states";
 export const MIN_HUB_STORIES = 3;
 
 /**
- * Hub HTML prebuilt at deploy time. The rest render on first request.
- * Keeps a 10k-story build from emitting thousands of listing pages.
+ * Every qualifying hub is prebuilt through this cap.
+ * Past it, validate-stories fails the build instead of rendering the rest
+ * on request. A 10k archive of real places stays well under this.
  */
-export const MAX_PRERENDERED_HUBS = 240;
+export const MAX_PRERENDERED_HUBS = 8_000;
 
 export type HubKind = "state-category" | "city" | "topic";
 
@@ -406,8 +407,16 @@ export function hubsToPrerender(hubs: Hub[]): Hub[] {
     .slice(0, MAX_PRERENDERED_HUBS);
 }
 
-export function hubPageParams(hubs: Hub[]): Hub[] {
-  return hubsToPrerender(hubs).filter((hub) => pageCount(hub.count) >= 2).slice(0, MAX_PRERENDERED_PAGES * 4);
+/** Page 2 and later for each prerendered hub. Page 1 is the hub path itself. */
+export function hubPageParams(hubs: Hub[]): { hub: Hub; page: string }[] {
+  const params: { hub: Hub; page: string }[] = [];
+  for (const hub of hubsToPrerender(hubs)) {
+    const last = Math.min(MAX_PRERENDERED_PAGES, pageCount(hub.count));
+    for (let page = 2; page <= last; page += 1) {
+      params.push({ hub, page: String(page) });
+    }
+  }
+  return params;
 }
 
 export function storiesForHub(hub: Hub, stories: Story[] = getPublishedStories()): Story[] {

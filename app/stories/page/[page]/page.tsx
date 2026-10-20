@@ -6,7 +6,7 @@ import { getPublishedStories } from "@/lib/stories";
 
 type Props = { params: Promise<{ page: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return archivePageParams(getPublishedStories().length);

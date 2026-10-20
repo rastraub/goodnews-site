@@ -156,7 +156,7 @@ export function getWorldStories(): Story[] {
   return getPublishedStories().filter((story) => story.country !== "US");
 }
 
-/** Newest stories prebuilt at deploy time. The rest render on first request. */
+/** Stories whose HTML is emitted at deploy time. The cap is enforced by validate-stories. */
 export function storiesToPrerender(stories = getPublishedStories()): Story[] {
   if (stories.length <= STATIC_STORY_CAP) return stories;
   const chosen: Story[] = [];

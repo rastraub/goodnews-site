@@ -1,11 +1,21 @@
-/** Listing pages stay small when the archive grows by 10x or 100x. */
+/** Listing pages stay small when the archive grows. */
 export const STORY_PAGE_SIZE = 24;
 
-/** Story HTML prebuilt at deploy time. Older stories render on first request and cache. */
-export const STATIC_STORY_CAP = 500;
+/**
+ * Every published story is prebuilt through this cap.
+ * Past it, validate-stories fails the build. Raising the cap costs build
+ * minutes. Leaving the extra stories to render on request costs a function
+ * invocation for each crawler after every deploy, so the cap fails closed.
+ * 15_000 covers a 10k archive with room for the next batches.
+ */
+export const STATIC_STORY_CAP = 15_000;
 
-/** Extra listing pages prebuilt per section. Later pages render on demand. */
-export const MAX_PRERENDERED_PAGES = 8;
+/**
+ * Listing page 2 and later, prebuilt per section. 700 pages is 16,800 stories
+ * in one section, above the story cap, so a normal archive never falls through
+ * to a function.
+ */
+export const MAX_PRERENDERED_PAGES = 700;
 
 export function pageCount(total: number, size = STORY_PAGE_SIZE): number {
   return Math.max(1, Math.ceil(total / size));

@@ -3,7 +3,7 @@ import { ogFonts } from "@/lib/og";
 import { PUBLISHER_LOGO } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
-export const revalidate = 86400;
+export const dynamic = "force-static";
 
 export function GET() {
   const image = new ImageResponse(
@@ -43,6 +43,5 @@ export function GET() {
       fonts: ogFonts(),
     },
   );
-  image.headers.set("Cache-Control", "public, max-age=86400");
   return image;
 }

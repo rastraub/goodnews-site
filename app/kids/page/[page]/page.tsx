@@ -6,7 +6,7 @@ import { KidsBrowse, kidsPageMetadata } from "../../browse";
 
 type Props = { params: Promise<{ page: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return archivePageParams(getKidStories().length);

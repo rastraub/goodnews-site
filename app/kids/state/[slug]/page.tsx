@@ -4,7 +4,7 @@ import { KidPlaceBrowse, kidPlaceMetadata } from "../../place-browse";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return kidPlaces()

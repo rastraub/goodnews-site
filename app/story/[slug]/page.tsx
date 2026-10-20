@@ -21,7 +21,7 @@ import { siteConfig } from "@/site.config";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return storiesToPrerender().map((story) => ({ slug: story.slug }));
