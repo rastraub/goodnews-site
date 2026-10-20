@@ -42,6 +42,17 @@ export const storySchema = z
     alsoStates: z.array(z.string().regex(/^[A-Z]{2}$/)).optional().default([]),
     place: z.string().min(2).optional(),
     category: z.enum(categorySlugs),
+    tags: z
+      .array(
+        z
+          .string()
+          .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Tags are lowercase kebab-case")
+          .min(2)
+          .max(40),
+      )
+      .max(5)
+      .optional()
+      .default([]),
     sourceName: z.string().min(2),
     sourceUrl: z.string().url().refine((url) => url.startsWith("https://"), "Source URL must use https"),
     image: z.string().regex(/^\/images\/.+\.webp$/),
@@ -63,6 +74,17 @@ export const storySchema = z
   })
   .strict()
   .superRefine((data, ctx) => {
+    const seenTags = new Set<string>();
+    for (const tag of data.tags) {
+      if (seenTags.has(tag)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["tags"],
+          message: `Duplicate tag ${tag}`,
+        });
+      }
+      seenTags.add(tag);
+    }
     if (!getCountry(data.country)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

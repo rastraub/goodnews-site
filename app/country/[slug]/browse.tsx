@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { countriesInRegion, getCountryBySlug, type CountryInfo } from "@/lib/countries";
+import { countryIsIndexable, getHubIndex } from "@/lib/hubs";
 import { pageCount, pageSlice, STORY_PAGE_SIZE } from "@/lib/paging";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { countryCounts, getByCountry } from "@/lib/stories";
@@ -19,7 +20,7 @@ export function countryPageMetadata(slug: string, page: number): Metadata {
   const pages = pageCount(stories.length);
   if (page > pages) return {};
   const image = stories[0];
-  return listingMeta({
+  const meta = listingMeta({
     title: `Good news ${country.name}`,
     description: countryDescription(country.name),
     base: `/country/${country.slug}`,
@@ -28,6 +29,10 @@ export function countryPageMetadata(slug: string, page: number): Metadata {
     feedPath: `/country/${country.slug}/rss.xml`,
     image: image ? { url: image.image, alt: image.imageAlt } : undefined,
   });
+  if (!countryIsIndexable(country.code)) {
+    return { ...meta, robots: { index: false, follow: true } };
+  }
+  return meta;
 }
 
 function CountryBody({ country, page }: { country: CountryInfo; page: number }) {
@@ -72,6 +77,11 @@ function CountryBody({ country, page }: { country: CountryInfo; page: number }) 
         <p className="link-pills">
           <Link href={`/country/${country.slug}/rss.xml`}>RSS</Link>
           {country.code === "US" ? <Link href="/local">Browse by state</Link> : <Link href="/world">All countries</Link>}
+          {(getHubIndex().byCountrySlug.get(country.slug) ?? []).map((hub) => (
+            <Link key={hub.path} href={hub.path}>
+              {hub.crumbs[hub.crumbs.length - 1]?.name ?? hub.linkLabel}
+            </Link>
+          ))}
         </p>
       </div>
       <div className="wrap state-layout" style={{ paddingTop: 24 }}>

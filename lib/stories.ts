@@ -206,6 +206,7 @@ export function searchStories(query: string): Story[] {
       story.country,
       story.place ?? "",
       story.category,
+      story.tags.join(" "),
       story.sourceName,
       story.body,
     ]

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
-import { COUNTRIES } from "@/lib/countries";
+import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
@@ -30,8 +30,8 @@ function bump(map: Map<string, string>, key: string | undefined, date: string) {
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const stories = getPublishedStories();
+  const hubs = getHubIndex();
   const latestState = new Map<string, string>();
-  const latestCountry = new Map<string, string>();
   const latestCategory = new Map<string, string>();
   let siteLatest: string | undefined;
   let worldLatest: string | undefined;
@@ -39,7 +39,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const story of stories) {
     if (!siteLatest || story.date > siteLatest) siteLatest = story.date;
     bump(latestCategory, story.category, story.date);
-    bump(latestCountry, story.country, story.date);
     if (story.country !== "US") {
       if (!worldLatest || story.date > worldLatest) worldLatest = story.date;
     }
@@ -74,11 +73,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.7,
     })),
-    ...COUNTRIES.map((country) => ({
+    ...hubs.countries.filter((country) => country.indexable).map((country) => ({
       url: absoluteUrl(`/country/${country.slug}`),
-      ...(latestCountry.get(country.code) ? { lastModified: latestCountry.get(country.code) } : {}),
+      lastModified: country.latest,
       changeFrequency: "daily" as const,
       priority: country.code === "US" ? 0.7 : 0.6,
+    })),
+    ...[...hubs.stateCategories, ...hubs.cities, ...hubs.topics].map((hub) => ({
+      url: absoluteUrl(hub.path),
+      lastModified: hub.latest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
     })),
     ...stories.map((story) => ({
       url: absoluteUrl(`/story/${story.slug}`),

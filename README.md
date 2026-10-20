@@ -94,6 +94,8 @@ Sitemaps and feeds:
 
 English stays at the site root. `lib/i18n.ts` is the hreflang list for a future translated edition. Adding a locale there, with a path prefix such as `/es`, is the extension point. Current URLs do not move.
 
+State-and-category pages (`/state/colorado/animals`), city pages, and topic pages are added to the sitemap only after at least three stories support them. Country pages with fewer stories stay on `/world` and are left out of the sitemap.
+
 The project is the App Router. No extra Vercel config file is required.
 
 ## What's left

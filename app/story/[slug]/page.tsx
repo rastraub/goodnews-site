@@ -9,6 +9,7 @@ import { StoryCard } from "@/components/story-card";
 import { EmphaticTitle, StoryBody } from "@/components/story-body";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
+import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { placeLabel, toCard } from "@/lib/present";
@@ -71,6 +72,10 @@ export default async function StoryPage({ params }: Props) {
   const state = story.country === "US" ? getStateByCode(story.state) : undefined;
   const country = story.country === "US" ? undefined : getCountry(story.country);
   const related = relatedStories(story);
+  const hubLinks = hubPathsForStory(story).flatMap((path) => {
+    const hub = getHubByPath(path);
+    return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
+  });
 
   return (
     <article className="story-page">
@@ -140,6 +145,15 @@ export default async function StoryPage({ params }: Props) {
             </a>
           </div>
           <StoryBody markdown={story.body} />
+          {hubLinks.length ? (
+            <p className="jump-links">
+              {hubLinks.map((hub) => (
+                <Link key={hub.href} href={hub.href}>
+                  {hub.label}
+                </Link>
+              ))}
+            </p>
+          ) : null}
         </div>
         <aside className="story-side">
           <section className="side-card" id="how-to-help">

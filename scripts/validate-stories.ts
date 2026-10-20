@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { buildHubs, getHubIndex, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
 import { storySchema } from "../lib/story-schema";
 import { loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
@@ -84,6 +85,51 @@ function assertWorldSpotlight() {
     throw new Error("A US story should not be the world spotlight.");
   }
   if (worldSpotlight([], day)) throw new Error("No international story means no spotlight.");
+}
+
+function hubStory(partial: Partial<HubStory> & Pick<HubStory, "slug">): HubStory {
+  return {
+    date: "2026-10-01",
+    city: "Denver",
+    country: "US",
+    state: "CO",
+    alsoStates: [],
+    category: "animals",
+    tags: [],
+    ...partial,
+  };
+}
+
+function assertHubs() {
+  const thin = buildHubs([
+    hubStory({ slug: "one" }),
+    hubStory({ slug: "two", date: "2026-10-02" }),
+  ]);
+  if (thin.cities.length || thin.stateCategories.length || thin.topics.length) {
+    throw new Error("Two stories should not publish a hub page.");
+  }
+  const ready = buildHubs([
+    hubStory({ slug: "one", tags: ["school-lunch"] }),
+    hubStory({ slug: "two", date: "2026-10-02", tags: ["school-lunch"] }),
+    hubStory({ slug: "three", date: "2026-10-03", city: "Boulder", tags: ["school-lunch"] }),
+    hubStory({ slug: "four", date: "2026-10-04" }),
+  ]);
+  const animals = ready.stateCategories.find((hub) => hub.path === "/state/colorado/animals");
+  const denver = ready.cities.find((hub) => hub.path === "/state/colorado/city/denver");
+  const topic = ready.topics.find((hub) => hub.path === "/topic/school-lunch");
+  if (!animals || animals.count < MIN_HUB_STORIES) throw new Error("Colorado animals should be a hub once three stories exist.");
+  if (!denver || denver.count !== 3) throw new Error("Denver should be a city hub, and Boulder should not.");
+  if (ready.cities.some((hub) => hub.path.includes("boulder"))) throw new Error("A single Boulder story should not be a city page.");
+  if (!topic) throw new Error("A shared tag should become a topic page at three stories.");
+  const badTag = storySchema.safeParse(minimalStory({ state: "OH", tags: ["School Lunch"] }));
+  if (badTag.success) throw new Error("Tags have to be kebab-case.");
+  const duplicate = storySchema.safeParse(minimalStory({ state: "OH", tags: ["dogs", "dogs"] }));
+  if (duplicate.success) throw new Error("Duplicate tags should fail.");
+  const index = getHubIndex();
+  for (const hub of [...index.stateCategories, ...index.cities, ...index.topics]) {
+    if (hub.count < MIN_HUB_STORIES) throw new Error(`${hub.path} is thinner than ${MIN_HUB_STORIES} stories.`);
+  }
+  console.log(`Hubs: ${index.stateCategories.length} state topics, ${index.cities.length} cities, ${index.topics.length} topics.`);
 }
 
 function assertLoadedCountries(stories: { slug: string; country: string; state?: string }[]) {
@@ -177,6 +223,7 @@ const stories = loadAllStories();
 assertSchemaRejectsGarbage();
 assertCountryRules();
 assertWorldSpotlight();
+assertHubs();
 assertLoadedCountries(stories);
 assertSeedSources(stories);
 assertOnlyMailbox();

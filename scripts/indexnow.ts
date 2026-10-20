@@ -1,5 +1,6 @@
 import { getCategory } from "../lib/categories";
 import { getCountry } from "../lib/countries";
+import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
@@ -21,7 +22,8 @@ async function main() {
     const state = getStateByCode(story.state);
     if (state) urls.add(`${siteConfig.url}/state/${state.slug}`);
     const country = getCountry(story.country);
-    if (country) urls.add(`${siteConfig.url}/country/${country.slug}`);
+    if (country && countryIsIndexable(country.code)) urls.add(`${siteConfig.url}/country/${country.slug}`);
+    for (const path of hubPathsForStory(story)) urls.add(`${siteConfig.url}${path}`);
     if (story.country !== "US") urls.add(`${siteConfig.url}/world`);
     if (getCategory(story.category)) urls.add(`${siteConfig.url}/category/${story.category}`);
   }

@@ -9,6 +9,7 @@ import { WorldSpotlight } from "@/components/world-spotlight";
 import { CATEGORIES } from "@/lib/categories";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { getHubIndex } from "@/lib/hubs";
 import { getByState, stateCounts } from "@/lib/stories";
 import { getStateBySlug, neighborStates, type StateInfo } from "@/lib/states";
 
@@ -51,6 +52,9 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
   const highlighted = stateCounts().map((item) => item.code.toLowerCase());
   const cities = uniqueCities(stories).slice(0, 4);
   const categories = CATEGORIES.filter((category) => stories.some((story) => story.category === category.slug));
+  const stateHubs = getHubIndex().byStateSlug.get(state.slug);
+  const categoryHubs = new Map((stateHubs?.categories ?? []).map((hub) => [hub.categorySlug, hub]));
+  const cityHubs = stateHubs?.cities ?? [];
   const neighbors = neighborStates(state.code);
   const description = stateDescription(state.name);
   const cityPhrase = cities.length ? `, including ${formatList(cities)}` : "";
@@ -88,12 +92,27 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
         </p>
         {categories.length ? (
           <p className="link-pills">
-            {categories.map((category) => (
-              <Link key={category.slug} href={`/category/${category.slug}`}>
-                {category.label}
-              </Link>
-            ))}
+            {categories.map((category) => {
+              const hub = categoryHubs.get(category.slug);
+              return (
+                <Link key={category.slug} href={hub?.path ?? `/category/${category.slug}`}>
+                  {category.label}
+                </Link>
+              );
+            })}
           </p>
+        ) : null}
+        {cityHubs.length ? (
+          <>
+            <h2 className="side-title">Cities</h2>
+            <p className="link-pills">
+              {cityHubs.map((hub) => (
+                <Link key={hub.path} href={hub.path}>
+                  {hub.crumbs[hub.crumbs.length - 1]?.name ?? hub.linkLabel}
+                </Link>
+              ))}
+            </p>
+          </>
         ) : null}
       </div>
       <div className="wrap state-layout" style={{ paddingTop: 24 }}>

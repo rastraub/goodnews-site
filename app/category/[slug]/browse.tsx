@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { getCategory } from "@/lib/categories";
+import { getHubIndex } from "@/lib/hubs";
 
 type Category = NonNullable<ReturnType<typeof getCategory>>;
 import { getCountry } from "@/lib/countries";
@@ -50,6 +51,7 @@ function CategoryBody({ category, page }: { category: Category; page: number }) 
   }
   const stateLinks = [...states.values()].sort((a, b) => a.name.localeCompare(b.name));
   const countryLinks = [...countries.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const placeHubs = getHubIndex().stateCategories.filter((hub) => hub.categorySlug === category.slug);
 
   return (
     <div className="page-block">
@@ -81,6 +83,18 @@ function CategoryBody({ category, page }: { category: Category; page: number }) 
               {stateLinks.map((state) => (
                 <Link key={state.slug} href={`/state/${state.slug}`}>
                   {state.name}
+                </Link>
+              ))}
+            </p>
+          </>
+        ) : null}
+        {placeHubs.length ? (
+          <>
+            <h2 className="side-title">{category.label} by state</h2>
+            <p className="link-pills">
+              {placeHubs.map((hub) => (
+                <Link key={hub.path} href={hub.path}>
+                  {hub.linkLabel}
                 </Link>
               ))}
             </p>

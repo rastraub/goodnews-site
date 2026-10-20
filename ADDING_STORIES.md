@@ -72,6 +72,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `alsoStates` | no | Other US states this story should appear in. Do not repeat `state`. Leave it off outside the United States. |
 | `place` | no | Overrides the default "City, State" or "City, Country" label. |
 | `category` | yes | `heroes`, `animals`, `science`, `community`, or `health-tech`. |
+| `tags` | no | Up to five lowercase kebab-case topics, such as `school-lunch`. A topic page is created only after at least three stories share that tag. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
 | `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. |
@@ -108,6 +109,17 @@ country: "JP"
 - The story appears at `/country/japan` (the code redirects to the name slug), in `/world`, in the main RSS and news sitemap, and in `/country/japan/rss.xml`. It does not appear on a US state page.
 - Existing US files can keep omitting `country`. They stay `US` and keep `state`.
 - `worldPick: true` marks the one international story for the day. See the daily job below.
+
+### Pages that appear on their own
+
+These URLs are created only when at least three published stories belong there. A thinner combination is not a page, so it is not in the sitemap and it does not rank.
+
+- `/state/colorado/animals` is that state's stories in one category.
+- `/state/colorado/city/denver` is one US city. The city name is slugified, and the state keeps Springfields apart.
+- `/country/japan/city/osaka` is a city outside the United States.
+- `/topic/school-lunch` is a tag shared by at least three stories.
+
+A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Add `tags` when a real topic is shared. Do not invent tags to force a page.
 
 ### Mix for a daily batch
 
