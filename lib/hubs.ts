@@ -3,6 +3,7 @@ import { getCountry } from "./countries";
 import { MAX_PRERENDERED_PAGES, pageCount } from "./paging";
 import { getPublishedStories, type Story } from "./stories";
 import { getStateByCode, type StateInfo } from "./states";
+import { getTag } from "./tags";
 
 /** A hub is published only when it has enough stories to be a real page. */
 export const MIN_HUB_STORIES = 3;
@@ -225,15 +226,18 @@ function finish(bucket: Bucket): Hub | undefined {
     };
   }
   if (bucket.kind === "topic" && bucket.topicSlug) {
-    const label = topicLabel(bucket.topicSlug);
+    const tag = getTag(bucket.topicSlug);
+    const label = tag?.label ?? topicLabel(bucket.topicSlug);
+    const title = tag?.title ?? `Good news about ${label.toLowerCase()}`;
+    const intro = tag?.intro ?? `Verified stories about ${label.toLowerCase()}.`;
     const where = places ? ` Stories come from ${places}.` : "";
     return {
       kind: bucket.kind,
       path: bucket.path,
       params: bucket.params,
-      title: `${label} good news`,
-      heading: `${label} good news.`,
-      description: `${count} verified ${storyWord(count)} about ${label.toLowerCase()}.${where} Each one is checked and linked to the original report.`,
+      title,
+      heading: `${title}.`,
+      description: `${intro} ${count} verified ${storyWord(count)}.${where} Each one is checked and linked to the original report.`,
       kicker: "Topic",
       linkLabel: label,
       count,
@@ -241,6 +245,7 @@ function finish(bucket: Bucket): Hub | undefined {
       storySlugs: [...bucket.slugs],
       crumbs: [
         { name: "Today", path: "/" },
+        { name: "Topics", path: "/topics" },
         { name: label, path: bucket.path },
       ],
     };
