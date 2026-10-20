@@ -10,6 +10,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { getHubIndex } from "@/lib/hubs";
+import { kidStoriesInState } from "@/lib/kids";
 import { getByState, stateCounts } from "@/lib/stories";
 import { getStateBySlug, neighborStates, type StateInfo } from "@/lib/states";
 
@@ -100,6 +101,11 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
                 </Link>
               );
             })}
+          </p>
+        ) : null}
+        {kidStoriesInState(state.code).length ? (
+          <p className="link-pills">
+            <Link href={`/kids/state/${state.slug}`}>Classroom stories from {state.name}</Link>
           </p>
         ) : null}
         {cityHubs.length ? (

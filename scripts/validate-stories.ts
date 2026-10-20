@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
+import { parseEmailInterest } from "../lib/email";
 import { buildHubs, getHubIndex, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
+import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { storySchema } from "../lib/story-schema";
 import { loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
@@ -132,6 +134,85 @@ function assertHubs() {
   console.log(`Hubs: ${index.stateCategories.length} state topics, ${index.cities.length} cities, ${index.topics.length} topics.`);
 }
 
+function assertKidClassrooms() {
+  const summary = "A short classroom summary a teacher can read aloud to the class.";
+  const questions = [
+    "What did the people in this story do?",
+    "How could a class try something kind this week?",
+  ];
+  const plain = storySchema.safeParse(minimalStory({ state: "OH" }));
+  if (!plain.success || plain.data.kidFriendly !== false || plain.data.kidSummary || plain.data.kidQuestions) {
+    throw new Error("Classroom fields should stay optional.");
+  }
+  const flagged = storySchema.safeParse(minimalStory({ state: "OH", kidFriendly: true }));
+  if (flagged.success) throw new Error("kidFriendly needs a summary and discussion questions.");
+  const one = storySchema.safeParse(
+    minimalStory({ state: "OH", kidFriendly: true, kidSummary: summary, kidQuestions: [questions[0]] }),
+  );
+  if (one.success) throw new Error("One discussion question is not enough.");
+  const four = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      kidFriendly: true,
+      kidSummary: summary,
+      kidQuestions: [...questions, "What else did you notice?", "Who would you thank?"],
+    }),
+  );
+  if (four.success) throw new Error("Four discussion questions is too many.");
+  const ready = storySchema.safeParse(minimalStory({ state: "OH", kidFriendly: true, kidSummary: summary, kidQuestions: questions }));
+  if (!ready.success || ready.data.kidQuestions?.length !== 2) {
+    throw new Error("Two questions and a summary should pass.");
+  }
+  const third = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      kidFriendly: true,
+      kidSummary: summary,
+      kidQuestions: [...questions, "Who would you thank?"],
+    }),
+  );
+  if (!third.success) throw new Error("Three discussion questions should pass.");
+  const orphan = storySchema.safeParse(minimalStory({ state: "OH", kidSummary: summary }));
+  if (orphan.success) throw new Error("A kid summary without kidFriendly should fail.");
+  const questionsOnly = storySchema.safeParse(minimalStory({ state: "OH", kidQuestions: questions }));
+  if (questionsOnly.success) throw new Error("Discussion questions without kidFriendly should fail.");
+
+  const day = "2026-10-20";
+  const alpha = { slug: "alpha-story", date: "2026-10-18", kidFriendly: true };
+  const bravo = { slug: "bravo-story", date: "2026-10-19", kidFriendly: true };
+  const first = storyOfTheDay([alpha, bravo], day);
+  const again = storyOfTheDay([bravo, alpha], day);
+  if (!first || first.slug !== again?.slug) {
+    throw new Error("The classroom story should stay on the same story for a date.");
+  }
+  const next = storyOfTheDay([alpha, bravo], "2026-10-21");
+  if (!next || next.slug === first.slug) throw new Error("The classroom story should rotate across dates.");
+  const today = storyOfTheDay([alpha, { slug: "today-tale", date: day, kidFriendly: true }], day);
+  if (today?.slug !== "today-tale") throw new Error("A classroom story dated today should be the story of the day.");
+  if (storyOfTheDay([{ ...alpha, kidFriendly: false }], day)) {
+    throw new Error("A story that is not kid-friendly should not print.");
+  }
+  if (storyOfTheDay([{ ...alpha, draft: true }], day)) throw new Error("A draft should not be the classroom story.");
+  if (storyOfTheDay([], day)) throw new Error("No classroom story means no story of the day.");
+
+  if (parseEmailInterest("teachers") !== "teachers") throw new Error("The teacher list tag should be accepted.");
+  if (parseEmailInterest("membership") !== "membership") throw new Error("Membership should stay its own tag.");
+  if (parseEmailInterest("nope") !== "daily") throw new Error("Unknown email interest should stay on the daily list.");
+
+  const places = kidPlaces();
+  for (const place of places) {
+    if (place.count < 1) throw new Error(`${place.path} has no classroom stories.`);
+    if (place.kind === "country" && place.code === "US") throw new Error("US classroom stories belong on state pages.");
+    if (place.kind === "state" && !place.path.startsWith("/kids/state/")) {
+      throw new Error(`${place.path} should live under /kids/state.`);
+    }
+    if (place.kind === "country" && !place.path.startsWith("/kids/country/")) {
+      throw new Error(`${place.path} should live under /kids/country.`);
+    }
+  }
+  console.log(`Kid-friendly stories: ${getKidStories().length}. Places: ${places.length}.`);
+}
+
 function assertLoadedCountries(stories: { slug: string; country: string; state?: string }[]) {
   for (const story of stories) {
     if (!story.country) throw new Error(`${story.slug} is missing a country`);
@@ -224,6 +305,7 @@ assertSchemaRejectsGarbage();
 assertCountryRules();
 assertWorldSpotlight();
 assertHubs();
+assertKidClassrooms();
 assertLoadedCountries(stories);
 assertSeedSources(stories);
 assertOnlyMailbox();

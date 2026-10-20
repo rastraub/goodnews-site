@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { countriesInRegion, getCountryBySlug, type CountryInfo } from "@/lib/countries";
 import { countryIsIndexable, getHubIndex } from "@/lib/hubs";
+import { kidStoriesInCountry } from "@/lib/kids";
 import { pageCount, pageSlice, STORY_PAGE_SIZE } from "@/lib/paging";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { countryCounts, getByCountry } from "@/lib/stories";
@@ -77,6 +78,9 @@ function CountryBody({ country, page }: { country: CountryInfo; page: number }) 
         <p className="link-pills">
           <Link href={`/country/${country.slug}/rss.xml`}>RSS</Link>
           {country.code === "US" ? <Link href="/local">Browse by state</Link> : <Link href="/world">All countries</Link>}
+          {country.code !== "US" && kidStoriesInCountry(country.code).length ? (
+            <Link href={`/kids/country/${country.slug}`}>Classroom stories</Link>
+          ) : null}
           {(getHubIndex().byCountrySlug.get(country.slug) ?? []).map((hub) => (
             <Link key={hub.path} href={hub.path}>
               {hub.crumbs[hub.crumbs.length - 1]?.name ?? hub.linkLabel}

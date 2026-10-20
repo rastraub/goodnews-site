@@ -145,6 +145,22 @@ export default async function StoryPage({ params }: Props) {
             </a>
           </div>
           <StoryBody markdown={story.body} />
+          {story.kidFriendly && story.kidSummary && story.kidQuestions?.length ? (
+            <section className="classroom-box" id="classroom">
+              <h2>For the classroom</h2>
+              <p>{story.kidSummary}</p>
+              <ol>
+                {story.kidQuestions.map((question) => (
+                  <li key={question}>{question}</li>
+                ))}
+              </ol>
+              <p>
+                For a teacher to read with a class. <Link href="/kids/print">Print the story of the day</Link>
+                {" · "}
+                <Link href="/kids">All classroom stories</Link>
+              </p>
+            </section>
+          ) : null}
           {hubLinks.length ? (
             <p className="jump-links">
               {hubLinks.map((hub) => (

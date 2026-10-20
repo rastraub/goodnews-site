@@ -87,6 +87,9 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `featured` | no | `true` makes it eligible to be the story of the day. The newest featured story wins. |
 | `top5` | no | Rank `1` through `5`. Each number can be used once. |
 | `worldPick` | no | `true` on one story from outside the United States. That story is the bonus "Around the World" link in the morning email, and the spotlight on the homepage and state pages. Leave it off US stories. Only one story may have it. |
+| `kidFriendly` | no | `true` when a teacher can read the story aloud with children. Requires `kidSummary` and `kidQuestions`. Defaults to false. Leave it off a story that is frightening, political, or too medical for a classroom. |
+| `kidSummary` | with `kidFriendly` | A short paragraph in plain language for a teacher to read aloud. Leave it off when `kidFriendly` is false. |
+| `kidQuestions` | with `kidFriendly` | Two or three discussion questions for the teacher to lead. Leave them off otherwise. |
 | `cheers` | no | Starting cheer count. Defaults to 0. Readers add one in their own browser. |
 | `draft` | no | `true` keeps it out of the site. It is still validated. |
 | `editorApproved` | yes | Must be `true` for anything that is not a draft. This is the publish switch. |
@@ -121,6 +124,23 @@ These URLs are created only when at least three published stories belong there. 
 
 A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Add `tags` when a real topic is shared. Do not invent tags to force a page.
 
+### Stories for classrooms
+
+Use these fields only when the story is appropriate to read with children. Skip anything frightening, political, or too medical for a classroom. Do not invent a kid-friendly version of a story that is not one.
+
+```yaml
+kidFriendly: true
+kidSummary: "A short paragraph in plain language a teacher can read aloud."
+kidQuestions:
+  - "What did the people in this story do?"
+  - "What is one kind thing your class could try?"
+```
+
+- `kidFriendly: true` without a summary and two or three questions fails validation. A summary or questions without the flag also fails, so the classroom text cannot be dropped by accident.
+- `/kids` lists every published classroom story. `/kids/print` is the printable story of the day for teachers. It rotates by calendar date. A classroom story dated that day is the one that prints.
+- `/kids/state/colorado` and `/kids/country/japan` exist only when that place has at least one classroom story. A state and a country can share a name, so the path says which is which. An empty place is not a page.
+- The teacher email is a separate signup on `/kids` for adults and educators. The tag is `teachers`. Do not collect a child's name, age, school, or email.
+
 ### Mix for a daily batch
 
 About one in four stories in a daily batch should come from outside the United States when the batch is large enough and the reporting is strong enough. Spread those stories across more than one region. Do not force a weak story to hit the mix, and do not fill the international share from a single country. Stories from the United States stay the majority while the world edition is growing.
@@ -141,6 +161,7 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **Featured.** The hero is the newest story with `featured: true` (newest date wins). Set `featured: true` on the single best story of the day, and set `featured: false` on every other story, including older ones. If an older story is left featured and no newer story is featured, it keeps the hero spot.
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
    - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
+   - **For classrooms.** When a story is appropriate to read with children, set `kidFriendly: true`, write `kidSummary` in plain language a teacher can read aloud, and add two or three `kidQuestions`. Skip the flag when the story is frightening, political, or too medical for a classroom. Do not force one into the batch. Do not invent facts to make a story sound simpler than it is. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list with the tag `teachers`. Do not add a child to any list.
 6. Run `npm run validate-stories` and `npm run build`. Both have to pass.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 

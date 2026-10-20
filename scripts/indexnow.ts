@@ -1,13 +1,14 @@
 import { getCategory } from "../lib/categories";
 import { getCountry } from "../lib/countries";
 import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
+import { kidPlaceForStory } from "../lib/kids";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
 import { getStateByCode } from "../lib/states";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/atom.xml", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/atom.xml", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/kids", "/kids/print"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -26,6 +27,18 @@ async function main() {
     for (const path of hubPathsForStory(story)) urls.add(`${siteConfig.url}${path}`);
     if (story.country !== "US") urls.add(`${siteConfig.url}/world`);
     if (getCategory(story.category)) urls.add(`${siteConfig.url}/category/${story.category}`);
+    if (story.kidFriendly) {
+      urls.add(`${siteConfig.url}/kids`);
+      urls.add(`${siteConfig.url}/kids/print`);
+      const classroom = kidPlaceForStory(story);
+      if (classroom) urls.add(`${siteConfig.url}${classroom}`);
+      if (story.country === "US") {
+        for (const extra of story.alsoStates) {
+          const extraState = getStateByCode(extra);
+          if (extraState) urls.add(`${siteConfig.url}/kids/state/${extraState.slug}`);
+        }
+      }
+    }
   }
 
   const urlList = [...urls];

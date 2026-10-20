@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
+import { kidPlaces } from "@/lib/kids";
 import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
@@ -8,6 +9,8 @@ import { STATES } from "@/lib/states";
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/local", changeFrequency: "daily", priority: 0.8 },
+  { path: "/kids", changeFrequency: "daily", priority: 0.6 },
+  { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
   { path: "/editorial-standards", changeFrequency: "monthly", priority: 0.6 },
@@ -78,6 +81,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: country.latest,
       changeFrequency: "daily" as const,
       priority: country.code === "US" ? 0.7 : 0.6,
+    })),
+    ...kidPlaces().map((place) => ({
+      url: absoluteUrl(place.path),
+      lastModified: place.latest,
+      changeFrequency: "daily" as const,
+      priority: 0.5,
     })),
     ...[...hubs.stateCategories, ...hubs.cities, ...hubs.topics].map((hub) => ({
       url: absoluteUrl(hub.path),

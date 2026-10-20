@@ -67,6 +67,13 @@ export const storySchema = z
     featured: z.boolean().optional().default(false),
     top5: z.number().int().min(1).max(5).optional(),
     worldPick: z.boolean().optional().default(false),
+    kidFriendly: z.boolean().optional().default(false),
+    kidSummary: z.string().trim().min(40).max(800).optional(),
+    kidQuestions: z
+      .array(z.string().trim().min(12).max(200))
+      .min(2, "Add 2 or 3 discussion questions")
+      .max(3, "Add 2 or 3 discussion questions")
+      .optional(),
     cheers: z.number().int().nonnegative().optional().default(0),
     draft: z.boolean().optional().default(false),
     editorApproved: z.boolean(),
@@ -74,6 +81,28 @@ export const storySchema = z
   })
   .strict()
   .superRefine((data, ctx) => {
+    if (data.kidFriendly) {
+      if (!data.kidSummary) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["kidSummary"],
+          message: "A classroom story needs a short summary a teacher can read aloud",
+        });
+      }
+      if (!data.kidQuestions) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["kidQuestions"],
+          message: "A classroom story needs 2 or 3 discussion questions",
+        });
+      }
+    } else if (data.kidSummary || data.kidQuestions?.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["kidFriendly"],
+        message: "Set kidFriendly: true when you add a kid summary or discussion questions",
+      });
+    }
     const seenTags = new Set<string>();
     for (const tag of data.tags) {
       if (seenTags.has(tag)) {

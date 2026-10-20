@@ -13,6 +13,8 @@ const PRIMARY = [
   ...CATEGORIES.map((category) => ({ href: `/category/${category.slug}`, label: category.label })),
 ];
 
+const MORE = [{ href: "/kids", label: "Kids" }];
+
 export function Header({ edition }: { edition: string }) {
   const pathname = usePathname();
   const [openPath, setOpenPath] = useState<string | null>(null);
@@ -85,7 +87,7 @@ export function Header({ edition }: { edition: string }) {
         </div>
       </header>
       <div className={`menu-panel${open ? " open" : ""}`} id="mobile-menu">
-        {PRIMARY.map((link) => (
+        {[...PRIMARY, ...MORE].map((link) => (
           <Link key={link.href} href={link.href}>
             {link.label}
           </Link>
@@ -96,7 +98,7 @@ export function Header({ edition }: { edition: string }) {
         <Link href="/subscribe">Subscribe</Link>
       </div>
       <div className="catbar">
-        {PRIMARY.map((link) => (
+        {[...PRIMARY, ...MORE].map((link) => (
           <Link key={link.href} href={link.href} className={active(link.href) ? "on" : undefined}>
             {link.label}
           </Link>

@@ -39,7 +39,9 @@ export function EmailSignup({
       setMessage(
         interest === "membership"
           ? `You're on the list. We'll write when membership opens at ${siteConfig.name}.`
-          : `You're in. Look for the morning Top 5 from ${siteConfig.name}.`,
+          : interest === "teachers"
+            ? "You're on the teacher list. Classroom notes will come to this adult address."
+            : `You're in. Look for the morning Top 5 from ${siteConfig.name}.`,
       );
     } catch {
       setStatus("error");
@@ -75,7 +77,13 @@ export function EmailSignup({
         />
       </label>
       <button className="btn btn-ink" type="submit" disabled={status === "loading"}>
-        {status === "loading" ? "Sending…" : interest === "membership" ? "Join the waitlist" : "Get the Top 5"}
+        {status === "loading"
+          ? "Sending…"
+          : interest === "membership"
+            ? "Join the waitlist"
+            : interest === "teachers"
+              ? "Join the teacher list"
+              : "Get the Top 5"}
       </button>
     </form>
   );
@@ -109,10 +117,21 @@ export function EmailSignup({
             </g>
           </svg>
           <div style={{ position: "relative" }}>
-            <h2>Start every morning on the bright side.</h2>
-            <p>
-              Five true, uplifting stories in your inbox at 6 a.m. It takes two minutes to read and it sets the tone for the whole day.
-            </p>
+            {interest === "teachers" ? (
+              <>
+                <h2>Classroom stories, for teachers.</h2>
+                <p>
+                  This list is only for adults and educators. One kid-friendly story and a few discussion questions. We never ask for a child&apos;s name, age, or school.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2>Start every morning on the bright side.</h2>
+                <p>
+                  Five true, uplifting stories in your inbox at 6 a.m. It takes two minutes to read and it sets the tone for the whole day.
+                </p>
+              </>
+            )}
           </div>
           <div style={{ position: "relative" }}>
             {status === "success" ? (
@@ -126,7 +145,7 @@ export function EmailSignup({
                 <svg className="ico" aria-hidden="true">
                   <use href="#i-check" />
                 </svg>
-                Free, every day
+                {interest === "teachers" ? "For adults and educators" : "Free, every day"}
               </span>
               <span>Unsubscribe anytime</span>
               <span>We never sell your email</span>

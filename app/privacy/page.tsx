@@ -29,6 +29,10 @@ export default function PrivacyPage() {
         <p>
           A cheer is stored in your browser so the button remembers you. The server only logs that a story was cheered. Counts on the page start from the number in the story file.
         </p>
+        <h2>Classrooms</h2>
+        <p>
+          The kids pages are for teachers and other adults to read with a class. The teacher email is a separate signup for educators. We do not ask for a child&apos;s name, age, school, or email. Those pages do not add advertising or any tracking beyond the rest of the site.
+        </p>
         <h2>Contact</h2>
         <p>
           Questions go to <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a>.

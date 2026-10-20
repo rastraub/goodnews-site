@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { pageAlternates } from "@/lib/seo";
 import { EmailSignup } from "@/components/email-signup";
 import { siteConfig } from "@/site.config";
@@ -17,6 +18,10 @@ export default function SubscribePage() {
         <h1>Five stories. Two minutes. Every morning.</h1>
         <p className="lede">
           A short email from {siteConfig.name}, free, with the same verified stories as the site. No pop-ups in your inbox, and we never sell the address.
+        </p>
+        <p className="lede">
+          This list is for adults. Teachers who want a classroom story can join the separate educator list on the{" "}
+          <Link href="/kids#teachers">kids page</Link>.
         </p>
       </div>
       <EmailSignup />
