@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
+import { SunMark } from "@/lib/brand";
 
-export const size = { width: 32, height: 32 };
+export const size = { width: 192, height: 192 };
 export const contentType = "image/png";
 
 export default function Icon() {
@@ -8,16 +9,15 @@ export default function Icon() {
     (
       <div
         style={{
-          width: 32,
-          height: 32,
-          background: "#FFF1D2",
-          borderRadius: 16,
+          width: 192,
+          height: 192,
+          background: "#FFFBF4",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <div style={{ width: 14, height: 14, borderRadius: 8, background: "#F3B23C" }} />
+        <SunMark size={150} />
       </div>
     ),
     { ...size },

@@ -27,24 +27,34 @@ export const siteConfig = {
     blurb:
       "Verified good news from the United States and countries around the world. Every story is checked against the original report, linked to that source, and kept free of politics.",
   },
+  /**
+   * Accounts this publication controls. A blank handle is omitted from the
+   * footer and from NewsMediaOrganization.sameAs. Fill one in only after
+   * that account exists.
+   */
   social: {
-    instagram: "tazzora",
-    tiktok: "tazzora",
-    youtube: "tazzora",
-    facebook: "tazzora",
     x: "TazzoraNews",
+    instagram: "",
+    tiktok: "",
+    youtube: "",
+    facebook: "",
   },
 } as const;
 
 export type SiteConfig = typeof siteConfig;
 
+const SOCIAL_PROFILES = [
+  { key: "x", label: "X", short: "X", href: (handle: string) => `https://x.com/${handle}` },
+  { key: "instagram", label: "Instagram", short: "IG", href: (handle: string) => `https://www.instagram.com/${handle}` },
+  { key: "tiktok", label: "TikTok", short: "TT", href: (handle: string) => `https://www.tiktok.com/@${handle}` },
+  { key: "youtube", label: "YouTube", short: "YT", href: (handle: string) => `https://www.youtube.com/@${handle}` },
+  { key: "facebook", label: "Facebook", short: "FB", href: (handle: string) => `https://www.facebook.com/${handle}` },
+] as const;
+
 export function socialLinks() {
-  const { social } = siteConfig;
-  return [
-    { label: "Instagram", short: "IG", href: `https://instagram.com/${social.instagram}` },
-    { label: "TikTok", short: "TT", href: `https://www.tiktok.com/@${social.tiktok}` },
-    { label: "YouTube", short: "YT", href: `https://www.youtube.com/@${social.youtube}` },
-    { label: "Facebook", short: "FB", href: `https://www.facebook.com/${social.facebook}` },
-    { label: "X", short: "X", href: `https://x.com/${social.x}` },
-  ];
+  return SOCIAL_PROFILES.flatMap((profile) => {
+    const handle = siteConfig.social[profile.key].trim();
+    if (!handle) return [];
+    return [{ label: profile.label, short: profile.short, href: profile.href(handle) }];
+  });
 }

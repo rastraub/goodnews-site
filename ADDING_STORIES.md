@@ -75,7 +75,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `tags` | yes on a new story | Two to five labels from `lib/tags.ts`, such as `animal-rescue` or `school-lunch`. A topic page is created only after at least three stories share that tag. Validation rejects a tag that is not in the vocabulary, and it rejects a list that is not two to five labels. Omitting `tags` entirely still builds, so a file that lands on `main` before it is tagged does not take the site down. Do not rely on that. Set the tags. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
-| `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. |
+| `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. A `pony-1600.jpg` is optional. See Photos. |
 | `imageAlt` | yes | Describe the actual photo. |
 | `imageCaption` | yes | Shown under the photo. Say when it is not the real subject. |
 | `imageCredit` | yes | Photographer and source. |
@@ -93,7 +93,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `cheers` | no | Starting cheer count. Defaults to 0. Readers add one in their own browser. |
 | `draft` | no | `true` keeps it out of the site. It is still validated. |
 | `editorApproved` | yes | Must be `true` for anything that is not a draft. This is the publish switch. |
-| `correction` | no | Public correction. It appears on the story and on `/corrections`. |
+| `correction` | no | Public correction. It appears on the story and on `/corrections`. Feeds and article markup then use a modified time 12 hours after that story's publish time. The file has a date, not a clock time. |
 
 The body under the front matter is the original summary. Write it yourself. Do not paste the source article. Aim for a short, sourced account, at least 40 words. Paragraphs separated by a blank line. Links look like `[label](https://example.com)`.
 
@@ -150,6 +150,16 @@ About one in four stories in a daily batch should come from outside the United S
 ## Photos
 
 Store images in `public/images/stories/` as WebP. Each story needs the full photo (`pony.webp`, about 840px wide) and a thumbnail (`pony-sm.webp`, about 360px wide). Do not upscale a smaller photo to invent the larger size. Listing pages are paginated and cards use the thumbnail through `srcSet`, so a large archive does not request every full photo at once. Use photos you have the right to use, credit them, and do not present a stranger's face as the person in the story. A caption should say when a photo is illustrative.
+
+Feeds, `og:image`, and the NewsArticle image prefer a sibling JPEG, `pony-1600.jpg` (about 1600px wide, 16:9 or 4:3, roughly 200 to 400 KB). The morning job does not have to create it. If the file is missing, the build still passes and those slots use the WebP.
+
+When you want the JPEG, run:
+
+```bash
+npm run feed-images
+```
+
+The script reads `imageCreditUrl`. It downloads a larger copy only from Wikimedia Commons, of the same file the story already credits. It keeps that credit and license, writes them into the JPEG, and skips a photo that cannot reach 1200px wide without stretching by more than 15 percent. It does not replace the WebP used on the page, and it does not pick a different photo.
 
 ## What the daily job does
 

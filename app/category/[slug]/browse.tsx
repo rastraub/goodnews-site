@@ -9,6 +9,7 @@ import { getHubIndex } from "@/lib/hubs";
 type Category = NonNullable<ReturnType<typeof getCategory>>;
 import { getCountry } from "@/lib/countries";
 import { pageCount, pageSlice } from "@/lib/paging";
+import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { getByCategory } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
@@ -29,7 +30,8 @@ export function categoryPageMetadata(slug: string, page: number): Metadata {
     base: `/category/${category.slug}`,
     page,
     total: stories.length,
-    image: image ? { url: image.image, alt: image.imageAlt } : undefined,
+    feedPath: `/category/${category.slug}/rss.xml`,
+    image: image ? openGraphImage(image) : undefined,
   });
 }
 

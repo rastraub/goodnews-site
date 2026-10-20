@@ -7,6 +7,7 @@ import { countriesInRegion, getCountryBySlug, type CountryInfo } from "@/lib/cou
 import { countryIsIndexable, getHubIndex } from "@/lib/hubs";
 import { kidStoriesInCountry } from "@/lib/kids";
 import { pageCount, pageSlice, STORY_PAGE_SIZE } from "@/lib/paging";
+import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { countryCounts, getByCountry } from "@/lib/stories";
 
@@ -28,7 +29,7 @@ export function countryPageMetadata(slug: string, page: number): Metadata {
     page,
     total: stories.length,
     feedPath: `/country/${country.slug}/rss.xml`,
-    image: image ? { url: image.image, alt: image.imageAlt } : undefined,
+    image: image ? openGraphImage(image) : undefined,
   });
   if (!countryIsIndexable(country.code)) {
     return { ...meta, robots: { index: false, follow: true } };

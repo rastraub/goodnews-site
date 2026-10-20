@@ -13,7 +13,8 @@ import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { placeLabel, toCard } from "@/lib/present";
-import { pageAlternates, publishedIso, storyJsonLd, xHandle } from "@/lib/seo";
+import { openGraphImage } from "@/lib/feed-image";
+import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
 import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
@@ -35,7 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = getCategory(story.category);
   const state = getStateByCode(story.state);
   const country = getCountry(story.country);
-  const published = publishedIso(story.date);
+  const published = storyPublishedIso(story);
+  const modified = storyModifiedIso(story);
+  const socialImage = openGraphImage(story);
   const tags = [story.country === "US" ? state?.name : country?.name, story.city, category?.label].filter((tag): tag is string => Boolean(tag));
   return {
     title: story.title,
@@ -48,18 +51,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: story.title,
       description,
       publishedTime: published,
-      modifiedTime: published,
+      modifiedTime: modified,
       authors: [siteConfig.editor.name],
       section: category?.label,
       tags,
-      images: [{ url: story.image, alt: story.imageAlt, type: "image/webp" }],
+      images: [socialImage],
     },
     twitter: {
       card: "summary_large_image",
       site: xHandle(),
       title: story.title,
       description,
-      images: [story.image],
+      images: [socialImage.url],
     },
   };
 }

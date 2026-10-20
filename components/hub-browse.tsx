@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { getHubByPath, getHubIndex, storiesForHub, type Hub } from "@/lib/hubs";
 import { pageCount, pagePath, pageSlice } from "@/lib/paging";
+import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 
 function relatedLinks(hub: Hub): { href: string; label: string }[] {
@@ -47,7 +48,7 @@ export function hubMetadata(path: string, page: number): Metadata {
     base: hub.path,
     page,
     total: hub.count,
-    image: image ? { url: image.image, alt: image.imageAlt } : undefined,
+    image: image ? openGraphImage(image) : undefined,
   });
 }
 

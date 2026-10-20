@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { IconSprite } from "@/components/icon-sprite";
 import { JsonLd } from "@/components/json-ld";
 import { editionLabel } from "@/lib/format";
+import { FAVICON_SIZES, faviconPath } from "@/lib/brand";
 import { pageAlternates, siteGraphJsonLd, xHandle } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 import "./globals.css";
@@ -53,6 +54,14 @@ export const metadata: Metadata = {
     description: siteConfig.description,
   },
   twitter: { card: "summary_large_image", site: xHandle() },
+  icons: {
+    icon: FAVICON_SIZES.map((size) => ({
+      url: faviconPath(size),
+      sizes: `${size}x${size}`,
+      type: "image/png" as const,
+    })),
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+  },
   robots: {
     index: true,
     follow: true,

@@ -6,6 +6,7 @@ import { siteConfig, socialLinks } from "@/site.config";
 
 export function Footer() {
   const year = editionYear();
+  const socials = socialLinks();
   return (
     <footer>
       <div className="wrap">
@@ -13,13 +14,15 @@ export function Footer() {
           <div className="fbrand">
             <Logo />
             <p className="about">{siteConfig.description}</p>
-            <div className="socials">
-              {socialLinks().map((social) => (
-                <a key={social.label} href={social.href} aria-label={`${social.short}, ${social.label}`} target="_blank" rel="noopener noreferrer">
-                  <span aria-hidden="true">{social.short}</span>
-                </a>
-              ))}
-            </div>
+            {socials.length ? (
+              <div className="socials">
+                {socials.map((social) => (
+                  <a key={social.label} href={social.href} aria-label={social.label} target="_blank" rel="noopener noreferrer">
+                    <span aria-hidden="true">{social.short}</span>
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </div>
           <div>
             <p className="flabel">Read</p>
@@ -36,6 +39,7 @@ export function Footer() {
                 </li>
               ))}
               <li><Link href="/rss.xml">RSS</Link></li>
+              <li><Link href="/feeds">All feeds</Link></li>
               <li><Link href="/atom.xml">Atom</Link></li>
             </ul>
           </div>

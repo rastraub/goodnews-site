@@ -224,6 +224,14 @@ footer a:hover{color:#fff}
 .link-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .link-pills a{font-size:14px;font-weight:600;padding:7px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink2)}
 .link-pills a:hover{color:var(--ink);border-color:#E4D8C4}
+.feed-groups{display:grid;gap:36px;padding-bottom:12px}
+.feed-groups h2{font-family:var(--font-serif);font-size:32px;font-weight:600;letter-spacing:-.02em;margin:0}
+.feed-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.feed-row .name{font-weight:600;font-size:16px;min-width:0}
+.feed-row .name a{color:inherit}
+.feed-row .blurb{display:block;color:var(--muted);font-size:13.5px;font-weight:500;margin-top:2px}
+.feed-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.feed-row .btn{height:36px;padding:0 12px;font-size:13.5px}
 .side-title{font-family:var(--font-serif);font-size:28px;font-weight:600;letter-spacing:-.02em;margin-top:22px}
 .crumbs a:hover{color:var(--blue-d)}
 
@@ -373,6 +381,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .source-box{flex-direction:column;align-items:flex-start}
   .form-grid,.state-index{grid-template-columns:1fr 1fr}
   .page-hero{padding-top:28px}
+  .feed-groups h2{font-size:28px}
+  .feed-row{grid-template-columns:1fr}
+  .feed-actions{justify-content:flex-start}
   .promise-card{padding:28px 22px}
   .promise-card h2{font-size:30px}
   .search-form{flex-direction:column}
