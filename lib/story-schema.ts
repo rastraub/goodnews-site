@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CATEGORIES } from "./categories";
 import { getCountry } from "./countries";
 import { getStateByCode } from "./states";
+import { isTag } from "./tags";
 
 const categorySlugs = CATEGORIES.map((category) => category.slug) as [
   CategorySlug,
@@ -105,6 +106,13 @@ export const storySchema = z
     }
     const seenTags = new Set<string>();
     for (const tag of data.tags) {
+      if (!isTag(tag)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["tags"],
+          message: `Unknown tag ${tag}. Use a tag from lib/tags.ts.`,
+        });
+      }
       if (seenTags.has(tag)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
