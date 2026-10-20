@@ -242,8 +242,13 @@ export function listingJsonLd(options: {
   path: string;
   crumbs: Crumb[];
   stories: Pick<Story, "slug" | "title">[];
+  /** When set, the list is these pages instead of stories. Used by the week index. */
+  items?: { name: string; path: string }[];
 }) {
-  const listed = options.stories.slice(0, 40);
+  const entries = options.items
+    ? options.items.map((item) => ({ name: item.name, url: absoluteUrl(item.path) }))
+    : options.stories.map((story) => ({ name: story.title, url: absoluteUrl(`/story/${story.slug}`) }));
+  const listed = entries.slice(0, 40);
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -255,12 +260,12 @@ export function listingJsonLd(options: {
         isPartOf: { "@id": `${siteConfig.url}/#website` },
         mainEntity: {
           "@type": "ItemList",
-          numberOfItems: options.stories.length,
-          itemListElement: listed.map((story, index) => ({
+          numberOfItems: entries.length,
+          itemListElement: listed.map((entry, index) => ({
             "@type": "ListItem",
             position: index + 1,
-            name: story.title,
-            url: absoluteUrl(`/story/${story.slug}`),
+            name: entry.name,
+            url: entry.url,
           })),
         },
       },

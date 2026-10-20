@@ -5,6 +5,21 @@ import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
 import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
+import {
+  MAX_PRERENDERED_WEEKS,
+  MIN_WEEK_STORIES,
+  SITE_LAUNCH,
+  addDays,
+  buildWeeks,
+  completedWeeks,
+  formatWeekRange,
+  getPublishedWeeks,
+  launchWeekStart,
+  mountainDay,
+  renderWeekRss,
+  weekStart,
+  type WeekSource,
+} from "../lib/weeks";
 import { storySchema } from "../lib/story-schema";
 import { loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
@@ -239,7 +254,165 @@ function assertPrerenderCoversArchive(storyCount: number) {
   if (hubCount > MAX_PRERENDERED_HUBS) {
     throw new Error(`${hubCount} hub pages exceed the prerender cap of ${MAX_PRERENDERED_HUBS}. Raise MAX_PRERENDERED_HUBS.`);
   }
-  console.log(`Prerender: ${storyCount} stories, ${pages} archive pages, ${hubCount} hubs. Caps ${STATIC_STORY_CAP} / ${MAX_PRERENDERED_PAGES} / ${MAX_PRERENDERED_HUBS}.`);
+  if (MAX_PRERENDERED_WEEKS < 2_000) {
+    throw new Error(`MAX_PRERENDERED_WEEKS is ${MAX_PRERENDERED_WEEKS}. Keep it at or above 2000 so decades of weekly pages stay static.`);
+  }
+  const weekCount = getPublishedWeeks().length;
+  if (weekCount > MAX_PRERENDERED_WEEKS) {
+    throw new Error(
+      `${weekCount} week pages exceed the prerender cap of ${MAX_PRERENDERED_WEEKS}. Raise MAX_PRERENDERED_WEEKS. Do not switch the overflow to on-demand rendering; each crawler would invoke a function after every deploy.`,
+    );
+  }
+  console.log(`Prerender: ${storyCount} stories, ${pages} archive pages, ${hubCount} hubs, ${weekCount} weeks. Caps ${STATIC_STORY_CAP} / ${MAX_PRERENDERED_PAGES} / ${MAX_PRERENDERED_HUBS} / ${MAX_PRERENDERED_WEEKS}.`);
+}
+
+function sampleWeekStory(partial: Partial<WeekSource> & Pick<WeekSource, "slug" | "date">): WeekSource {
+  return {
+    title: `A verified good news story ${partial.slug}`,
+    country: "US",
+    state: "CO",
+    alsoStates: [],
+    category: "community",
+    image: `/images/stories/${partial.slug}.webp`,
+    imageAlt: "A photo from the week",
+    ...partial,
+  };
+}
+
+function assertWeeks() {
+  if (launchWeekStart() !== "2026-10-05") throw new Error("Launch week should start Monday, October 5, 2026.");
+  if (weekStart("2026-10-07") !== "2026-10-05") throw new Error("October 7 belongs to the October 5 week.");
+  if (weekStart("2026-10-11") !== "2026-10-05") throw new Error("Sunday October 11 belongs to the October 5 week.");
+  if (weekStart("2026-10-12") !== "2026-10-12") throw new Error("October 12 is a Monday.");
+  if (weekStart("2026-10-25") !== "2026-10-19") throw new Error("October 25 belongs to the October 19 week.");
+  if (formatWeekRange("2026-10-19", "2026-10-25") !== "Oct 19 to 25, 2026") {
+    throw new Error("A week inside one month should read like Oct 19 to 25, 2026.");
+  }
+  if (formatWeekRange("2026-10-26", "2026-11-01") !== "Oct 26 to Nov 1, 2026") {
+    throw new Error("A week across months should name both months.");
+  }
+  if (formatWeekRange("2026-12-28", "2027-01-03") !== "Dec 28, 2026 to Jan 3, 2027") {
+    throw new Error("A week across years should name both years.");
+  }
+  const beforeMidnight = mountainDay(new Date("2026-10-20T05:30:00.000Z"));
+  const afterMidnight = mountainDay(new Date("2026-10-20T07:00:00.000Z"));
+  if (beforeMidnight !== "2026-10-19" || afterMidnight !== "2026-10-20") {
+    throw new Error("The open week should follow Mountain Time, not UTC midnight.");
+  }
+
+  const thin = buildWeeks(
+    Array.from({ length: 9 }, (_, index) => sampleWeekStory({ slug: `thin-${index}`, date: addDays("2026-10-05", index % 7) })),
+    "2026-10-20",
+  );
+  if (thin.length) throw new Error("Nine stories should not publish a week page.");
+
+  const beforeLaunch = buildWeeks(
+    Array.from({ length: 12 }, (_, index) => sampleWeekStory({ slug: `early-${index}`, date: addDays("2026-09-28", index % 7) })),
+    "2026-10-20",
+  );
+  if (beforeLaunch.length) throw new Error("A week that ended before launch should not be a roundup.");
+
+  const future = buildWeeks(
+    Array.from({ length: 10 }, (_, index) => sampleWeekStory({ slug: `future-${index}`, date: addDays("2026-10-26", index % 7) })),
+    "2026-10-20",
+  );
+  if (future.length) throw new Error("A week that has not started should wait.");
+
+  const marked = [
+    sampleWeekStory({ slug: "featured-one", date: "2026-10-07", featured: true, top5: 4 }),
+    sampleWeekStory({ slug: "rank-one", date: "2026-10-06", top5: 1 }),
+    sampleWeekStory({ slug: "rank-two", date: "2026-10-08", top5: 2 }),
+    sampleWeekStory({ slug: "world-one", date: "2026-10-09", worldPick: true, country: "JP", state: undefined, cheers: 1 }),
+    sampleWeekStory({ slug: "cheered-high", date: "2026-10-05", cheers: 100, alsoStates: ["WY"] }),
+    sampleWeekStory({ slug: "cheered-mid", date: "2026-10-10", cheers: 40 }),
+    ...Array.from({ length: 6 }, (_, index) => sampleWeekStory({ slug: `plain-${index}`, date: addDays("2026-10-05", index % 7) })),
+  ];
+  const finished = buildWeeks(marked, "2026-10-20");
+  if (finished.length !== 1 || finished[0].path !== "/week/2026-10-05" || finished[0].inProgress) {
+    throw new Error("The October 5 week should be a finished roundup on October 20.");
+  }
+  const standouts = finished[0].standouts.map((story) => story.slug);
+  if (standouts.join(",") !== "featured-one,rank-one,rank-two,world-one,cheered-high") {
+    throw new Error(`Standouts should be homepage marks, then cheers. Got ${standouts.join(",")}.`);
+  }
+  if (!finished[0].standoutNote.includes("story of the day") || !finished[0].standoutNote.includes("Today's Top 5") || !finished[0].standoutNote.includes("world pick") || !finished[0].standoutNote.includes("cheered")) {
+    throw new Error("The standout note should explain the marks that were used.");
+  }
+  if (!finished[0].intro.includes("12 verified stories") || !finished[0].intro.includes("2 states") || !finished[0].intro.includes("1 country (Japan)")) {
+    throw new Error(`The intro should count stories, states, and countries. Got: ${finished[0].intro}`);
+  }
+  const sameDay = buildWeeks(
+    [
+      sampleWeekStory({ slug: "only-rank", date: "2026-10-12", top5: 1 }),
+      ...Array.from({ length: 9 }, (_, index) => sampleWeekStory({ slug: `rest-${index}`, date: "2026-10-12" })),
+    ],
+    "2026-10-20",
+  );
+  if (!sameDay[0]?.standoutNote.includes("newest stories still in the week")) {
+    throw new Error("Stories that fill an open standout spot should be described as the newest in the week.");
+  }
+  const withCapital = buildWeeks(
+    [
+      ...Array.from({ length: 9 }, (_, index) => sampleWeekStory({ slug: `dc-state-${index}`, date: "2026-10-12", state: "CO" })),
+      sampleWeekStory({ slug: "dc-story", date: "2026-10-12", state: "DC" }),
+    ],
+    "2026-10-20",
+  );
+  if (!withCapital[0]?.intro.includes("1 state and Washington, D.C.")) {
+    throw new Error(`Washington, D.C. should not be counted as a state. Got: ${withCapital[0]?.intro}`);
+  }
+  if (finished[0].image !== finished[0].standouts[0].image) throw new Error("The share image should be the first standout photo.");
+  if (!finished[0].states.some((state) => state.slug === "wyoming")) throw new Error("alsoStates should count toward the state list.");
+  if (finished[0].world.length !== 1) throw new Error("The Japan story should be in Around the World.");
+
+  const openStories = Array.from({ length: 10 }, (_, index) =>
+    sampleWeekStory({ slug: `open-${index}`, date: addDays("2026-10-19", index % 7), cheers: index === 0 ? 0 : 0 }),
+  );
+  const open = buildWeeks(openStories, "2026-10-20");
+  if (open.length !== 1 || !open[0].inProgress || open[0].path !== "/week/2026-10-19") {
+    throw new Error("The current Mountain Time week should stay open and say so far.");
+  }
+  if (!open[0].title.startsWith("This Week in Good News, So Far:")) throw new Error("The open week title should say so far.");
+  if (!open[0].heading.includes("so far")) throw new Error("The open week heading should say so far.");
+  if (open[0].rangeLabel !== "Oct 19 to 25, 2026") throw new Error("The open week range should be Oct 19 to 25, 2026.");
+  const feed = renderWeekRss([...completedWeeks(finished), ...open]);
+  if (!feed.includes("/week/2026-10-05") || feed.includes("/week/2026-10-19")) {
+    throw new Error("The week feed should include finished weeks and leave the open week out.");
+  }
+
+  const today = mountainDay();
+  const currentStart = weekStart(today);
+  const weeks = getPublishedWeeks();
+  const published = new Set(weeks.map((week) => week.start));
+  const counts = new Map<string, number>();
+  for (const story of loadAllStories()) {
+    if (story.draft || story.date < launchWeekStart()) continue;
+    const start = weekStart(story.date);
+    if (start > currentStart) continue;
+    counts.set(start, (counts.get(start) ?? 0) + 1);
+  }
+  for (const [start, count] of counts) {
+    if (count >= MIN_WEEK_STORIES && !published.has(start)) {
+      throw new Error(`${start} has ${count} stories and should be a week page.`);
+    }
+    if (count < MIN_WEEK_STORIES && published.has(start)) {
+      throw new Error(`${start} has only ${count} stories and should not be a week page.`);
+    }
+  }
+  for (const week of weeks) {
+    if (week.stories.length < MIN_WEEK_STORIES) throw new Error(`${week.path} is thinner than ${MIN_WEEK_STORIES} stories.`);
+    if (week.start < launchWeekStart()) throw new Error(`${week.path} starts before launch week.`);
+    if (week.start !== weekStart(week.start) || week.end !== addDays(week.start, 6)) {
+      throw new Error(`${week.path} is not a Monday-to-Sunday week.`);
+    }
+    if (week.inProgress !== (week.start === currentStart)) throw new Error(`${week.path} has the wrong so-far flag.`);
+    if (!week.standouts.length || week.image !== week.standouts[0].image) throw new Error(`${week.path} is missing a standout photo.`);
+    if (!week.intro.includes(String(week.stories.length))) throw new Error(`${week.path} intro should include the story count.`);
+    const grouped = week.categories.reduce((sum, category) => sum + category.stories.length, 0);
+    if (grouped !== week.stories.length) throw new Error(`${week.path} should group every story by category.`);
+  }
+  const paths = weeks.map((week) => week.path).join(", ");
+  console.log(`Weeks: ${weeks.length} roundups since ${launchWeekStart()} (${SITE_LAUNCH} launch). ${paths || "none yet"}.`);
 }
 
 function assertEnrichmentMerge() {
@@ -483,6 +656,7 @@ assertCountryRules();
 assertWorldSpotlight();
 assertHubs();
 assertKidClassrooms();
+assertWeeks();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertEnrichmentMerge();
 assertLoadedCountries(stories);
