@@ -85,6 +85,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `howToHelp` | yes | At least one link. `kind` is `donate`, `volunteer`, `thank`, or `learn`. |
 | `featured` | no | `true` makes it eligible to be the story of the day. The newest featured story wins. |
 | `top5` | no | Rank `1` through `5`. Each number can be used once. |
+| `worldPick` | no | `true` on one story from outside the United States. That story is the bonus "Around the World" link in the morning email, and the spotlight on the homepage and state pages. Leave it off US stories. Only one story may have it. |
 | `cheers` | no | Starting cheer count. Defaults to 0. Readers add one in their own browser. |
 | `draft` | no | `true` keeps it out of the site. It is still validated. |
 | `editorApproved` | yes | Must be `true` for anything that is not a draft. This is the publish switch. |
@@ -106,6 +107,7 @@ country: "JP"
 - `city` is still required. Use `place` when one city is the wrong label.
 - The story appears at `/country/japan` (the code redirects to the name slug), in `/world`, in the main RSS and news sitemap, and in `/country/japan/rss.xml`. It does not appear on a US state page.
 - Existing US files can keep omitting `country`. They stay `US` and keep `state`.
+- `worldPick: true` marks the one international story for the day. See the daily job below.
 
 ### Mix for a daily batch
 
@@ -126,6 +128,7 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
 5. Rotate the homepage. Ranks live in front matter. Each `top5` number can be used only once.
    - **Featured.** The hero is the newest story with `featured: true` (newest date wins). Set `featured: true` on the single best story of the day, and set `featured: false` on every other story, including older ones. If an older story is left featured and no newer story is featured, it keeps the hero spot.
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
+   - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
 6. Run `npm run validate-stories` and `npm run build`. Both have to pass.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 

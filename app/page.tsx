@@ -5,6 +5,7 @@ import { LocalExplorer } from "@/components/local-explorer";
 import { CheerButton } from "@/components/cheer-button";
 import { EmphaticTitle } from "@/components/story-body";
 import { TopFiveCard } from "@/components/story-card";
+import { WorldSpotlight } from "@/components/world-spotlight";
 import { StoryImage } from "@/components/story-image";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { CATEGORIES } from "@/lib/categories";
@@ -74,6 +75,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <WorldSpotlight />
       <LocalExplorer highlighted={counts.map((item) => item.code.toLowerCase())} chips={chips} />
       <EmailSignup />
       <HomeLatest stories={homeShelf(cards, hero?.slug)} heroSlug={hero?.slug} />

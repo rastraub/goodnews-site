@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { StateJump } from "@/components/local-explorer";
 import { UsMap } from "@/components/us-map";
+import { WorldSpotlight } from "@/components/world-spotlight";
 import { CATEGORIES } from "@/lib/categories";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
@@ -141,6 +142,7 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
           </p>
         </aside>
       </div>
+      {page === 1 ? <WorldSpotlight /> : null}
     </div>
   );
 }

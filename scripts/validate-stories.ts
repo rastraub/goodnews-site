@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { storySchema } from "../lib/story-schema";
 import { loadAllStories } from "../lib/stories";
+import { worldSpotlight } from "../lib/world-pick";
 import { siteConfig } from "../site.config";
 
 const REQUIRED_SOURCES = [
@@ -56,6 +57,33 @@ function assertCountryRules() {
   if (japanState.success) throw new Error("A non-US story with a state should fail.");
   const unknown = storySchema.safeParse(minimalStory({ country: "ZZ", city: "Nowhere" }));
   if (unknown.success) throw new Error("An unknown country code should fail.");
+  const usPick = storySchema.safeParse(minimalStory({ state: "OH", worldPick: true }));
+  if (usPick.success) throw new Error("A US story cannot be the world pick.");
+  const japanPick = storySchema.safeParse(minimalStory({ country: "JP", city: "Osaka", worldPick: true }));
+  if (!japanPick.success || japanPick.data.worldPick !== true) {
+    throw new Error("A Japan story should be allowed as the world pick.");
+  }
+}
+
+function assertWorldSpotlight() {
+  const osaka = { slug: "osaka-kindness", date: "2026-10-18", country: "JP", worldPick: false };
+  const lyon = { slug: "lyon-library", date: "2026-10-19", country: "FR", worldPick: false };
+  const day = "2026-10-20";
+  const first = worldSpotlight([osaka, lyon], day);
+  const again = worldSpotlight([lyon, osaka], day);
+  if (!first || first.slug !== again?.slug) {
+    throw new Error("The world spotlight should stay on the same story for a date.");
+  }
+  const nextDay = worldSpotlight([osaka, lyon], "2026-10-21");
+  if (!nextDay || nextDay.slug === first.slug) {
+    throw new Error("The world spotlight should rotate across dates.");
+  }
+  const flagged = worldSpotlight([{ ...osaka, worldPick: true }, lyon], day);
+  if (flagged?.slug !== osaka.slug) throw new Error("worldPick should win the spotlight.");
+  if (worldSpotlight([{ ...osaka, country: "US" }], day)) {
+    throw new Error("A US story should not be the world spotlight.");
+  }
+  if (worldSpotlight([], day)) throw new Error("No international story means no spotlight.");
 }
 
 function assertLoadedCountries(stories: { slug: string; country: string; state?: string }[]) {
@@ -148,6 +176,7 @@ function assertBrandLivesInOneFile() {
 const stories = loadAllStories();
 assertSchemaRejectsGarbage();
 assertCountryRules();
+assertWorldSpotlight();
 assertLoadedCountries(stories);
 assertSeedSources(stories);
 assertOnlyMailbox();

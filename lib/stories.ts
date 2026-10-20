@@ -33,6 +33,7 @@ export function loadAllStories(): Story[] {
   const stories: Story[] = [];
   const slugs = new Set<string>();
   const top5 = new Map<number, string>();
+  let worldPickFile: string | undefined;
 
   for (const file of files) {
     const slug = file.slice(0, -3);
@@ -76,6 +77,10 @@ export function loadAllStories(): Story[] {
       const previous = top5.get(data.top5);
       if (previous) errors.push(`${file}: top5 ${data.top5} is already used by ${previous}`);
       top5.set(data.top5, file);
+    }
+    if (data.worldPick) {
+      if (worldPickFile) errors.push(`${file}: worldPick is already set on ${worldPickFile}`);
+      worldPickFile = file;
     }
 
     const body = parsed.content.trim();

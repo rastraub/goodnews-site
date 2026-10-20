@@ -55,6 +55,7 @@ export const storySchema = z
     howToHelp: z.array(helpLinkSchema).min(1),
     featured: z.boolean().optional().default(false),
     top5: z.number().int().min(1).max(5).optional(),
+    worldPick: z.boolean().optional().default(false),
     cheers: z.number().int().nonnegative().optional().default(0),
     draft: z.boolean().optional().default(false),
     editorApproved: z.boolean(),
@@ -71,6 +72,13 @@ export const storySchema = z
       return;
     }
     if (data.country === "US") {
+      if (data.worldPick) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["worldPick"],
+          message: "worldPick is only for stories outside the United States",
+        });
+      }
       if (!getStateByCode(data.state)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
