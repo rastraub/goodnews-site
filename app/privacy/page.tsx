@@ -23,7 +23,8 @@ export default function PrivacyPage() {
         </p>
         <h2>Story tips</h2>
         <p>
-          Tips include your name, email, place, and what you sent. They are logged, saved to a local inbox when the server can write files, and forwarded to a webhook if the owner has set one.
+          Tips include your name, email, place, and what you sent. They are logged and saved to a local inbox when the server can write files. When mail delivery is configured, the tip is emailed to{" "}
+          <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a>. If a webhook is set, the same tip is sent there too.
         </p>
         <h2>Cheers</h2>
         <p>

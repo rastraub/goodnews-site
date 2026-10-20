@@ -66,22 +66,26 @@ If the provider rejects an address, the form shows an error. If no key is set, i
 
 ## Story tips
 
-`POST /api/submit` validates the form and calls `handleStorySubmission` in `lib/submissions.ts`.
+`POST /api/submit` validates the form and calls `handleStorySubmission` in `lib/submissions.ts`. The Submit a story form is the reader tip form. It keeps a hidden honeypot field and a per-IP rate limit (5 tips a minute). Names, emails, cities, summaries, and links have length limits. Line breaks are stripped from single-line fields, and the email body escapes HTML.
 
 - Every tip is logged.
-- When the disk is writable, it is appended to `data/submissions/inbox.jsonl` (gitignored).
-- Set `SUBMISSION_WEBHOOK_URL` to POST the same JSON to Slack, Zapier, or an editor inbox.
+- When `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` are all set, the tip is emailed with nodemailer. From and To are the site mailbox (`cheers@tazzora.com`, `siteConfig.contactEmail`). Reply-To is the submitter's email. The subject looks like `[Tazzora story tip] Neighbors fixed the library roof...`. The body lists every submitted field, the page URL, and a timestamp.
+- Intended mail host: Gmail or Google Workspace. `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465` (implicit TLS), `SMTP_USER=cheers@tazzora.com`, and `SMTP_PASS` set to an app password for that mailbox. Port 587 uses STARTTLS instead.
+- If any SMTP variable is missing or the port is not a number, the server logs that and does not send mail. The form still shows the thank-you message. `npm run build` does not need these variables.
+- When the disk is writable, the tip is appended to `data/submissions/inbox.jsonl` (gitignored).
+- Set `SUBMISSION_WEBHOOK_URL` to POST the same JSON to Slack, Zapier, or another inbox. That request still runs when SMTP is not configured.
 
-Persistent storage is still a TODO. See below.
+A database for tips is still a later step. See below.
 
 ## Deploy on Vercel
 
 1. Import this GitHub repo in Vercel. Framework preset: Next.js. Build command: `npm run build`. Install command: `npm install`.
 2. For Buttondown, set `BUTTONDOWN_API_KEY`. Or set `EMAIL_PROVIDER` and `EMAIL_API_KEY` together; that pair takes precedence. Leave every email key empty and signups still succeed and log.
-3. Add `SUBMISSION_WEBHOOK_URL` if tips should reach an editor inbox. The filesystem on Vercel does not keep `inbox.jsonl`.
-4. Deploy. `main` (or a merged pull request) publishes the site.
-5. Add `tazzora.com` and `www.tazzora.com` in the Vercel project settings. Production currently redirects the apex to `www`, and absolute URLs in `site.config.ts` follow that host. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
-6. Optional, for Search Console and Bing HTML-tag verification: set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` (see `.env.example`) and redeploy. A production build also pings IndexNow when `VERCEL_ENV=production`.
+3. For story tips, set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS`. For Gmail or Google Workspace use `smtp.gmail.com`, port `465`, user `cheers@tazzora.com`, and an app password. Leave them unset and the form still thanks the reader; the tip is logged (and webhooked if `SUBMISSION_WEBHOOK_URL` is set). The build does not require them.
+4. Add `SUBMISSION_WEBHOOK_URL` if tips should also reach a webhook. The filesystem on Vercel does not keep `inbox.jsonl`.
+5. Deploy. `main` (or a merged pull request) publishes the site.
+6. Add `tazzora.com` and `www.tazzora.com` in the Vercel project settings. Production currently redirects the apex to `www`, and absolute URLs in `site.config.ts` follow that host. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
+7. Optional, for Search Console and Bing HTML-tag verification: set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` (see `.env.example`) and redeploy. A production build also pings IndexNow when `VERCEL_ENV=production`.
 
 Sitemaps and feeds:
 
@@ -101,7 +105,7 @@ The project is the App Router. No extra Vercel config file is required. Do not a
 ## What's left
 
 - Cheer counts are the number in the story file, plus one in the reader's browser. `POST /api/cheer` only logs. A database can make counts shared.
-- Story tips are logged and optionally webhooked. They are not in a database yet (`lib/submissions.ts`).
+- Story tips are emailed when `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` are set. Otherwise they are logged and optionally webhooked. They are not in a database yet (`lib/submissions.ts`).
 - Membership is a waitlist. Card billing is not wired.
 - ZIP lookup uses prefix ranges. It is good enough to jump to a state, not a town-level geocoder.
 - Short vertical video for social is not in this version.
