@@ -72,7 +72,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `alsoStates` | no | Other US states this story should appear in. Do not repeat `state`. Leave it off outside the United States. |
 | `place` | no | Overrides the default "City, State" or "City, Country" label. |
 | `category` | yes | `heroes`, `animals`, `science`, `community`, or `health-tech`. |
-| `tags` | no | Up to five lowercase kebab-case topics, such as `school-lunch`. A topic page is created only after at least three stories share that tag. |
+| `tags` | yes on a new story | Two to five labels from `lib/tags.ts`, such as `animal-rescue` or `school-lunch`. A topic page is created only after at least three stories share that tag. Validation rejects a tag that is not in the vocabulary, and it rejects a list that is not two to five labels. Omitting `tags` entirely still builds, so a file that lands on `main` before it is tagged does not take the site down. Do not rely on that. Set the tags. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
 | `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. A `pony-1600.jpg` is optional. See Photos. |
@@ -87,9 +87,9 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `featured` | no | `true` makes it eligible to be the story of the day. The newest featured story wins. |
 | `top5` | no | Rank `1` through `5`. Each number can be used once. |
 | `worldPick` | no | `true` on one story from outside the United States. That story is the bonus "Around the World" link in the morning email, and the spotlight on the homepage and state pages. Leave it off US stories. Only one story may have it. |
-| `kidFriendly` | no | `true` when a teacher can read the story aloud with children. Requires `kidSummary` and `kidQuestions`. Defaults to false. Leave it off a story that is frightening, political, or too medical for a classroom. |
-| `kidSummary` | with `kidFriendly` | A short paragraph in plain language for a teacher to read aloud. Leave it off when `kidFriendly` is false. |
-| `kidQuestions` | with `kidFriendly` | Two or three discussion questions for the teacher to lead. Leave them off otherwise. |
+| `kidFriendly` | no | `true` only when a teacher can read the story aloud with children about ages 6 to 12. Requires `kidSummary` and `kidQuestions`. Defaults to false. Leave it off stories centered on death, serious illness, violence, crime, accidents with injuries, abuse, war, or addiction. |
+| `kidSummary` | with `kidFriendly` | About 60 to 110 words in plain language, accurate to the story and its source. No invented facts or quotes. A teacher should be able to read it aloud. Leave it off when `kidFriendly` is false. |
+| `kidQuestions` | with `kidFriendly` | Two or three discussion questions: feelings, kindness, how a class could help, or a simple science or geography question. Leave them off otherwise. |
 | `cheers` | no | Starting cheer count. Defaults to 0. Readers add one in their own browser. |
 | `draft` | no | `true` keeps it out of the site. It is still validated. |
 | `editorApproved` | yes | Must be `true` for anything that is not a draft. This is the publish switch. |
@@ -120,26 +120,28 @@ These URLs are created only when at least three published stories belong there. 
 - `/state/colorado/animals` is that state's stories in one category.
 - `/state/colorado/city/denver` is one US city. The city name is slugified, and the state keeps Springfields apart.
 - `/country/japan/city/osaka` is a city outside the United States.
-- `/topic/school-lunch` is a tag shared by at least three stories.
+- `/topic/animal-rescue` is a tag shared by at least three stories. The index of those pages is `/topics`.
 
-A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Add `tags` when a real topic is shared. Do not invent tags to force a page.
+A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Pick tags from `lib/tags.ts`. Do not invent a tag to force a page. If a real topic is missing from that list, add the slug, a human title such as "Good news about animal rescue", and a one-sentence intro there first. Validation rejects anything else. Topic hubs are in the sitemap and in the IndexNow ping, the same way city and state hubs are.
 
 ### Stories for classrooms
 
-Use these fields only when the story is appropriate to read with children. Skip anything frightening, political, or too medical for a classroom. Do not invent a kid-friendly version of a story that is not one.
+Use these fields only when the story is genuinely appropriate to read aloud with children about ages 6 to 12: animals, nature, science, kindness, kids doing something great, community help, sports spirit. Skip stories centered on death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, or anything a teacher would hesitate to read to a class, even if the ending is happy. Do not force a kid-friendly version of a story that is not one. Expect some stories in a batch to qualify and some not to. Do not hit a quota.
 
 ```yaml
 kidFriendly: true
-kidSummary: "A short paragraph in plain language a teacher can read aloud."
+kidSummary: "About 60 to 110 words in plain language, accurate to the report, with no invented facts."
 kidQuestions:
   - "What did the people in this story do?"
   - "What is one kind thing your class could try?"
 ```
 
 - `kidFriendly: true` without a summary and two or three questions fails validation. A summary or questions without the flag also fails, so the classroom text cannot be dropped by accident.
-- `/kids` lists every published classroom story. `/kids/print` is the printable story of the day for teachers. It rotates by calendar date. A classroom story dated that day is the one that prints.
+- `kidSummary` is a read-aloud version, not a shorter headline. Use plain words. Stay accurate to the story and its source. Do not invent facts, numbers, or quotes.
+- `kidQuestions` should spark a discussion: a feeling, an act of kindness, how the class might help, or a simple science or geography question tied to the story.
+- `/kids` lists every published classroom story. `/kids/print` is the printable story of the day for teachers. It rotates by calendar date. A classroom story dated that day is the one that prints. If that date has none, a recent classroom story is used so the sheet is not blank.
 - `/kids/state/colorado` and `/kids/country/japan` exist only when that place has at least one classroom story. A state and a country can share a name, so the path says which is which. An empty place is not a page.
-- The teacher email is a separate signup on `/kids` for adults and educators. The tag is `teachers`. Do not collect a child's name, age, school, or email.
+- The teacher email is a separate signup on `/kids` for adults and educators. The list tag is `teachers`. Do not collect a child's name, age, school, or email. Classroom pages do not run ads.
 
 ### Mix for a daily batch
 
@@ -164,14 +166,14 @@ The script reads `imageCreditUrl`. It downloads a larger copy only from Wikimedi
 A morning batch is new story files. Verify each one, then rotate the homepage so the freshest news is what people see first.
 
 1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only, including a reputable desk outside the United States. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`. For `health-tech`, also follow the rules in the next section. Aim for the mix in "Stories outside the United States": about one in four of a large batch from outside the United States, across more than one region, and only when the reporting is strong enough.
-2. Add `stories/some-new-slug.md`, the full WebP, and the `-sm` thumbnail. Write an original summary of at least 40 words. Do not paste the article.
+2. Add `stories/some-new-slug.md`, the full WebP, and the `-sm` thumbnail. Write an original summary of at least 40 words. Do not paste the article. Set `tags` to two, three, four, or five slugs from `lib/tags.ts`. Read that file and reuse a label people already search. Do not coin a near-duplicate (`dog` next to `dogs`) or a tag that only this story would ever use. If the story truly needs a new label, add it to `lib/tags.ts` with a title and intro before you tag the story. Put the tags in the new story's front matter. Do not add them to `data/story-enrichment.json`. That file is the backfill for stories published before tags existed. Front matter wins if both places set tags, which is why new stories should carry their own.
 3. Set `cheers: 0` on every new story. Do not invent a cheer count.
 4. Set `editorApproved: true` and `draft: false` only after that check. Until then, keep `draft: true`.
 5. Rotate the homepage. Ranks live in front matter. Each `top5` number can be used only once.
    - **Featured.** The hero is the newest story with `featured: true` (newest date wins). Set `featured: true` on the single best story of the day, and set `featured: false` on every other story, including older ones. If an older story is left featured and no newer story is featured, it keeps the hero spot.
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
    - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
-   - **For classrooms.** When a story is appropriate to read with children, set `kidFriendly: true`, write `kidSummary` in plain language a teacher can read aloud, and add two or three `kidQuestions`. Skip the flag when the story is frightening, political, or too medical for a classroom. Do not force one into the batch. Do not invent facts to make a story sound simpler than it is. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list with the tag `teachers`. Do not add a child to any list.
+   - **For classrooms.** When a story is appropriate to read aloud with children about ages 6 to 12, set `kidFriendly: true` in that story's front matter, write `kidSummary` in about 60 to 110 plain words, and add two or three `kidQuestions`. Stay accurate to the source. Do not invent facts or quotes. Skip the flag for death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, and anything a teacher would hesitate to read to a class. Do not force one into the batch. Do not backfill classroom text into `data/story-enrichment.json`. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list. Do not add a child to any list, and do not add ads or anything else that identifies a child.
 6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 

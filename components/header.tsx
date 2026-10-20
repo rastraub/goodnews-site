@@ -13,7 +13,10 @@ const PRIMARY = [
   ...CATEGORIES.map((category) => ({ href: `/category/${category.slug}`, label: category.label })),
 ];
 
-const MORE = [{ href: "/kids", label: "Kids" }];
+const MORE = [
+  { href: "/kids", label: "Kids" },
+  { href: "/topics", label: "Topics" },
+];
 
 export function Header({ edition }: { edition: string }) {
   const pathname = usePathname();
@@ -24,6 +27,7 @@ export function Header({ edition }: { edition: string }) {
     if (href === "/") return pathname === "/";
     if (href === "/local") return pathname === "/local" || pathname.startsWith("/state/");
     if (href === "/world") return pathname === "/world" || pathname.startsWith("/country/");
+    if (href === "/topics") return pathname === "/topics" || pathname.startsWith("/topic/");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

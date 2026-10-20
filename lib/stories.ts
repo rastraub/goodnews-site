@@ -5,6 +5,7 @@ import { countryName } from "./countries";
 import { getCategory } from "./categories";
 import { readingMinutes } from "./format";
 import { STATIC_STORY_CAP } from "./paging";
+import { applyEnrichment, loadEnrichment } from "./enrichment";
 import { storySchema, type StoryFrontmatter } from "./story-schema";
 
 export type Story = StoryFrontmatter & {
@@ -46,7 +47,7 @@ export function loadAllStories(): Story[] {
 
     const raw = fs.readFileSync(path.join(STORIES_DIR, file), "utf8");
     const parsed = matter(raw);
-    const result = storySchema.safeParse(parsed.data);
+    const result = storySchema.safeParse(applyEnrichment(slug, parsed.data as Record<string, unknown>));
     if (!result.success) {
       const details = result.error.issues
         .map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`)
@@ -94,6 +95,11 @@ export function loadAllStories(): Story[] {
       body,
       minutes: readingMinutes(`${data.dek}\n${body}`),
     });
+  }
+
+  const enrichment = loadEnrichment();
+  for (const slug of Object.keys(enrichment)) {
+    if (!slugs.has(slug)) errors.push(`data/story-enrichment.json: no story file for ${slug}`);
   }
 
   if (errors.length) {

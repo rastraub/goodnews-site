@@ -25,6 +25,16 @@ function relatedLinks(hub: Hub): { href: string; label: string }[] {
       if (item.path !== hub.path) links.push({ href: item.path, label: item.linkLabel });
     }
   }
+  if (hub.kind === "topic") {
+    const others = index.topics
+      .filter((item) => item.path !== hub.path)
+      .slice()
+      .sort((a, b) => b.count - a.count || a.linkLabel.localeCompare(b.linkLabel));
+    for (const item of others) {
+      if (links.length >= 12) break;
+      links.push({ href: item.path, label: item.linkLabel });
+    }
+  }
   return links.slice(0, 12);
 }
 

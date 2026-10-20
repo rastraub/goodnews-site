@@ -51,6 +51,7 @@ const nextConfig: NextConfig = {
       cached("/kids/rss.xml", FEED_CACHE_CONTROL),
       cached("/category/:slug/rss.xml", FEED_CACHE_CONTROL),
       cached("/state/:slug/rss.xml", FEED_CACHE_CONTROL),
+      cached("/week/rss.xml", FEED_CACHE_CONTROL),
       cached("/country/:slug/rss.xml", FEED_CACHE_CONTROL),
       cached("/brand/:path*", IMAGE_CACHE_CONTROL),
       cached("/sitemap.xml", FEED_CACHE_CONTROL),
