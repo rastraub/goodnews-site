@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
+import { COUNTRIES } from "@/lib/countries";
 import { absoluteUrl } from "@/lib/seo";
-import { getByCategory, getByState, getPublishedStories } from "@/lib/stories";
+import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
@@ -21,13 +22,32 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/terms", changeFrequency: "yearly", priority: 0.2 },
 ];
 
-function latestDate(dates: string[]): string | undefined {
-  return dates.reduce<string | undefined>((latest, date) => (!latest || date > latest ? date : latest), undefined);
+function bump(map: Map<string, string>, key: string | undefined, date: string) {
+  if (!key) return;
+  const current = map.get(key);
+  if (!current || date > current) map.set(key, date);
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const stories = getPublishedStories();
-  const siteLatest = latestDate(stories.map((story) => story.date));
+  const latestState = new Map<string, string>();
+  const latestCountry = new Map<string, string>();
+  const latestCategory = new Map<string, string>();
+  let siteLatest: string | undefined;
+  let worldLatest: string | undefined;
+
+  for (const story of stories) {
+    if (!siteLatest || story.date > siteLatest) siteLatest = story.date;
+    bump(latestCategory, story.category, story.date);
+    bump(latestCountry, story.country, story.date);
+    if (story.country !== "US") {
+      if (!worldLatest || story.date > worldLatest) worldLatest = story.date;
+    }
+    if (story.country === "US" && story.state) {
+      bump(latestState, story.state, story.date);
+      for (const extra of story.alsoStates) bump(latestState, extra, story.date);
+    }
+  }
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -36,17 +56,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: page.changeFrequency,
       priority: page.priority,
     })),
+    {
+      url: absoluteUrl("/world"),
+      ...(worldLatest ? { lastModified: worldLatest } : {}),
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    },
     ...CATEGORIES.map((category) => ({
       url: absoluteUrl(`/category/${category.slug}`),
-      lastModified: latestDate(getByCategory(category.slug).map((story) => story.date)) ?? siteLatest,
+      lastModified: latestCategory.get(category.slug) ?? siteLatest,
       changeFrequency: "daily" as const,
       priority: 0.7,
     })),
     ...STATES.map((state) => ({
       url: absoluteUrl(`/state/${state.slug}`),
-      lastModified: latestDate(getByState(state.code).map((story) => story.date)) ?? siteLatest,
+      lastModified: latestState.get(state.code) ?? siteLatest,
       changeFrequency: "daily" as const,
       priority: 0.7,
+    })),
+    ...COUNTRIES.map((country) => ({
+      url: absoluteUrl(`/country/${country.slug}`),
+      ...(latestCountry.get(country.code) ? { lastModified: latestCountry.get(country.code) } : {}),
+      changeFrequency: "daily" as const,
+      priority: country.code === "US" ? 0.7 : 0.6,
     })),
     ...stories.map((story) => ({
       url: absoluteUrl(`/story/${story.slug}`),

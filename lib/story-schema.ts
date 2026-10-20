@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { CATEGORIES } from "./categories";
+import { getCountry } from "./countries";
+import { getStateByCode } from "./states";
 
 const categorySlugs = CATEGORIES.map((category) => category.slug) as [
   CategorySlug,
@@ -31,7 +33,12 @@ export const storySchema = z
     dek: z.string().min(20),
     date: isoDate,
     city: z.string().min(1),
-    state: z.string().regex(/^[A-Z]{2}$/, "Use a two-letter USPS code"),
+    country: z
+      .string()
+      .regex(/^[A-Z]{2}$/, "Use an ISO 3166-1 alpha-2 code")
+      .optional()
+      .default("US"),
+    state: z.string().regex(/^[A-Z]{2}$/, "Use a two-letter USPS code").optional(),
     alsoStates: z.array(z.string().regex(/^[A-Z]{2}$/)).optional().default([]),
     place: z.string().min(2).optional(),
     category: z.enum(categorySlugs),
@@ -53,7 +60,57 @@ export const storySchema = z
     editorApproved: z.boolean(),
     correction: z.string().min(8).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((data, ctx) => {
+    if (!getCountry(data.country)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["country"],
+        message: `Unknown country code ${data.country}`,
+      });
+      return;
+    }
+    if (data.country === "US") {
+      if (!getStateByCode(data.state)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["state"],
+          message: "US stories need a two-letter USPS state code",
+        });
+      }
+      for (const extra of data.alsoStates) {
+        if (!getStateByCode(extra)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["alsoStates"],
+            message: `Unknown alsoStates code ${extra}`,
+          });
+        }
+        if (extra === data.state) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["alsoStates"],
+            message: `alsoStates should not repeat ${data.state}`,
+          });
+        }
+      }
+      return;
+    }
+    if (data.state) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["state"],
+        message: "Leave state off stories outside the United States",
+      });
+    }
+    if (data.alsoStates.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["alsoStates"],
+        message: "Leave alsoStates off stories outside the United States",
+      });
+    }
+  });
 
 export type StoryFrontmatter = z.infer<typeof storySchema>;
 export type HelpLink = z.infer<typeof helpLinkSchema>;

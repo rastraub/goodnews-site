@@ -9,6 +9,7 @@ import { CATEGORIES } from "@/lib/categories";
 const PRIMARY = [
   { href: "/", label: "Today" },
   { href: "/local", label: "Local" },
+  { href: "/world", label: "World" },
   ...CATEGORIES.map((category) => ({ href: `/category/${category.slug}`, label: category.label })),
 ];
 
@@ -20,6 +21,7 @@ export function Header({ edition }: { edition: string }) {
   function active(href: string) {
     if (href === "/") return pathname === "/";
     if (href === "/local") return pathname === "/local" || pathname.startsWith("/state/");
+    if (href === "/world") return pathname === "/world" || pathname.startsWith("/country/");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

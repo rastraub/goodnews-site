@@ -71,8 +71,8 @@ export function getStateBySlug(slug: string | undefined | null): StateInfo | und
   return bySlug.get(slug.toLowerCase());
 }
 
-export function stateName(code: string): string {
-  return getStateByCode(code)?.name ?? code;
+export function stateName(code: string | undefined | null): string {
+  return getStateByCode(code)?.name ?? code ?? "";
 }
 
 /** Land borders, used for internal links between state pages. */

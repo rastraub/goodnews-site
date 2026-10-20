@@ -4,6 +4,7 @@ import { getCategory } from "./categories";
 import { editionYear } from "./format";
 import { placeLabel } from "./present";
 import { absoluteUrl, publishedIso } from "./seo";
+import { getCountry } from "./countries";
 import { getPublishedStories, type Story } from "./stories";
 import { getStateByCode } from "./states";
 import { siteConfig } from "@/site.config";
@@ -12,6 +13,25 @@ export const FEED_LIMIT = 100;
 
 export function feedStories(): Story[] {
   return getPublishedStories().slice(0, FEED_LIMIT);
+}
+
+export type FeedOptions = {
+  stories?: Story[];
+  selfPath?: string;
+  title?: string;
+  description?: string;
+  /** Site path or absolute URL for the channel link. */
+  link?: string;
+};
+
+function feedView(options: FeedOptions, fallbackSelf: string) {
+  return {
+    stories: (options.stories ?? feedStories()).slice(0, FEED_LIMIT),
+    self: absoluteUrl(options.selfPath ?? fallbackSelf),
+    title: options.title ?? siteConfig.name,
+    description: options.description ?? siteConfig.description,
+    link: absoluteUrl(options.link ?? "/"),
+  };
 }
 
 function escapeXml(value: string) {
@@ -62,15 +82,15 @@ function fileLength(publicPath: string): number | undefined {
   }
 }
 
-export function renderRss(): string {
-  const stories = feedStories();
+export function renderRss(options: FeedOptions = {}): string {
+  const { stories, self, title, description, link: channelLink } = feedView(options, "/rss.xml");
   const updated = stories[0] ? new Date(publishedIso(stories[0].date)).toUTCString() : new Date().toUTCString();
-  const self = absoluteUrl("/rss.xml");
   const items = stories
     .map((story) => {
       const link = absoluteUrl(`/story/${story.slug}`);
       const category = getCategory(story.category);
       const state = getStateByCode(story.state);
+      const country = story.country === "US" ? undefined : getCountry(story.country);
       const image = absoluteUrl(story.image);
       const thumb = absoluteUrl(story.image.replace(/\.webp$/, "-sm.webp"));
       const length = fileLength(story.image);
@@ -86,6 +106,7 @@ export function renderRss(): string {
       <author>${escapeXml(`${siteConfig.contactEmail} (${siteConfig.editor.name})`)}</author>
       ${category ? `<category>${escapeXml(category.label)}</category>` : ""}
       ${state ? `<category>${escapeXml(state.name)}</category>` : ""}
+      ${country ? `<category>${escapeXml(country.name)}</category>` : ""}
       <media:content url="${escapeXml(image)}" medium="image" type="image/webp">
         <media:title>${escapeXml(story.title)}</media:title>
         <media:description>${escapeXml(story.imageAlt)}</media:description>
@@ -100,10 +121,10 @@ export function renderRss(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:snf="http://www.smartnews.be/snf">
   <channel>
-    <title>${escapeXml(siteConfig.name)}</title>
-    <link>${siteConfig.url}</link>
+    <title>${escapeXml(title)}</title>
+    <link>${channelLink}</link>
     <atom:link href="${self}" rel="self" type="application/rss+xml" />
-    <description>${escapeXml(siteConfig.description)}</description>
+    <description>${escapeXml(description)}</description>
     <language>en-us</language>
     <lastBuildDate>${updated}</lastBuildDate>
     <copyright>© ${editionYear()} ${escapeXml(siteConfig.name)}</copyright>
@@ -115,14 +136,14 @@ export function renderRss(): string {
 </rss>`;
 }
 
-export function renderAtom(): string {
-  const stories = feedStories();
+export function renderAtom(options: FeedOptions = {}): string {
+  const { stories, self, title, description, link: channelLink } = feedView(options, "/atom.xml");
   const updated = stories[0] ? publishedIso(stories[0].date) : new Date().toISOString();
-  const self = absoluteUrl("/atom.xml");
   const entries = stories
     .map((story) => {
       const link = absoluteUrl(`/story/${story.slug}`);
       const category = getCategory(story.category);
+      const country = story.country === "US" ? undefined : getCountry(story.country);
       const image = absoluteUrl(story.image);
       return `<entry>
       <title>${escapeXml(story.title)}</title>
@@ -134,6 +155,7 @@ export function renderAtom(): string {
       <summary>${escapeXml(`${story.dek} ${placeLabel(story)}.`)}</summary>
       <content type="html">${escapeXml(storyHtml(story))}</content>
       ${category ? `<category term="${escapeXml(category.label)}" />` : ""}
+      ${country ? `<category term="${escapeXml(country.name)}" />` : ""}
       <link rel="enclosure" href="${escapeXml(image)}" type="image/webp" />
     </entry>`;
     })
@@ -141,9 +163,9 @@ export function renderAtom(): string {
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>${escapeXml(siteConfig.name)}</title>
-  <subtitle>${escapeXml(siteConfig.description)}</subtitle>
-  <link href="${siteConfig.url}" rel="alternate" type="text/html" />
+  <title>${escapeXml(title)}</title>
+  <subtitle>${escapeXml(description)}</subtitle>
+  <link href="${channelLink}" rel="alternate" type="text/html" />
   <link href="${self}" rel="self" type="application/atom+xml" />
   <id>${self}</id>
   <updated>${updated}</updated>

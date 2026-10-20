@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { countryName } from "./countries";
 import { getCategory } from "./categories";
 import { readingMinutes } from "./format";
-import { getStateByCode } from "./states";
+import { STATIC_STORY_CAP } from "./paging";
 import { storySchema, type StoryFrontmatter } from "./story-schema";
 
 export type Story = StoryFrontmatter & {
@@ -59,13 +60,6 @@ export function loadAllStories(): Story[] {
     }
     if (data.emphasis && !data.title.includes(data.emphasis)) {
       errors.push(`${file}: emphasis must appear in the title`);
-    }
-    if (!getStateByCode(data.state)) {
-      errors.push(`${file}: unknown state code ${data.state}`);
-    }
-    for (const extra of data.alsoStates) {
-      if (!getStateByCode(extra)) errors.push(`${file}: unknown alsoStates code ${extra}`);
-      if (extra === data.state) errors.push(`${file}: alsoStates should not repeat ${data.state}`);
     }
     if (!getCategory(data.category)) {
       errors.push(`${file}: unknown category ${data.category}`);
@@ -144,8 +138,34 @@ export function getByCategory(slug: string): Story[] {
 export function getByState(code: string): Story[] {
   const upper = code.toUpperCase();
   return getPublishedStories().filter(
-    (story) => story.state === upper || story.alsoStates.includes(upper),
+    (story) => story.country === "US" && (story.state === upper || story.alsoStates.includes(upper)),
   );
+}
+
+export function getByCountry(code: string): Story[] {
+  const upper = code.toUpperCase();
+  return getPublishedStories().filter((story) => story.country === upper);
+}
+
+export function getWorldStories(): Story[] {
+  return getPublishedStories().filter((story) => story.country !== "US");
+}
+
+/** Newest stories prebuilt at deploy time. The rest render on first request. */
+export function storiesToPrerender(stories = getPublishedStories()): Story[] {
+  if (stories.length <= STATIC_STORY_CAP) return stories;
+  const chosen: Story[] = [];
+  const seen = new Set<string>();
+  function add(story: Story) {
+    if (seen.has(story.slug) || chosen.length >= STATIC_STORY_CAP) return;
+    seen.add(story.slug);
+    chosen.push(story);
+  }
+  for (const story of stories) {
+    if (story.featured || story.top5) add(story);
+  }
+  for (const story of stories) add(story);
+  return chosen;
 }
 
 export function relatedStories(story: Story, limit = 3): Story[] {
@@ -154,7 +174,12 @@ export function relatedStories(story: Story, limit = 3): Story[] {
     .map((item) => {
       let score = 0;
       if (item.category === story.category) score += 2;
-      if (item.state === story.state || item.alsoStates.includes(story.state) || story.alsoStates.includes(item.state)) {
+      if (story.country !== "US" && item.country === story.country) score += 3;
+      if (
+        story.state &&
+        item.state &&
+        (item.state === story.state || item.alsoStates.includes(story.state) || story.alsoStates.includes(item.state))
+      ) {
         score += 2;
       }
       return { item, score };
@@ -171,7 +196,9 @@ export function searchStories(query: string): Story[] {
       story.title,
       story.dek,
       story.city,
-      story.state,
+      story.state ?? "",
+      countryName(story.country),
+      story.country,
       story.place ?? "",
       story.category,
       story.sourceName,
@@ -188,6 +215,7 @@ export type StateCount = { code: string; count: number; latest: string };
 export function stateCounts(stories = getPublishedStories()): StateCount[] {
   const map = new Map<string, StateCount>();
   for (const story of stories) {
+    if (story.country !== "US" || !story.state) continue;
     const codes = [story.state, ...story.alsoStates];
     for (const code of codes) {
       const current = map.get(code);
@@ -197,6 +225,22 @@ export function stateCounts(stories = getPublishedStories()): StateCount[] {
         current.count += 1;
         if (story.date > current.latest) current.latest = story.date;
       }
+    }
+  }
+  return [...map.values()];
+}
+
+export type CountryCount = { code: string; count: number; latest: string };
+
+export function countryCounts(stories = getPublishedStories()): CountryCount[] {
+  const map = new Map<string, CountryCount>();
+  for (const story of stories) {
+    const current = map.get(story.country);
+    if (!current) {
+      map.set(story.country, { code: story.country, count: 1, latest: story.date });
+    } else {
+      current.count += 1;
+      if (story.date > current.latest) current.latest = story.date;
     }
   }
   return [...map.values()];

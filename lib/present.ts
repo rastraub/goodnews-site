@@ -1,4 +1,5 @@
 import { getCategory } from "./categories";
+import { countryName, getCountry } from "./countries";
 import { formatStoryDate } from "./format";
 import { getStateByCode, stateName } from "./states";
 import type { Story } from "./stories";
@@ -21,12 +22,18 @@ export type StoryCardModel = {
   dateLabel: string;
   minutes: number;
   cheers: number;
-  stateCode: string;
-  stateSlug: string;
+  stateCode?: string;
+  stateSlug?: string;
+  countryCode: string;
+  countrySlug: string;
 };
 
-export function placeLabel(story: Pick<Story, "city" | "state" | "place">): string {
+export function placeLabel(story: Pick<Story, "city" | "state" | "place" | "country">): string {
   if (story.place) return story.place;
+  if (story.country !== "US") {
+    const name = countryName(story.country);
+    return story.city ? `${story.city}, ${name}` : name;
+  }
   const name = stateName(story.state);
   return story.city ? `${story.city}, ${name}` : name;
 }
@@ -52,6 +59,8 @@ export function toCard(story: Story): StoryCardModel {
     minutes: story.minutes,
     cheers: story.cheers,
     stateCode: story.state,
-    stateSlug: getStateByCode(story.state)?.slug ?? story.state.toLowerCase(),
+    stateSlug: getStateByCode(story.state)?.slug,
+    countryCode: story.country,
+    countrySlug: getCountry(story.country)?.slug ?? story.country.toLowerCase(),
   };
 }

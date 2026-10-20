@@ -1,6 +1,8 @@
 import { getCategory } from "@/lib/categories";
+import { countryName } from "@/lib/countries";
 import { absoluteUrl, isWithinHours, publishedIso } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
+import { stateName } from "@/lib/states";
 import { siteConfig } from "@/site.config";
 
 export const revalidate = 3600;
@@ -17,7 +19,8 @@ export function GET() {
   const stories = getPublishedStories().filter((story) => isWithinHours(story.date, 48));
   const urls = stories
     .map((story) => {
-      const keywords = [getCategory(story.category)?.label, story.city].filter(Boolean).join(", ");
+      const place = story.country === "US" ? stateName(story.state) : countryName(story.country);
+      const keywords = [getCategory(story.category)?.label, story.city, place].filter(Boolean).join(", ");
       return `<url>
     <loc>${absoluteUrl(`/story/${story.slug}`)}</loc>
     <news:news>

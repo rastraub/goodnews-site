@@ -11,11 +11,12 @@ export const siteConfig = {
   tagline: "Upbeat, verified good news from across America",
   seoTitle: "Upbeat, verified good news from across America",
   description:
-    "Real, uplifting news from all 50 states. Every story is checked and linked to its original source. No politics, no pop-ups, no clickbait.",
+    "Real, uplifting news from all 50 states and countries around the world. Every story is checked and linked to its original source. No politics, no pop-ups, no clickbait.",
   domain,
   // The apex host 308s to www. Absolute URLs use the host that returns 200.
   url: `https://www.${domain}`,
-  contactEmail: `hello@${domain}`,
+  // The only mailbox. Pages, feeds, and structured data read this. Do not add another address.
+  contactEmail: `cheers@${domain}`,
   locale: "en-US",
   /**
    * Public byline. Organization-style masthead, not a named person.
@@ -24,7 +25,7 @@ export const siteConfig = {
   editor: {
     name: "Tazzora Editorial Team",
     blurb:
-      "Verified good news from across the United States. Every story is checked against the original report, linked to that source, and kept free of politics.",
+      "Verified good news from the United States and countries around the world. Every story is checked against the original report, linked to that source, and kept free of politics.",
   },
   social: {
     instagram: "tazzora",

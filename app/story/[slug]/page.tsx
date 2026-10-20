@@ -13,14 +13,17 @@ import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { placeLabel, toCard } from "@/lib/present";
 import { pageAlternates, publishedIso, storyJsonLd, xHandle } from "@/lib/seo";
-import { getPublishedStories, getStory, relatedStories } from "@/lib/stories";
+import { getCountry } from "@/lib/countries";
+import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { siteConfig } from "@/site.config";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamicParams = true;
+
 export function generateStaticParams() {
-  return getPublishedStories().map((story) => ({ slug: story.slug }));
+  return storiesToPrerender().map((story) => ({ slug: story.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -30,8 +33,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = story.dek;
   const category = getCategory(story.category);
   const state = getStateByCode(story.state);
+  const country = getCountry(story.country);
   const published = publishedIso(story.date);
-  const tags = [state?.name, story.city, category?.label].filter((tag): tag is string => Boolean(tag));
+  const tags = [story.country === "US" ? state?.name : country?.name, story.city, category?.label].filter((tag): tag is string => Boolean(tag));
   return {
     title: story.title,
     description,
@@ -64,7 +68,8 @@ export default async function StoryPage({ params }: Props) {
   const story = getStory(slug);
   if (!story) notFound();
   const category = getCategory(story.category);
-  const state = getStateByCode(story.state);
+  const state = story.country === "US" ? getStateByCode(story.state) : undefined;
+  const country = story.country === "US" ? undefined : getCountry(story.country);
   const related = relatedStories(story);
 
   return (
@@ -77,6 +82,7 @@ export default async function StoryPage({ params }: Props) {
             <span aria-hidden="true">/</span>
             {category ? <Link href={`/category/${category.slug}`}>{category.label}</Link> : null}
             <span aria-hidden="true">/</span>
+            {country ? <Link href={`/country/${country.slug}`}>{country.name}</Link> : null}
             {state ? <Link href={`/state/${state.slug}`}>{state.name}</Link> : null}
           </p>
           <div className="kicker">
@@ -170,6 +176,7 @@ export default async function StoryPage({ params }: Props) {
             <p className="jump-links">
               {category ? <Link href={`/category/${category.slug}`}>All {category.label} stories</Link> : null}
               {state ? <Link href={`/state/${state.slug}`}>Good news from {state.name}</Link> : null}
+              {country ? <Link href={`/country/${country.slug}`}>Good news from {country.name}</Link> : null}
             </p>
           </div>
         </section>

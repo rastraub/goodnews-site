@@ -89,6 +89,10 @@ Sitemaps and feeds:
 - `https://www.tazzora.com/news-sitemap.xml` (stories from the last 48 hours)
 - `https://www.tazzora.com/rss.xml`
 - `https://www.tazzora.com/atom.xml`
+- `https://www.tazzora.com/world/rss.xml` (stories from outside the United States)
+- `https://www.tazzora.com/country/japan/rss.xml` (same pattern for every country slug)
+
+English stays at the site root. `lib/i18n.ts` is the hreflang list for a future translated edition. Adding a locale there, with a path prefix such as `/es`, is the extension point. Current URLs do not move.
 
 The project is the App Router. No extra Vercel config file is required.
 

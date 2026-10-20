@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { getCategory } from "./categories";
+import { getCountry } from "./countries";
+import { hreflangAlternates } from "./i18n";
+import { pageCount, pagePath } from "./paging";
 import { getStateByCode } from "./states";
 import type { Story } from "./stories";
 import { siteConfig, socialLinks } from "@/site.config";
@@ -34,16 +37,63 @@ const feedTypes = {
   "application/atom+xml": "/atom.xml",
 } as const;
 
-/** Canonical plus feed links. Setting canonical alone would drop the layout feed tags. */
-export function pageAlternates(path: string): NonNullable<Metadata["alternates"]> {
+/**
+ * Canonical, hreflang, and feed links.
+ * Setting canonical alone would drop the layout feed tags.
+ * `feedPath` points a section at its own RSS file.
+ */
+export function pageAlternates(path: string, feedPath?: string): NonNullable<Metadata["alternates"]> {
   return {
     canonical: path === "" ? "/" : path,
-    types: feedTypes,
+    languages: hreflangAlternates(path),
+    types: feedPath
+      ? { "application/rss+xml": feedPath, "application/atom+xml": "/atom.xml" }
+      : feedTypes,
   };
 }
 
 export function xHandle(): string {
   return `@${siteConfig.social.x}`;
+}
+
+export function listingMeta(options: {
+  title: string;
+  description: string;
+  base: string;
+  page: number;
+  total: number;
+  feedPath?: string;
+  image?: { url: string; alt: string };
+}): Metadata {
+  const path = pagePath(options.base, options.page);
+  const pages = pageCount(options.total);
+  const title = options.page > 1 ? `${options.title} (page ${options.page})` : options.title;
+  const pagination: { previous?: string; next?: string } = {};
+  if (options.page > 1) pagination.previous = pagePath(options.base, options.page - 1);
+  if (options.page < pages) pagination.next = pagePath(options.base, options.page + 1);
+  return {
+    title,
+    description: options.description,
+    alternates: pageAlternates(path, options.feedPath),
+    ...(pagination.previous || pagination.next ? { pagination } : {}),
+    ...(options.image
+      ? {
+          openGraph: {
+            url: path,
+            title,
+            description: options.description,
+            images: [{ url: options.image.url, alt: options.image.alt, type: "image/webp" as const }],
+          },
+          twitter: {
+            card: "summary_large_image" as const,
+            site: xHandle(),
+            title,
+            description: options.description,
+            images: [options.image.url],
+          },
+        }
+      : {}),
+  };
 }
 
 type Crumb = { name: string; path: string };
@@ -122,13 +172,16 @@ export function siteGraphJsonLd() {
 export function storyJsonLd(story: Story) {
   const category = getCategory(story.category);
   const state = getStateByCode(story.state);
+  const country = getCountry(story.country);
   const url = absoluteUrl(`/story/${story.slug}`);
   const image = absoluteUrl(story.image);
   const published = publishedIso(story.date);
   const crumbs: Crumb[] = [{ name: "Today", path: "/" }];
   if (category) crumbs.push({ name: category.label, path: `/category/${category.slug}` });
-  if (state) crumbs.push({ name: state.name, path: `/state/${state.slug}` });
+  if (story.country !== "US" && country) crumbs.push({ name: country.name, path: `/country/${country.slug}` });
+  else if (state) crumbs.push({ name: state.name, path: `/state/${state.slug}` });
   crumbs.push({ name: story.title, path: `/story/${story.slug}` });
+  const placeName = story.country === "US" && state ? `${story.city}, ${state.name}` : `${story.city}, ${country?.name ?? story.country}`;
 
   return {
     "@context": "https://schema.org",
@@ -145,7 +198,17 @@ export function storyJsonLd(story: Story) {
         inLanguage: "en-US",
         isAccessibleForFree: true,
         articleSection: category?.label,
-        keywords: [state?.name, story.city, category?.label].filter(Boolean).join(", "),
+        keywords: [story.country === "US" ? state?.name : country?.name, story.city, category?.label].filter(Boolean).join(", "),
+        contentLocation: {
+          "@type": "Place",
+          name: placeName,
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: story.city,
+            ...(state ? { addressRegion: state.code } : {}),
+            addressCountry: story.country,
+          },
+        },
         author: {
           "@type": "Organization",
           name: siteConfig.editor.name,

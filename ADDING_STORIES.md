@@ -28,6 +28,7 @@ emphasis: "optional phrase"
 dek: "One or two sentences a reader can trust. This is the summary on the card."
 date: "2026-10-06"
 city: "Akron"
+country: "US"
 state: "OH"
 alsoStates:
   - "ID"
@@ -66,9 +67,10 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `dek` | yes | The deck under the headline. |
 | `date` | yes | `YYYY-MM-DD`. Quote it so YAML does not surprise you. |
 | `city` | yes | Town or city. |
-| `state` | yes | Two-letter USPS code, including `DC`. |
-| `alsoStates` | no | Other states this story should appear in. Do not repeat `state`. |
-| `place` | no | Overrides the default "City, State" label. |
+| `country` | no | ISO 3166-1 alpha-2 code, uppercase, such as `JP` or `US`. Omit it on a United States story. The default is `US`. |
+| `state` | US only | Two-letter USPS code, including `DC`. Required when `country` is `US` or omitted. Leave it off for every other country. |
+| `alsoStates` | no | Other US states this story should appear in. Do not repeat `state`. Leave it off outside the United States. |
+| `place` | no | Overrides the default "City, State" or "City, Country" label. |
 | `category` | yes | `heroes`, `animals`, `science`, `community`, or `health-tech`. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
@@ -90,15 +92,34 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 
 The body under the front matter is the original summary. Write it yourself. Do not paste the source article. Aim for a short, sourced account, at least 40 words. Paragraphs separated by a blank line. Links look like `[label](https://example.com)`.
 
+## Stories outside the United States
+
+Use the same verification bar as a domestic story. The source is a reputable local newsroom or an international desk, the URL is `https`, and the summary is checked against that report. Do not lower the bar to fill a country page.
+
+```yaml
+city: "Osaka"
+country: "JP"
+```
+
+- Set `country` to the uppercase ISO code. `jp` and `Japan` both fail.
+- Omit `state` and `alsoStates`. A state code on a non-US story fails validation.
+- `city` is still required. Use `place` when one city is the wrong label.
+- The story appears at `/country/japan` (the code redirects to the name slug), in `/world`, in the main RSS and news sitemap, and in `/country/japan/rss.xml`. It does not appear on a US state page.
+- Existing US files can keep omitting `country`. They stay `US` and keep `state`.
+
+### Mix for a daily batch
+
+About one in four stories in a daily batch should come from outside the United States when the batch is large enough and the reporting is strong enough. Spread those stories across more than one region. Do not force a weak story to hit the mix, and do not fill the international share from a single country. Stories from the United States stay the majority while the world edition is growing.
+
 ## Photos
 
-Store images in `public/images/stories/` as WebP. Each story needs the full photo (`pony.webp`, about 840px wide) and a thumbnail (`pony-sm.webp`, about 360px wide). Use photos you have the right to use, credit them, and do not present a stranger's face as the person in the story. A caption should say when a photo is illustrative.
+Store images in `public/images/stories/` as WebP. Each story needs the full photo (`pony.webp`, about 840px wide) and a thumbnail (`pony-sm.webp`, about 360px wide). Do not upscale a smaller photo to invent the larger size. Listing pages are paginated and cards use the thumbnail through `srcSet`, so a large archive does not request every full photo at once. Use photos you have the right to use, credit them, and do not present a stranger's face as the person in the story. A caption should say when a photo is illustrative.
 
 ## What the daily job does
 
 A morning batch is new story files. Verify each one, then rotate the homepage so the freshest news is what people see first.
 
-1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`. For `health-tech`, also follow the rules in the next section.
+1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only, including a reputable desk outside the United States. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`. For `health-tech`, also follow the rules in the next section. Aim for the mix in "Stories outside the United States": about one in four of a large batch from outside the United States, across more than one region, and only when the reporting is strong enough.
 2. Add `stories/some-new-slug.md`, the full WebP, and the `-sm` thumbnail. Write an original summary of at least 40 words. Do not paste the article.
 3. Set `cheers: 0` on every new story. Do not invent a cheer count.
 4. Set `editorApproved: true` and `draft: false` only after that check. Until then, keep `draft: true`.

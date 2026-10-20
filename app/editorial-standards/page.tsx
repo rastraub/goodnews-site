@@ -26,7 +26,7 @@ export default function EditorialStandardsPage() {
 
         <h2>What we publish</h2>
         <p>
-          We look for true, hopeful stories from the United States: neighbors, rescuers, animals, classrooms, clinics, and scientific or medical advances that are already helping people or have been shown in human trials. We skip rumors, fundraising appeals with no reported outcome, and anything whose goodness depends on a political side.
+          We look for true, hopeful stories from the United States and from other countries: neighbors, rescuers, animals, classrooms, clinics, and scientific or medical advances that are already helping people or have been shown in human trials. We skip rumors, fundraising appeals with no reported outcome, and anything whose goodness depends on a political side. The same check applies outside the United States. A story still needs a reputable report, a real place, and a reading of that report.
         </p>
         <p>
           The no-politics rule is absolute. Candidates, parties, elections, legislation, and culture-war topics stay out, even when the ending sounds happy. The plain-language version lives on the <Link href="/about#no-politics">about page</Link>.

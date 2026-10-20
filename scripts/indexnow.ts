@@ -1,11 +1,12 @@
 import { getCategory } from "../lib/categories";
+import { getCountry } from "../lib/countries";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
 import { getStateByCode } from "../lib/states";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/atom.xml", "/about", "/editorial-standards", "/corrections", "/contact", "/local"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/atom.xml", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -19,6 +20,9 @@ async function main() {
     urls.add(`${siteConfig.url}/story/${story.slug}`);
     const state = getStateByCode(story.state);
     if (state) urls.add(`${siteConfig.url}/state/${state.slug}`);
+    const country = getCountry(story.country);
+    if (country) urls.add(`${siteConfig.url}/country/${country.slug}`);
+    if (story.country !== "US") urls.add(`${siteConfig.url}/world`);
     if (getCategory(story.category)) urls.add(`${siteConfig.url}/category/${story.category}`);
   }
 

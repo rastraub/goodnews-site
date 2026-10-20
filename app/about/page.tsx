@@ -5,7 +5,7 @@ import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `${siteConfig.name} publishes verified good news from across the United States. Every story links to the original report. No politics, no clickbait, no pop-ups.`,
+  description: `${siteConfig.name} publishes verified good news from the United States and from other countries. Every story links to the original report. No politics, no clickbait, no pop-ups.`,
   alternates: pageAlternates("/about"),
 };
 
@@ -16,7 +16,7 @@ export default function AboutPage() {
         <p className="kicker">Our promise</p>
         <h1>Good news, checked.</h1>
         <p className="lede">
-          {siteConfig.name} publishes verified, uplifting stories from the United States. We link the original report on every story. We do not do politics, clickbait, or pop-ups.
+          {siteConfig.name} publishes verified, uplifting stories from the United States and from other countries. We link the original report on every story. We do not do politics, clickbait, or pop-ups.
         </p>
 
         <section id="mission">
@@ -25,7 +25,7 @@ export default function AboutPage() {
             The job is simple: find something true and hopeful, check it against the original reporting, and put it where a reader can share it without a pit in their stomach. We cover kindness, neighbors, animals, science, health advances that are already helping people, and towns that showed up for someone.
           </p>
           <p>
-            Stories come from all 50 states and Washington, D.C. You can start with <Link href="/">today</Link>, browse <Link href="/local">by state</Link>, or follow a <Link href="/category/community">topic</Link>.
+            Stories come from all 50 states, Washington, D.C., and countries beyond the United States. You can start with <Link href="/">today</Link>, browse <Link href="/local">by state</Link>, read the <Link href="/world">world edition</Link>, or follow a <Link href="/category/community">topic</Link>.
           </p>
         </section>
 

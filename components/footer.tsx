@@ -26,6 +26,7 @@ export function Footer() {
             <ul>
               <li><Link href="/">Today</Link></li>
               <li><Link href="/local">Local</Link></li>
+              <li><Link href="/world">World</Link></li>
               {CATEGORIES.map((category) => (
                 <li key={category.slug}>
                   <Link href={`/category/${category.slug}`}>{category.label}</Link>
