@@ -80,9 +80,17 @@ Persistent storage is still a TODO. See below.
 2. For Buttondown, set `BUTTONDOWN_API_KEY`. Or set `EMAIL_PROVIDER` and `EMAIL_API_KEY` together; that pair takes precedence. Leave every email key empty and signups still succeed and log.
 3. Add `SUBMISSION_WEBHOOK_URL` if tips should reach an editor inbox. The filesystem on Vercel does not keep `inbox.jsonl`.
 4. Deploy. `main` (or a merged pull request) publishes the site.
-5. Add `tazzora.com` as the custom domain in the Vercel project settings. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
+5. Add `tazzora.com` and `www.tazzora.com` in the Vercel project settings. Production currently redirects the apex to `www`, and absolute URLs in `site.config.ts` follow that host. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
+6. Optional, for Search Console and Bing HTML-tag verification: set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` (see `.env.example`) and redeploy. A production build also pings IndexNow when `VERCEL_ENV=production`.
 
-The project is the App Router, static pages, `sitemap.xml`, and `/rss.xml`. No extra Vercel config file is required.
+Sitemaps and feeds:
+
+- `https://www.tazzora.com/sitemap.xml`
+- `https://www.tazzora.com/news-sitemap.xml` (stories from the last 48 hours)
+- `https://www.tazzora.com/rss.xml`
+- `https://www.tazzora.com/atom.xml`
+
+The project is the App Router. No extra Vercel config file is required.
 
 ## What's left
 

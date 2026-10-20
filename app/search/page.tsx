@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { StoryCard } from "@/components/story-card";
 import { toCard } from "@/lib/present";
 import { searchStories } from "@/lib/stories";
@@ -6,7 +7,8 @@ import { searchStories } from "@/lib/stories";
 export const metadata: Metadata = {
   title: "Search",
   description: "Search verified good news by place, topic, or source.",
-  alternates: { canonical: "/search" },
+  alternates: pageAlternates("/search"),
+  robots: { index: false, follow: true },
 };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {

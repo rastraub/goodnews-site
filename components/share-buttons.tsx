@@ -38,7 +38,7 @@ export function ShareButtons({ title, path }: { title: string; path: string }) {
       <button type="button" onClick={copy}>
         {copied ? "Copied" : "Copy link"}
       </button>
-      <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer">
+      <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&via=${encodeURIComponent(siteConfig.social.x)}`} target="_blank" rel="noopener noreferrer">
         Post
       </a>
       <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer">

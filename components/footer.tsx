@@ -32,15 +32,17 @@ export function Footer() {
                 </li>
               ))}
               <li><Link href="/rss.xml">RSS</Link></li>
+              <li><Link href="/atom.xml">Atom</Link></li>
             </ul>
           </div>
           <div>
             <p className="flabel">Our promise</p>
             <ul>
-              <li><Link href="/about">How we verify</Link></li>
+              <li><Link href="/about">About</Link></li>
+              <li><Link href="/about#how-we-verify">How we verify</Link></li>
+              <li><Link href="/editorial-standards">Editorial standards</Link></li>
               <li><Link href="/about#no-politics">Our no-politics rule</Link></li>
               <li><Link href="/corrections">Corrections</Link></li>
-              <li><Link href="/about">About us</Link></li>
             </ul>
           </div>
           <div>

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { EmailSignup } from "@/components/email-signup";
 import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "Subscribe",
   description: `The daily Top 5 from ${siteConfig.name}. Five true stories, two minutes, every morning.`,
-  alternates: { canonical: "/subscribe" },
+  alternates: pageAlternates("/subscribe"),
 };
 
 export default function SubscribePage() {

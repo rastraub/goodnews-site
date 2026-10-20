@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "Privacy",
   description: `What ${siteConfig.name} collects, and what it does not.`,
-  alternates: { canonical: "/privacy" },
+  alternates: pageAlternates("/privacy"),
 };
 
 export default function PrivacyPage() {

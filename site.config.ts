@@ -13,14 +13,25 @@ export const siteConfig = {
   description:
     "Real, uplifting news from all 50 states. Every story is checked and linked to its original source. No politics, no pop-ups, no clickbait.",
   domain,
-  url: `https://${domain}`,
+  // The apex host 308s to www. Absolute URLs use the host that returns 200.
+  url: `https://www.${domain}`,
   contactEmail: `hello@${domain}`,
   locale: "en-US",
+  /**
+   * Public byline. Organization-style masthead, not a named person.
+   * `blurb` is the short mission line shown with the masthead.
+   */
+  editor: {
+    name: "Tazzora Editorial Team",
+    blurb:
+      "Verified good news from across the United States. Every story is checked against the original report, linked to that source, and kept free of politics.",
+  },
   social: {
     instagram: "tazzora",
     tiktok: "tazzora",
     youtube: "tazzora",
     facebook: "tazzora",
+    x: "TazzoraNews",
   },
 } as const;
 
@@ -33,5 +44,6 @@ export function socialLinks() {
     { label: "TikTok", short: "TT", href: `https://www.tiktok.com/@${social.tiktok}` },
     { label: "YouTube", short: "YT", href: `https://www.youtube.com/@${social.youtube}` },
     { label: "Facebook", short: "FB", href: `https://www.facebook.com/${social.facebook}` },
+    { label: "X", short: "X", href: `https://x.com/${social.x}` },
   ];
 }

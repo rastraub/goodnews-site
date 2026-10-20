@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "Terms",
   description: `How to use ${siteConfig.name}.`,
-  alternates: { canonical: "/terms" },
+  alternates: pageAlternates("/terms"),
 };
 
 export default function TermsPage() {

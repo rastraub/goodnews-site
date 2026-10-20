@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { StoryCard } from "@/components/story-card";
 import { toCard } from "@/lib/present";
 import { getPublishedStories } from "@/lib/stories";
@@ -6,7 +7,7 @@ import { getPublishedStories } from "@/lib/stories";
 export const metadata: Metadata = {
   title: "All stories",
   description: "Every verified story on the site, newest first.",
-  alternates: { canonical: "/stories" },
+  alternates: pageAlternates("/stories"),
 };
 
 export default function StoriesPage() {

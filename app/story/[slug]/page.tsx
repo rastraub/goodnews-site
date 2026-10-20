@@ -12,6 +12,7 @@ import { getCategory } from "@/lib/categories";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { placeLabel, toCard } from "@/lib/present";
+import { pageAlternates, publishedIso, storyJsonLd, xHandle } from "@/lib/seo";
 import { getPublishedStories, getStory, relatedStories } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { siteConfig } from "@/site.config";
@@ -27,15 +28,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const story = getStory(slug);
   if (!story) return {};
   const description = story.dek;
+  const category = getCategory(story.category);
+  const state = getStateByCode(story.state);
+  const published = publishedIso(story.date);
+  const tags = [state?.name, story.city, category?.label].filter((tag): tag is string => Boolean(tag));
   return {
     title: story.title,
     description,
-    alternates: { canonical: `/story/${story.slug}` },
+    authors: [{ name: siteConfig.editor.name, url: "/about#masthead" }],
+    alternates: pageAlternates(`/story/${story.slug}`),
     openGraph: {
       type: "article",
       url: `/story/${story.slug}`,
+      title: story.title,
       description,
-      publishedTime: story.date,
+      publishedTime: published,
+      modifiedTime: published,
+      authors: [siteConfig.editor.name],
+      section: category?.label,
+      tags,
+      images: [{ url: story.image, alt: story.imageAlt, type: "image/webp" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: xHandle(),
+      title: story.title,
+      description,
+      images: [story.image],
     },
   };
 }
@@ -47,25 +66,10 @@ export default async function StoryPage({ params }: Props) {
   const category = getCategory(story.category);
   const state = getStateByCode(story.state);
   const related = relatedStories(story);
-  const url = `${siteConfig.url}/story/${story.slug}`;
 
   return (
     <article className="story-page">
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "NewsArticle",
-          headline: story.title,
-          description: story.dek,
-          datePublished: story.date,
-          image: [`${siteConfig.url}${story.image}`],
-          author: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
-          publisher: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
-          isBasedOn: story.sourceUrl,
-          mainEntityOfPage: url,
-          citation: story.sourceUrl,
-        }}
-      />
+      <JsonLd data={storyJsonLd(story)} />
       <div className="wrap story-layout">
         <div className="story-main">
           <p className="crumbs">
@@ -83,6 +87,9 @@ export default async function StoryPage({ params }: Props) {
           <EmphaticTitle title={story.title} emphasis={story.emphasis} />
           <p className="dek">{story.dek}</p>
           <div className="meta">
+            <span className="byline">
+              By <Link href="/about#masthead">{siteConfig.editor.name}</Link>
+            </span>
             <VerifiedBadge source={story.sourceName} withSourceWord />
             <span className="time">
               {formatStoryDate(story.date)} · {story.minutes} min read
@@ -160,6 +167,10 @@ export default async function StoryPage({ params }: Props) {
                 <StoryCard key={item.slug} story={toCard(item)} />
               ))}
             </div>
+            <p className="jump-links">
+              {category ? <Link href={`/category/${category.slug}`}>All {category.label} stories</Link> : null}
+              {state ? <Link href={`/state/${state.slug}`}>Good news from {state.name}</Link> : null}
+            </p>
           </div>
         </section>
       ) : null}

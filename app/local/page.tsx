@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import Link from "next/link";
 import { LocalExplorer } from "@/components/local-explorer";
 import { StoryCard } from "@/components/story-card";
@@ -9,7 +10,7 @@ import { getStateByCode, stateName, STATES } from "@/lib/states";
 export const metadata: Metadata = {
   title: "Good news near you",
   description: "Pick a state and read verified, uplifting stories from close to home.",
-  alternates: { canonical: "/local" },
+  alternates: pageAlternates("/local"),
 };
 
 export default function LocalPage() {
