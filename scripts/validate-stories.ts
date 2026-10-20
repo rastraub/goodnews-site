@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { parseEmailInterest } from "../lib/email";
+import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
 import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
@@ -143,8 +144,12 @@ function assertHubs() {
   if (!topic) throw new Error("A shared tag should become a topic page at three stories.");
   const badTag = storySchema.safeParse(minimalStory({ state: "OH", tags: ["School Lunch"] }));
   if (badTag.success) throw new Error("Tags have to be kebab-case.");
+  const unknownTag = storySchema.safeParse(minimalStory({ state: "OH", tags: ["not-a-real-topic"] }));
+  if (unknownTag.success) throw new Error("Tags outside the vocabulary should fail.");
   const duplicate = storySchema.safeParse(minimalStory({ state: "OH", tags: ["dogs", "dogs"] }));
   if (duplicate.success) throw new Error("Duplicate tags should fail.");
+  const known = storySchema.safeParse(minimalStory({ state: "OH", tags: ["dogs", "animal-rescue"] }));
+  if (!known.success) throw new Error("Tags from the vocabulary should pass.");
   const index = getHubIndex();
   for (const hub of [...index.stateCategories, ...index.cities, ...index.topics]) {
     if (hub.count < MIN_HUB_STORIES) throw new Error(`${hub.path} is thinner than ${MIN_HUB_STORIES} stories.`);
@@ -410,6 +415,58 @@ function assertWeeks() {
   console.log(`Weeks: ${weeks.length} roundups since ${launchWeekStart()} (${SITE_LAUNCH} launch). ${paths || "none yet"}.`);
 }
 
+function assertEnrichmentMerge() {
+  const summary = "A classroom summary that is long enough for the schema when it is copied onto a story file.";
+  const questions = ["What did the people in this story do?", "How could a class try something kind this week?"];
+  const extra = {
+    tags: ["cats", "animal-rescue"] as string[],
+    kidFriendly: true as const,
+    kidSummary: summary,
+    kidQuestions: questions,
+  };
+  const filled = mergeStoryFields({}, extra);
+  if (!Array.isArray(filled.tags) || filled.tags[0] !== "cats" || filled.kidFriendly !== true) {
+    throw new Error("Missing front matter should take tags and classroom text from the backfill.");
+  }
+  const tagsWin = mergeStoryFields({ tags: ["dogs"] }, extra);
+  if (!Array.isArray(tagsWin.tags) || tagsWin.tags.length !== 1 || tagsWin.tags[0] !== "dogs") {
+    throw new Error("Front matter tags should win over the backfill.");
+  }
+  const kidsWin = mergeStoryFields({ kidFriendly: false }, extra);
+  if (kidsWin.kidSummary || kidsWin.kidFriendly !== false) {
+    throw new Error("Front matter classroom fields should win over the backfill.");
+  }
+  const emptyTags = mergeStoryFields({ tags: [] }, extra);
+  if (!Array.isArray(emptyTags.tags) || emptyTags.tags.length !== 0) {
+    throw new Error("An explicit empty tag list in front matter should not be replaced.");
+  }
+
+  const enrichment = loadEnrichment();
+  const slugs = new Set(stories.map((story) => story.slug));
+  for (const slug of Object.keys(enrichment)) {
+    if (!slugs.has(slug)) throw new Error(`Enrichment slug ${slug} does not match a story file.`);
+  }
+  let tagged = 0;
+  const untagged: string[] = [];
+  for (const story of stories) {
+    if (story.draft) continue;
+    if (story.tags.length === 0 && !enrichment[story.slug]) {
+      // A file added on main after this backfill, before its own tags land.
+      // Unknown tags still fail in the schema. Do not fail the deploy for a missing list.
+      untagged.push(story.slug);
+      continue;
+    }
+    if (story.tags.length < 2 || story.tags.length > 5) {
+      throw new Error(`${story.slug} should have 2 to 5 tags after the backfill merge.`);
+    }
+    tagged += 1;
+  }
+  if (untagged.length) {
+    console.log(`Stories still missing tags (add them in front matter): ${untagged.join(", ")}`);
+  }
+  console.log(`Tagged stories: ${tagged}. Enrichment entries: ${Object.keys(enrichment).length}.`);
+}
+
 function assertLoadedCountries(stories: { slug: string; country: string; state?: string }[]) {
   for (const story of stories) {
     if (!story.country) throw new Error(`${story.slug} is missing a country`);
@@ -601,6 +658,7 @@ assertHubs();
 assertKidClassrooms();
 assertWeeks();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
+assertEnrichmentMerge();
 assertLoadedCountries(stories);
 assertSeedSources(stories);
 assertTipMail();

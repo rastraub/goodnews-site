@@ -9,7 +9,7 @@ import { getStateByCode } from "../lib/states";
 import { weeksToPrerender } from "../lib/weeks";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/atom.xml", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/print"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/atom.xml", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/print", "/topics"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
