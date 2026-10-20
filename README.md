@@ -44,7 +44,7 @@ Copy `.env.example` to `.env.local`.
 
 With **no** email key, the signup form still succeeds and the address is written to the server log. That is the local and preview behavior.
 
-To send signups to Buttondown, set `BUTTONDOWN_API_KEY` to the newsletter API key (this is the variable on the Vercel project). The adapter posts to `https://api.buttondown.com/v1/subscribers` with `Authorization: Token <key>` and `{"email_address": "..."}`. An address that is already subscribed is treated as success. Any other failure is returned to the form as an error. The form does not show success when Buttondown rejects the request.
+To send signups to Buttondown, set `BUTTONDOWN_API_KEY` to the newsletter API key (this is the variable on the Vercel project). The adapter posts to `https://api.buttondown.com/v1/subscribers` with `Authorization: Token <key>`, `{"email_address": "..."}`, and one tag: `daily`, `membership`, or `teachers`. The teacher tag is only for the adult educator list on `/kids`. An address that is already subscribed is treated as success. Any other failure is returned to the form as an error. The form does not show success when Buttondown rejects the request.
 
 `EMAIL_PROVIDER` and `EMAIL_API_KEY` still work, and they take precedence when **both** are set:
 
@@ -56,7 +56,7 @@ To send signups to Buttondown, set `BUTTONDOWN_API_KEY` to the newsletter API ke
 | `EMAIL_PUBLICATION_ID` | Beehiiv publication id |
 | `EMAIL_AUDIENCE_ID` | Resend audience id |
 
-When `EMAIL_PROVIDER` is `buttondown`, the same subscribers endpoint and `Token` header are used. That path also sends a tag, `daily` or `membership`.
+When `EMAIL_PROVIDER` is `buttondown`, the same subscribers endpoint and `Token` header are used, including the `daily`, `membership`, or `teachers` tag. The `BUTTONDOWN_API_KEY` path sends that tag too.
 
 Beehiiv uses `Authorization: Bearer` and `POST https://api.beehiiv.com/v2/publications/{EMAIL_PUBLICATION_ID}/subscriptions`.
 
@@ -80,9 +80,23 @@ Persistent storage is still a TODO. See below.
 2. For Buttondown, set `BUTTONDOWN_API_KEY`. Or set `EMAIL_PROVIDER` and `EMAIL_API_KEY` together; that pair takes precedence. Leave every email key empty and signups still succeed and log.
 3. Add `SUBMISSION_WEBHOOK_URL` if tips should reach an editor inbox. The filesystem on Vercel does not keep `inbox.jsonl`.
 4. Deploy. `main` (or a merged pull request) publishes the site.
-5. Add `tazzora.com` as the custom domain in the Vercel project settings. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
+5. Add `tazzora.com` and `www.tazzora.com` in the Vercel project settings. Production currently redirects the apex to `www`, and absolute URLs in `site.config.ts` follow that host. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
+6. Optional, for Search Console and Bing HTML-tag verification: set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` (see `.env.example`) and redeploy. A production build also pings IndexNow when `VERCEL_ENV=production`.
 
-The project is the App Router, static pages, `sitemap.xml`, and `/rss.xml`. No extra Vercel config file is required.
+Sitemaps and feeds:
+
+- `https://www.tazzora.com/sitemap.xml`
+- `https://www.tazzora.com/news-sitemap.xml` (stories from the last 48 hours)
+- `https://www.tazzora.com/rss.xml`
+- `https://www.tazzora.com/atom.xml`
+- `https://www.tazzora.com/world/rss.xml` (stories from outside the United States)
+- `https://www.tazzora.com/country/japan/rss.xml` (same pattern for every country slug)
+
+English stays at the site root. `lib/i18n.ts` is the hreflang list for a future translated edition. Adding a locale there, with a path prefix such as `/es`, is the extension point. Current URLs do not move.
+
+State-and-category pages (`/state/colorado/animals`), city pages, and topic pages are added to the sitemap only after at least three stories support them. Country pages with fewer stories stay on `/world` and are left out of the sitemap.
+
+The project is the App Router. No extra Vercel config file is required. Do not add `middleware.ts`: it runs on every request. Story photos stay as plain images (`images.unoptimized`) because they are already sized WebP files. Pages, feeds, and sitemaps are static build output with long cache headers; the only functions are the forms (`/api/subscribe`, `/api/submit`, `/api/cheer`) and a search query.
 
 ## What's left
 

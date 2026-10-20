@@ -3,9 +3,14 @@ import localFont from "next/font/local";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { IconSprite } from "@/components/icon-sprite";
+import { JsonLd } from "@/components/json-ld";
 import { editionLabel } from "@/lib/format";
+import { pageAlternates, siteGraphJsonLd, xHandle } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 import "./globals.css";
+
+const googleVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+const bingVerification = process.env.BING_SITE_VERIFICATION?.trim();
 
 const inter = localFont({
   src: [{ path: "../assets/fonts/Inter-Variable.woff2", weight: "100 900", style: "normal" }],
@@ -37,23 +42,39 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
-  alternates: {
-    types: { "application/rss+xml": "/rss.xml" },
-  },
+  alternates: pageAlternates("/"),
+  authors: [{ name: siteConfig.editor.name, url: "/about#masthead" }],
+  creator: siteConfig.editor.name,
+  publisher: siteConfig.name,
   openGraph: {
     type: "website",
     siteName: siteConfig.name,
     locale: "en_US",
     description: siteConfig.description,
   },
-  twitter: { card: "summary_large_image" },
-  robots: { index: true, follow: true },
+  twitter: { card: "summary_large_image", site: xHandle() },
+  robots: {
+    index: true,
+    follow: true,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+    "max-video-preview": -1,
+  },
+  ...(googleVerification || bingVerification
+    ? {
+        verification: {
+          ...(googleVerification ? { google: googleVerification } : {}),
+          ...(bingVerification ? { other: { "msvalidate.01": bingVerification } } : {}),
+        },
+      }
+    : {}),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${interItalic.variable} ${fraunces.variable}`}>
       <body>
+        <JsonLd data={siteGraphJsonLd()} />
         <IconSprite />
         <a className="skip" href="#main">
           Skip to stories

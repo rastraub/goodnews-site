@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { EmailSignup } from "@/components/email-signup";
 import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "Membership",
   description: `An ad-free ${siteConfig.name} for about $3 a month. Billing is not open yet.`,
-  alternates: { canonical: "/membership" },
+  alternates: pageAlternates("/membership"),
 };
 
 export default function MembershipPage() {

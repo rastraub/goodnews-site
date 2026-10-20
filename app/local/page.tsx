@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import Link from "next/link";
 import { LocalExplorer } from "@/components/local-explorer";
 import { StoryCard } from "@/components/story-card";
 import { toCard } from "@/lib/present";
+import { STORY_PAGE_SIZE } from "@/lib/paging";
 import { getPublishedStories, stateCounts } from "@/lib/stories";
 import { getStateByCode, stateName, STATES } from "@/lib/states";
 
 export const metadata: Metadata = {
   title: "Good news near you",
   description: "Pick a state and read verified, uplifting stories from close to home.",
-  alternates: { canonical: "/local" },
+  alternates: pageAlternates("/local"),
 };
 
 export default function LocalPage() {
@@ -49,11 +51,18 @@ export default function LocalPage() {
               <h2>Latest from the states</h2>
               <p>Every story still links back to the newsroom that reported it.</p>
             </div>
+            <Link className="more" href="/stories">
+              All stories
+              <svg className="ico" aria-hidden="true"><use href="#i-arrow" /></svg>
+            </Link>
           </div>
           <div className="grid">
-            {stories.map((story) => (
-              <StoryCard key={story.slug} story={toCard(story)} />
-            ))}
+            {stories
+              .filter((story) => story.country === "US")
+              .slice(0, STORY_PAGE_SIZE)
+              .map((story) => (
+                <StoryCard key={story.slug} story={toCard(story)} />
+              ))}
           </div>
         </div>
       </section>

@@ -1,17 +1,43 @@
 import Link from "next/link";
 import { EmailSignup } from "@/components/email-signup";
 import { HomeLatest } from "@/components/home-latest";
-import { JsonLd } from "@/components/json-ld";
 import { LocalExplorer } from "@/components/local-explorer";
 import { CheerButton } from "@/components/cheer-button";
 import { EmphaticTitle } from "@/components/story-body";
 import { TopFiveCard } from "@/components/story-card";
+import { WorldSpotlight } from "@/components/world-spotlight";
 import { StoryImage } from "@/components/story-image";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { CATEGORIES } from "@/lib/categories";
 import { getStateByCode, stateName } from "@/lib/states";
-import { placeLabel, toCard } from "@/lib/present";
+import { placeLabel, toCard, type StoryCardModel } from "@/lib/present";
 import { getHero, getPublishedStories, getTop5, stateCounts } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
+
+const SHELF_ALL = 24;
+const SHELF_PER_CATEGORY = 6;
+
+function homeShelf(cards: StoryCardModel[], heroSlug?: string): StoryCardModel[] {
+  const rest = cards.filter((story) => story.slug !== heroSlug);
+  const picked: StoryCardModel[] = [];
+  const seen = new Set<string>();
+  function add(story: StoryCardModel) {
+    if (seen.has(story.slug)) return;
+    seen.add(story.slug);
+    picked.push(story);
+  }
+  for (const story of rest.slice(0, SHELF_ALL)) add(story);
+  for (const category of CATEGORIES) {
+    let count = 0;
+    for (const story of rest) {
+      if (story.category !== category.slug) continue;
+      add(story);
+      count += 1;
+      if (count === SHELF_PER_CATEGORY) break;
+    }
+  }
+  return picked;
+}
 
 export default function HomePage() {
   const stories = getPublishedStories();
@@ -27,20 +53,6 @@ export default function HomePage() {
 
   return (
     <>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: siteConfig.name,
-          url: siteConfig.url,
-          description: siteConfig.description,
-          potentialAction: {
-            "@type": "SearchAction",
-            target: `${siteConfig.url}/search?q={query}`,
-            "query-input": "required name=query",
-          },
-        }}
-      />
       {hero ? <Hero story={hero} /> : null}
       <section className="top5">
         <div className="wrap">
@@ -63,9 +75,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <WorldSpotlight />
       <LocalExplorer highlighted={counts.map((item) => item.code.toLowerCase())} chips={chips} />
       <EmailSignup />
-      <HomeLatest stories={cards} heroSlug={hero?.slug} />
+      <HomeLatest stories={homeShelf(cards, hero?.slug)} heroSlug={hero?.slug} />
       <section className="member">
         <div className="wrap member-in">
           <div className="mcard">
@@ -134,6 +147,9 @@ function Hero({ story }: { story: NonNullable<ReturnType<typeof getHero>> }) {
           <EmphaticTitle title={story.title} emphasis={story.emphasis} />
           <p className="dek">{story.dek}</p>
           <div className="meta">
+            <span className="byline">
+              By <Link href="/about#masthead">{siteConfig.editor.name}</Link>
+            </span>
             <VerifiedBadge source={story.sourceName} withSourceWord />
             <span className="time">
               {card.dateLabel} · {story.minutes} min read

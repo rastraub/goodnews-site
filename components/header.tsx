@@ -9,8 +9,11 @@ import { CATEGORIES } from "@/lib/categories";
 const PRIMARY = [
   { href: "/", label: "Today" },
   { href: "/local", label: "Local" },
+  { href: "/world", label: "World" },
   ...CATEGORIES.map((category) => ({ href: `/category/${category.slug}`, label: category.label })),
 ];
+
+const MORE = [{ href: "/kids", label: "Kids" }];
 
 export function Header({ edition }: { edition: string }) {
   const pathname = usePathname();
@@ -20,6 +23,7 @@ export function Header({ edition }: { edition: string }) {
   function active(href: string) {
     if (href === "/") return pathname === "/";
     if (href === "/local") return pathname === "/local" || pathname.startsWith("/state/");
+    if (href === "/world") return pathname === "/world" || pathname.startsWith("/country/");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
@@ -83,7 +87,7 @@ export function Header({ edition }: { edition: string }) {
         </div>
       </header>
       <div className={`menu-panel${open ? " open" : ""}`} id="mobile-menu">
-        {PRIMARY.map((link) => (
+        {[...PRIMARY, ...MORE].map((link) => (
           <Link key={link.href} href={link.href}>
             {link.label}
           </Link>
@@ -94,7 +98,7 @@ export function Header({ edition }: { edition: string }) {
         <Link href="/subscribe">Subscribe</Link>
       </div>
       <div className="catbar">
-        {PRIMARY.map((link) => (
+        {[...PRIMARY, ...MORE].map((link) => (
           <Link key={link.href} href={link.href} className={active(link.href) ? "on" : undefined}>
             {link.label}
           </Link>

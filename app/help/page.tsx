@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import Link from "next/link";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { getPublishedStories } from "@/lib/stories";
@@ -6,7 +7,7 @@ import { getPublishedStories } from "@/lib/stories";
 export const metadata: Metadata = {
   title: "Ways to help",
   description: "Donate, volunteer, or say thank you. One practical action beside each story.",
-  alternates: { canonical: "/help" },
+  alternates: pageAlternates("/help"),
 };
 
 export default function HelpPage() {

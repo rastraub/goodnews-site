@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "Partner with us",
   description: "Sponsorships are labeled. The news is not for sale.",
-  alternates: { canonical: "/partner" },
+  alternates: pageAlternates("/partner"),
 };
 
 export default function PartnerPage() {

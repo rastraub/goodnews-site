@@ -28,6 +28,7 @@ emphasis: "optional phrase"
 dek: "One or two sentences a reader can trust. This is the summary on the card."
 date: "2026-10-06"
 city: "Akron"
+country: "US"
 state: "OH"
 alsoStates:
   - "ID"
@@ -66,10 +67,12 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `dek` | yes | The deck under the headline. |
 | `date` | yes | `YYYY-MM-DD`. Quote it so YAML does not surprise you. |
 | `city` | yes | Town or city. |
-| `state` | yes | Two-letter USPS code, including `DC`. |
-| `alsoStates` | no | Other states this story should appear in. Do not repeat `state`. |
-| `place` | no | Overrides the default "City, State" label. |
+| `country` | no | ISO 3166-1 alpha-2 code, uppercase, such as `JP` or `US`. Omit it on a United States story. The default is `US`. |
+| `state` | US only | Two-letter USPS code, including `DC`. Required when `country` is `US` or omitted. Leave it off for every other country. |
+| `alsoStates` | no | Other US states this story should appear in. Do not repeat `state`. Leave it off outside the United States. |
+| `place` | no | Overrides the default "City, State" or "City, Country" label. |
 | `category` | yes | `heroes`, `animals`, `science`, `community`, or `health-tech`. |
+| `tags` | no | Up to five lowercase kebab-case topics, such as `school-lunch`. A topic page is created only after at least three stories share that tag. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
 | `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. |
@@ -83,6 +86,10 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `howToHelp` | yes | At least one link. `kind` is `donate`, `volunteer`, `thank`, or `learn`. |
 | `featured` | no | `true` makes it eligible to be the story of the day. The newest featured story wins. |
 | `top5` | no | Rank `1` through `5`. Each number can be used once. |
+| `worldPick` | no | `true` on one story from outside the United States. That story is the bonus "Around the World" link in the morning email, and the spotlight on the homepage and state pages. Leave it off US stories. Only one story may have it. |
+| `kidFriendly` | no | `true` when a teacher can read the story aloud with children. Requires `kidSummary` and `kidQuestions`. Defaults to false. Leave it off a story that is frightening, political, or too medical for a classroom. |
+| `kidSummary` | with `kidFriendly` | A short paragraph in plain language for a teacher to read aloud. Leave it off when `kidFriendly` is false. |
+| `kidQuestions` | with `kidFriendly` | Two or three discussion questions for the teacher to lead. Leave them off otherwise. |
 | `cheers` | no | Starting cheer count. Defaults to 0. Readers add one in their own browser. |
 | `draft` | no | `true` keeps it out of the site. It is still validated. |
 | `editorApproved` | yes | Must be `true` for anything that is not a draft. This is the publish switch. |
@@ -90,22 +97,72 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 
 The body under the front matter is the original summary. Write it yourself. Do not paste the source article. Aim for a short, sourced account, at least 40 words. Paragraphs separated by a blank line. Links look like `[label](https://example.com)`.
 
+## Stories outside the United States
+
+Use the same verification bar as a domestic story. The source is a reputable local newsroom or an international desk, the URL is `https`, and the summary is checked against that report. Do not lower the bar to fill a country page.
+
+```yaml
+city: "Osaka"
+country: "JP"
+```
+
+- Set `country` to the uppercase ISO code. `jp` and `Japan` both fail.
+- Omit `state` and `alsoStates`. A state code on a non-US story fails validation.
+- `city` is still required. Use `place` when one city is the wrong label.
+- The story appears at `/country/japan` (the code redirects to the name slug), in `/world`, in the main RSS and news sitemap, and in `/country/japan/rss.xml`. It does not appear on a US state page.
+- Existing US files can keep omitting `country`. They stay `US` and keep `state`.
+- `worldPick: true` marks the one international story for the day. See the daily job below.
+
+### Pages that appear on their own
+
+These URLs are created only when at least three published stories belong there. A thinner combination is not a page, so it is not in the sitemap and it does not rank.
+
+- `/state/colorado/animals` is that state's stories in one category.
+- `/state/colorado/city/denver` is one US city. The city name is slugified, and the state keeps Springfields apart.
+- `/country/japan/city/osaka` is a city outside the United States.
+- `/topic/school-lunch` is a tag shared by at least three stories.
+
+A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Add `tags` when a real topic is shared. Do not invent tags to force a page.
+
+### Stories for classrooms
+
+Use these fields only when the story is appropriate to read with children. Skip anything frightening, political, or too medical for a classroom. Do not invent a kid-friendly version of a story that is not one.
+
+```yaml
+kidFriendly: true
+kidSummary: "A short paragraph in plain language a teacher can read aloud."
+kidQuestions:
+  - "What did the people in this story do?"
+  - "What is one kind thing your class could try?"
+```
+
+- `kidFriendly: true` without a summary and two or three questions fails validation. A summary or questions without the flag also fails, so the classroom text cannot be dropped by accident.
+- `/kids` lists every published classroom story. `/kids/print` is the printable story of the day for teachers. It rotates by calendar date. A classroom story dated that day is the one that prints.
+- `/kids/state/colorado` and `/kids/country/japan` exist only when that place has at least one classroom story. A state and a country can share a name, so the path says which is which. An empty place is not a page.
+- The teacher email is a separate signup on `/kids` for adults and educators. The tag is `teachers`. Do not collect a child's name, age, school, or email.
+
+### Mix for a daily batch
+
+About one in four stories in a daily batch should come from outside the United States when the batch is large enough and the reporting is strong enough. Spread those stories across more than one region. Do not force a weak story to hit the mix, and do not fill the international share from a single country. Stories from the United States stay the majority while the world edition is growing.
+
 ## Photos
 
-Store images in `public/images/stories/` as WebP. Each story needs the full photo (`pony.webp`, about 840px wide) and a thumbnail (`pony-sm.webp`, about 360px wide). Use photos you have the right to use, credit them, and do not present a stranger's face as the person in the story. A caption should say when a photo is illustrative.
+Store images in `public/images/stories/` as WebP. Each story needs the full photo (`pony.webp`, about 840px wide) and a thumbnail (`pony-sm.webp`, about 360px wide). Do not upscale a smaller photo to invent the larger size. Listing pages are paginated and cards use the thumbnail through `srcSet`, so a large archive does not request every full photo at once. Use photos you have the right to use, credit them, and do not present a stranger's face as the person in the story. A caption should say when a photo is illustrative.
 
 ## What the daily job does
 
 A morning batch is new story files. Verify each one, then rotate the homepage so the freshest news is what people see first.
 
-1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`. For `health-tech`, also follow the rules in the next section.
+1. Open the source article and confirm the URL, the date, and the facts you plan to summarize. Reputable newsrooms only, including a reputable desk outside the United States. Skip politics, tragedy-with-a-silver-lining framing, and anything already in `stories/`. For `health-tech`, also follow the rules in the next section. Aim for the mix in "Stories outside the United States": about one in four of a large batch from outside the United States, across more than one region, and only when the reporting is strong enough.
 2. Add `stories/some-new-slug.md`, the full WebP, and the `-sm` thumbnail. Write an original summary of at least 40 words. Do not paste the article.
 3. Set `cheers: 0` on every new story. Do not invent a cheer count.
 4. Set `editorApproved: true` and `draft: false` only after that check. Until then, keep `draft: true`.
 5. Rotate the homepage. Ranks live in front matter. Each `top5` number can be used only once.
    - **Featured.** The hero is the newest story with `featured: true` (newest date wins). Set `featured: true` on the single best story of the day, and set `featured: false` on every other story, including older ones. If an older story is left featured and no newer story is featured, it keeps the hero spot.
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
-6. Run `npm run validate-stories` and `npm run build`. Both have to pass.
+   - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
+   - **For classrooms.** When a story is appropriate to read with children, set `kidFriendly: true`, write `kidSummary` in plain language a teacher can read aloud, and add two or three `kidQuestions`. Skip the flag when the story is frightening, political, or too medical for a classroom. Do not force one into the batch. Do not invent facts to make a story sound simpler than it is. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list with the tag `teachers`. Do not add a child to any list.
+6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 
 ## Health & Tech

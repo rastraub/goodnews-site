@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { SubmitForm } from "@/components/submit-form";
 
 export const metadata: Metadata = {
   title: "Submit a story",
   description: "Send a tip about a kind, verified, non-political story. An editor checks every one.",
-  alternates: { canonical: "/submit" },
+  alternates: pageAlternates("/submit"),
 };
 
 export default function SubmitPage() {

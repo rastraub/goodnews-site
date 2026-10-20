@@ -1,4 +1,10 @@
-export type EmailInterest = "daily" | "membership";
+export type EmailInterest = "daily" | "membership" | "teachers";
+
+/** Accept only known list tags. Anything else stays on the daily list. */
+export function parseEmailInterest(value: unknown): EmailInterest {
+  if (value === "membership" || value === "teachers" || value === "daily") return value;
+  return "daily";
+}
 
 export type SubscribeResult =
   | { ok: true; mode: "provider" | "logged" }
@@ -11,6 +17,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  *
  * EMAIL_PROVIDER and EMAIL_API_KEY, when both are set, take precedence.
  * Otherwise BUTTONDOWN_API_KEY sends the address to Buttondown.
+ * Both Buttondown paths send one tag: daily, membership, or teachers.
  * With no key at all, this logs the address and reports success so the form
  * works in local dev. See README.
  */
@@ -38,7 +45,7 @@ export async function subscribeEmail(emailRaw: string, interest: EmailInterest =
 
   if (buttondownKey) {
     try {
-      return await subscribeButtondown(email, buttondownKey);
+      return await subscribeButtondown(email, buttondownKey, interest);
     } catch (error) {
       console.error("[email] buttondown request failed", error);
       return { ok: false, error: "We couldn't add you just now. Please try again in a minute." };

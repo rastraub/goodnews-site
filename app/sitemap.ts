@@ -1,37 +1,105 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
+import { kidPlaces } from "@/lib/kids";
+import { getHubIndex } from "@/lib/hubs";
+import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
-import { siteConfig } from "@/site.config";
+
+const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
+  { path: "/", changeFrequency: "daily", priority: 1 },
+  { path: "/local", changeFrequency: "daily", priority: 0.8 },
+  { path: "/kids", changeFrequency: "daily", priority: 0.6 },
+  { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
+  { path: "/stories", changeFrequency: "daily", priority: 0.7 },
+  { path: "/about", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/editorial-standards", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/corrections", changeFrequency: "weekly", priority: 0.5 },
+  { path: "/contact", changeFrequency: "yearly", priority: 0.5 },
+  { path: "/submit", changeFrequency: "yearly", priority: 0.4 },
+  { path: "/subscribe", changeFrequency: "yearly", priority: 0.4 },
+  { path: "/help", changeFrequency: "weekly", priority: 0.4 },
+  { path: "/membership", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/partner", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.2 },
+];
+
+function bump(map: Map<string, string>, key: string | undefined, date: string) {
+  if (!key) return;
+  const current = map.get(key);
+  if (!current || date > current) map.set(key, date);
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const stories = getPublishedStories();
-  const latest = stories[0]?.date;
-  const staticPaths = ["", "/local", "/stories", "/about", "/submit", "/subscribe", "/search", "/help", "/membership", "/corrections", "/privacy", "/terms", "/contact", "/partner"];
+  const hubs = getHubIndex();
+  const latestState = new Map<string, string>();
+  const latestCategory = new Map<string, string>();
+  let siteLatest: string | undefined;
+  let worldLatest: string | undefined;
+
+  for (const story of stories) {
+    if (!siteLatest || story.date > siteLatest) siteLatest = story.date;
+    bump(latestCategory, story.category, story.date);
+    if (story.country !== "US") {
+      if (!worldLatest || story.date > worldLatest) worldLatest = story.date;
+    }
+    if (story.country === "US" && story.state) {
+      bump(latestState, story.state, story.date);
+      for (const extra of story.alsoStates) bump(latestState, extra, story.date);
+    }
+  }
+
   return [
-    ...staticPaths.map((path) => ({
-      url: `${siteConfig.url}${path || "/"}`,
-      lastModified: latest,
-      changeFrequency: "daily" as const,
-      priority: path === "" ? 1 : 0.6,
+    ...STATIC_PAGES.map((page) => ({
+      url: absoluteUrl(page.path),
+      lastModified: siteLatest,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
     })),
+    {
+      url: absoluteUrl("/world"),
+      ...(worldLatest ? { lastModified: worldLatest } : {}),
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    },
     ...CATEGORIES.map((category) => ({
-      url: `${siteConfig.url}/category/${category.slug}`,
-      lastModified: latest,
+      url: absoluteUrl(`/category/${category.slug}`),
+      lastModified: latestCategory.get(category.slug) ?? siteLatest,
       changeFrequency: "daily" as const,
       priority: 0.7,
     })),
     ...STATES.map((state) => ({
-      url: `${siteConfig.url}/state/${state.slug}`,
-      lastModified: latest,
+      url: absoluteUrl(`/state/${state.slug}`),
+      lastModified: latestState.get(state.code) ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    })),
+    ...hubs.countries.filter((country) => country.indexable).map((country) => ({
+      url: absoluteUrl(`/country/${country.slug}`),
+      lastModified: country.latest,
+      changeFrequency: "daily" as const,
+      priority: country.code === "US" ? 0.7 : 0.6,
+    })),
+    ...kidPlaces().map((place) => ({
+      url: absoluteUrl(place.path),
+      lastModified: place.latest,
       changeFrequency: "daily" as const,
       priority: 0.5,
     })),
+    ...[...hubs.stateCategories, ...hubs.cities, ...hubs.topics].map((hub) => ({
+      url: absoluteUrl(hub.path),
+      lastModified: hub.latest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    })),
     ...stories.map((story) => ({
-      url: `${siteConfig.url}/story/${story.slug}`,
+      url: absoluteUrl(`/story/${story.slug}`),
       lastModified: story.date,
-      changeFrequency: "weekly" as const,
+      changeFrequency: "monthly" as const,
       priority: 0.8,
+      images: [absoluteUrl(story.image)],
     })),
   ];
 }

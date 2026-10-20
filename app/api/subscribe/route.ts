@@ -1,4 +1,4 @@
-import { subscribeEmail, type EmailInterest } from "@/lib/email";
+import { parseEmailInterest, subscribeEmail } from "@/lib/email";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   if (typeof data.company === "string" && data.company.trim()) {
     return Response.json({ ok: true, mode: "logged" });
   }
-  const interest: EmailInterest = data.interest === "membership" ? "membership" : "daily";
+  const interest = parseEmailInterest(data.interest);
   const result = await subscribeEmail(typeof data.email === "string" ? data.email : "", interest);
   return Response.json(result, { status: result.ok ? 200 : 400 });
 }

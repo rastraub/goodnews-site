@@ -26,27 +26,32 @@ export function Footer() {
             <ul>
               <li><Link href="/">Today</Link></li>
               <li><Link href="/local">Local</Link></li>
+              <li><Link href="/world">World</Link></li>
+              <li><Link href="/kids">For classrooms</Link></li>
               {CATEGORIES.map((category) => (
                 <li key={category.slug}>
                   <Link href={`/category/${category.slug}`}>{category.label}</Link>
                 </li>
               ))}
               <li><Link href="/rss.xml">RSS</Link></li>
+              <li><Link href="/atom.xml">Atom</Link></li>
             </ul>
           </div>
           <div>
             <p className="flabel">Our promise</p>
             <ul>
-              <li><Link href="/about">How we verify</Link></li>
+              <li><Link href="/about">About</Link></li>
+              <li><Link href="/about#how-we-verify">How we verify</Link></li>
+              <li><Link href="/editorial-standards">Editorial standards</Link></li>
               <li><Link href="/about#no-politics">Our no-politics rule</Link></li>
               <li><Link href="/corrections">Corrections</Link></li>
-              <li><Link href="/about">About us</Link></li>
             </ul>
           </div>
           <div>
             <p className="flabel">Join in</p>
             <ul>
               <li><Link href="/subscribe">Daily Top 5 email</Link></li>
+              <li><Link href="/kids#teachers">Teacher email</Link></li>
               <li><Link href="/submit">Submit a story</Link></li>
               <li><Link href="/membership">Membership</Link></li>
               <li><Link href="/partner">Partner with us</Link></li>

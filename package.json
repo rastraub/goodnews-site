@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run validate-stories && next build",
+    "postbuild": "tsx scripts/indexnow.ts",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
