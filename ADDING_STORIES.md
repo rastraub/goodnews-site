@@ -176,8 +176,19 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
    - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
    - **For classrooms.** When a story is appropriate to read aloud with children about ages 6 to 12, set `kidFriendly: true` in that story's front matter, write `kidSummary` in about 60 to 110 plain words, and add two or three `kidQuestions`. Stay accurate to the source. Do not invent facts or quotes. Skip the flag for death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, and anything a teacher would hesitate to read to a class. Do not force one into the batch. Do not backfill classroom text into `data/story-enrichment.json`. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list. Do not add a child to any list, and do not add ads or anything else that identifies a child.
-6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
+6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML, and it rebuilds the Good News Index from those story files, including the open month. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
+
+## Good News Index
+
+The monthly index is built from published story files. Do not hand-edit ranks or totals.
+
+- The first edition is October 2026. A story dated before that month stays in the archive and is not an edition.
+- The open month is labeled month to date until the month is over. The updated-through date is the newest story date in that edition.
+- A United States story counts once in the national total, and it also counts in its state and in each `alsoStates` code. Adding the state rows can come out higher than the United States total.
+- Each edition is `/good-news-index/YYYY-MM`. The spreadsheet is `/good-news-index/YYYY-MM/index.csv`.
+- Stories per 1 million residents use the July 1, 2024 resident population in `lib/population.ts` (`NST-EST2024-POP`). Replacing that table changes every closed edition, so do it only on purpose.
+- The index counts stories this site published. It is not a measure of how good a state is.
 
 ## Health & Tech
 

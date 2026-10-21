@@ -11,6 +11,7 @@ import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { getHubIndex } from "@/lib/hubs";
+import { stateIndexLink } from "@/lib/good-news-index";
 import { kidStoriesInState } from "@/lib/kids";
 import { getByState, stateCounts } from "@/lib/stories";
 import { getStateBySlug, neighborStates, type StateInfo } from "@/lib/states";
@@ -59,6 +60,7 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
   const categoryHubs = new Map((stateHubs?.categories ?? []).map((hub) => [hub.categorySlug, hub]));
   const cityHubs = stateHubs?.cities ?? [];
   const neighbors = neighborStates(state.code);
+  const indexLink = stateIndexLink(state);
   const description = stateDescription(state.name);
   const cityPhrase = cities.length ? `, including ${formatList(cities)}` : "";
   const path = page <= 1 ? `/state/${state.slug}` : `/state/${state.slug}/page/${page}`;
@@ -93,6 +95,11 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
             ? `Good news from ${state.name}${cityPhrase}. ${stories.length} verified ${stories.length === 1 ? "story" : "stories"}, each one checked and linked to the original report.`
             : `Good news from ${state.name} will land here once a story is checked and published. If you know one, send it in.`}
         </p>
+        {indexLink ? (
+          <p className="link-pills">
+            <Link href={indexLink.href}>{indexLink.label}</Link>
+          </p>
+        ) : null}
         {categories.length ? (
           <p className="link-pills">
             {categories.map((category) => {

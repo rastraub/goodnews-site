@@ -387,7 +387,66 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .promise-card{padding:28px 22px}
   .promise-card h2{font-size:30px}
   .search-form{flex-direction:column}
+  .index-stats{grid-template-columns:1fr 1fr}
+  .index-split{grid-template-columns:1fr}
+  .index-stats dd{font-size:28px}
+  #methodology > h2,#cite > h2{font-size:29px}
 }
+
+.index-promo{margin-top:18px;font-size:15.5px;font-weight:650}
+.index-promo a{color:var(--blue-d);text-decoration:underline;text-underline-offset:3px}
+.index-updated{margin-top:10px;color:var(--ink2);font-size:15.5px}
+.index-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+.index-stats div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.index-stats dt{font-size:13px;color:var(--ink2);font-weight:650}
+.index-stats dd{font-family:var(--font-serif);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin-top:6px}
+.index-table-wrap{overflow-x:auto;margin-top:18px;border:1px solid var(--line);border-radius:18px;background:#fff}
+.index-table{width:100%;border-collapse:collapse;font-size:15px}
+.index-table caption{caption-side:top;text-align:left;padding:14px 16px 4px;color:var(--ink2);font-size:14px}
+.index-table th,.index-table td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:baseline}
+.index-table thead th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);background:#FFFBF4}
+.index-table th.num,.index-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.index-table tbody th{position:sticky;left:0;z-index:1;font-weight:650;background:#fff}
+.index-table tr[id]{scroll-margin-top:24px}
+.index-table a{text-decoration:underline;text-underline-offset:2px}
+.index-note{margin-top:12px;color:var(--ink2);font-size:14.5px;line-height:1.55}
+.index-note a{text-decoration:underline;text-underline-offset:2px}
+.index-rank{color:var(--ink2);font-weight:500}
+.index-map{margin:8px 0 4px}
+.index-map svg{width:100%;height:auto;overflow:visible}
+.index-map path,.index-map circle{stroke:#C4D7EA;stroke-width:1.2}
+.index-map path.band-0,.index-map circle.band-0{fill:#F6F1E8}
+.index-map path.band-1,.index-map circle.band-1{fill:#FFF1D2}
+.index-map path.band-2,.index-map circle.band-2{fill:#FFE3A3}
+.index-map path.band-3,.index-map circle.band-3{fill:#F3B23C}
+.index-map path.band-4,.index-map circle.band-4{fill:#C98612}
+.index-map a.state-link{cursor:pointer}
+.index-map a.state-link:focus-visible path,.index-map a.state-link:focus-visible circle,.index-map a.state-link:hover path,.index-map a.state-link:hover circle{stroke:var(--blue-d);stroke-width:2.4}
+.index-map figcaption{color:var(--ink2);font-size:14.5px;margin-top:8px}
+.index-legend{display:flex;flex-wrap:wrap;gap:10px 18px;list-style:none;margin:0 0 8px;padding:0}
+.index-legend li{display:flex;align-items:center;gap:8px}
+.index-legend .swatch{width:16px;height:16px;border-radius:4px;border:1px solid #E4D8C4;display:block}
+.index-legend .swatch.band-0{background:#F6F1E8}
+.index-legend .swatch.band-1{background:#FFF1D2}
+.index-legend .swatch.band-2{background:#FFE3A3}
+.index-legend .swatch.band-3{background:#F3B23C}
+.index-legend .swatch.band-4{background:#C98612}
+.index-split{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+.index-bars{list-style:none;display:grid;gap:12px;margin:0;padding:0}
+.index-bar-label{display:flex;justify-content:space-between;gap:12px;font-weight:650;font-size:15px}
+.index-bar-label a{text-decoration:underline;text-underline-offset:2px}
+.index-bar{height:8px;background:#F6F1E8;border-radius:999px;overflow:hidden;margin-top:6px}
+.index-bar span{display:block;height:100%;background:var(--gold);border-radius:999px}
+.index-rank-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.index-rank-list li{display:flex;justify-content:space-between;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:650}
+.index-rank-list a{text-decoration:underline;text-underline-offset:2px}
+.index-method h3{font-family:var(--font-serif);font-size:24px;font-weight:600;margin:22px 0 8px}
+.index-method p{color:var(--ink2);font-size:16.5px;line-height:1.65}
+.index-method a{text-decoration:underline;text-underline-offset:2px}
+#methodology > h2,#cite > h2{font-family:var(--font-serif);font-weight:600;font-size:38px;letter-spacing:-.02em;line-height:1.1;margin-bottom:12px}
+.cite-box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:16px;padding:16px 18px;margin:0}
+.cite-box p{font-size:16.5px;line-height:1.6}
+.cite-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 
 .classroom-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin-top:28px}
 .classroom-box h2{font-family:var(--font-serif);font-size:28px;margin:0 0 10px;font-weight:600}

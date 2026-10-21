@@ -5,6 +5,7 @@ import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
+import { indexesToPrerender } from "@/lib/good-news-index";
 import { weeksToPrerender } from "@/lib/weeks";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
@@ -56,6 +57,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const weeks = weeksToPrerender();
   const newestWeek = weeks[weeks.length - 1];
+  const indexes = indexesToPrerender();
+  const newestIndex = indexes[indexes.length - 1];
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -84,6 +87,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: week.latest,
         changeFrequency: (week.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: week.inProgress ? 0.7 : 0.6,
+      })),
+    {
+      url: absoluteUrl("/good-news-index"),
+      lastModified: newestIndex?.latest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    },
+    ...indexes
+      .slice()
+      .reverse()
+      .map((edition) => ({
+        url: absoluteUrl(edition.path),
+        lastModified: edition.latest,
+        changeFrequency: (edition.inProgress ? "daily" : "monthly") as "daily" | "monthly",
+        priority: edition.inProgress ? 0.7 : 0.6,
       })),
     ...CATEGORIES.map((category) => ({
       url: absoluteUrl(`/category/${category.slug}`),
