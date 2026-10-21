@@ -27,6 +27,10 @@ import { getPublishedStories, loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
+import sitemap from "../app/sitemap";
+import { BADGE_VARIANTS, badgeSvg } from "../lib/badges";
+import { badgeEmbedHtml, embedDocumentForSlug, embedScriptSource, iframeSnippet, renderEmbedDocument, storyShareLines } from "../lib/partner-kit";
+import { absoluteUrl } from "../lib/seo";
 import { siteConfig, socialLinks } from "../site.config";
 
 const REQUIRED_SOURCES = [
@@ -656,6 +660,65 @@ function decodeXml(value: string) {
   return value.replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", '"');
 }
 
+function assertPartnerKit() {
+  for (const variant of BADGE_VARIANTS) {
+    const svg = badgeSvg(variant);
+    if (!svg.includes(siteConfig.name)) throw new Error(`Badge ${variant.id} is missing the site name.`);
+    if (svg.includes("<script")) throw new Error(`Badge ${variant.id} should not contain a script.`);
+  }
+
+  const embed = badgeEmbedHtml({
+    variant: BADGE_VARIANTS[0],
+    href: "/story/example",
+    format: "svg",
+  });
+  if (!embed.includes(`${siteConfig.url}/story/example`)) throw new Error("Badge embed should link to the story.");
+  if (!embed.includes("/brand/featured/light-horizontal.svg")) throw new Error("Badge embed should use the SVG file.");
+  if (embed.includes("<script")) throw new Error("Badge embed should be an image link, not a script.");
+
+  const nasty = renderEmbedDocument({
+    heading: "More & <good>",
+    moreHref: `${siteConfig.url}/state/colorado`,
+    moreLabel: "All stories",
+    items: [{ href: `${siteConfig.url}/story/a`, title: `<script>alert("x")</script>`, meta: "Denver & Co." }],
+  });
+  if (nasty.includes("<script>") || nasty.includes("<good>")) throw new Error("Widget HTML should escape titles.");
+  if (!nasty.includes("noindex")) throw new Error("Widget pages should be noindex.");
+
+  const iframe = iframeSnippet({ place: "latest", title: "News & <views>" });
+  if (!iframe.includes("&amp;") || iframe.includes("<views>")) throw new Error("Iframe snippet should escape the title.");
+  if (!iframe.startsWith("<iframe ") || !iframe.includes("title=")) throw new Error("Iframe snippet should be an iframe with a title.");
+
+  const js = embedScriptSource();
+  if (!js.includes(siteConfig.url)) throw new Error("Embed script should point at this site.");
+  if (/\b(cookie|gtag|analytics|fetch\s*\(|XMLHttpRequest|localStorage)\b/i.test(js)) {
+    throw new Error("Embed script should not track, store data, or call the network.");
+  }
+
+  const story = getPublishedStories()[0];
+  if (story) {
+    for (const line of storyShareLines(story)) {
+      const mentions = line.text.match(/@[A-Za-z0-9_]+/g) ?? [];
+      for (const mention of mentions) {
+        if (mention.slice(1) !== siteConfig.social.x) {
+          throw new Error(`Share text mentions ${mention}, which is not a confirmed account.`);
+        }
+      }
+      if (!line.text.includes(`/story/${story.slug}`)) throw new Error("Story share text should include the story URL.");
+    }
+    const widget = embedDocumentForSlug("latest");
+    if (!widget || !widget.includes("/story/")) throw new Error("Latest widget should link to stories.");
+    const stateWidget = embedDocumentForSlug("colorado");
+    if (!stateWidget || !stateWidget.includes("/state/colorado")) throw new Error("State widget should link to the state page.");
+  }
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl("/featured"))) throw new Error("Sitemap should include /featured.");
+  if (!urls.includes(absoluteUrl("/widgets"))) throw new Error("Sitemap should include /widgets.");
+  if (urls.some((url) => url.includes("/featured/"))) throw new Error("Sitemap should not include per-story kits.");
+  if (urls.some((url) => url.includes("/embed"))) throw new Error("Sitemap should not include embed widgets.");
+}
+
 function assertFeeds() {
   const links = socialLinks();
   const expected = `https://x.com/${siteConfig.social.x}`;
@@ -714,6 +777,7 @@ assertTipMail();
 assertOnlyMailbox();
 assertBrandLivesInOneFile();
 assertFeeds();
+assertPartnerKit();
 const published = stories.filter((story) => !story.draft);
 const images = feedImageReport(published.map((story) => story.image));
 console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);

@@ -3,10 +3,33 @@ import { COUNTRIES } from "./lib/countries";
 import { FEED_CACHE_CONTROL, IMAGE_CACHE_CONTROL, NEWS_SITEMAP_CACHE_CONTROL } from "./lib/http-cache";
 import { STATES } from "./lib/states";
 
-const securityHeaders = [
+const documentSecurity = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
+/**
+ * Headline widgets are framed on other sites. X-Frame-Options has no "allow"
+ * value, so those routes omit it and send frame-ancestors instead.
+ * The page itself is a static HTML document: no scripts, images, or connections.
+ */
+const embedSecurity = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  {
+    key: "Content-Security-Policy",
+    value:
+      "default-src 'none'; style-src 'unsafe-inline'; img-src 'none'; font-src 'none'; script-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors *",
+  },
+  { key: "X-Robots-Tag", value: "noindex, follow" },
+];
+
+const embedScriptSecurity = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
@@ -57,13 +80,24 @@ const nextConfig: NextConfig = {
       cached("/sitemap.xml", FEED_CACHE_CONTROL),
       cached("/robots.txt", FEED_CACHE_CONTROL),
       cached("/news-sitemap.xml", NEWS_SITEMAP_CACHE_CONTROL),
+      cached("/embed/:path*", FEED_CACHE_CONTROL),
+      cached("/embed.js", FEED_CACHE_CONTROL),
       cached("/publisher-logo.png", IMAGE_CACHE_CONTROL),
       cached("/icon", IMAGE_CACHE_CONTROL),
       cached("/apple-icon", IMAGE_CACHE_CONTROL),
       cached("/opengraph-image", IMAGE_CACHE_CONTROL),
       {
-        source: "/:path*",
-        headers: securityHeaders,
+        // Paths whose first segment starts with "embed" are framed widgets, not site pages.
+        source: "/((?!embed).*)",
+        headers: documentSecurity,
+      },
+      {
+        source: "/embed/:path*",
+        headers: embedSecurity,
+      },
+      {
+        source: "/embed.js",
+        headers: embedScriptSecurity,
       },
     ];
   },

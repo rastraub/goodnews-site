@@ -101,6 +101,12 @@ Sitemaps and feeds:
 - `https://www.tazzora.com/country/japan/rss.xml` (same pattern for every country slug; not listed on `/feeds`)
 - `https://www.tazzora.com/feeds` (copy links, plus Feedly and Inoreader, for the feeds above except country feeds)
 
+For a newsroom, nonprofit, school, or reporter named in a story:
+
+- `https://www.tazzora.com/featured` is the badge, the embed code, and suggested share text.
+- `https://www.tazzora.com/featured/{story-slug}` fills that kit in for one story. Those pages are noindex and are not in the sitemap.
+- `https://www.tazzora.com/widgets` has a headline widget for each state and a latest widget. `/embed/latest` and `/embed/{state-slug}` are the frames. They do not use cookies.
+
 English stays at the site root. `lib/i18n.ts` is the hreflang list for a future translated edition. Adding a locale there, with a path prefix such as `/es`, is the extension point. Current URLs do not move.
 
 State-and-category pages (`/state/colorado/animals`), city pages, and topic pages are added to the sitemap only after at least three stories support them. Country pages with fewer stories stay on `/world` and are left out of the sitemap.
