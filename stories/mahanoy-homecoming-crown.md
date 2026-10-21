@@ -14,7 +14,7 @@ tags:
   - schools
 sourceName: "6abc Philadelphia"
 sourceUrl: "https://6abc.com/post/pennsylvania-teen-gives-homecoming-crown-classmate-down-syndrome/19961405/"
-image: "/images/stories/mahanoy-homecoming-crown.webp"
+image: "/images/stories/mahanoy-homecoming-crown-v2.webp"
 imageAlt: "Students in red and white cheering at a pep rally, seen mostly from behind"
 imageCaption: "Illustrative photo of a pep rally crowd. This is not Mahanoy Area, and these are not the students in the story."
 imageCredit: "Daniel Hartwig / Wikimedia Commons"

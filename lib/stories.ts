@@ -6,6 +6,7 @@ import { getCategory } from "./categories";
 import { readingMinutes } from "./format";
 import { STATIC_STORY_CAP } from "./paging";
 import { applyEnrichment, loadEnrichment } from "./enrichment";
+import { storyThumbPath } from "./images";
 import { storySchema, type StoryFrontmatter } from "./story-schema";
 
 export type Story = StoryFrontmatter & {
@@ -67,12 +68,13 @@ export function loadAllStories(): Story[] {
       errors.push(`${file}: unknown category ${data.category}`);
     }
     const imageFile = path.join(process.cwd(), "public", data.image.replace(/^\//, ""));
-    const thumbFile = imageFile.replace(/\.webp$/, "-sm.webp");
+    const thumbPublic = storyThumbPath(data.image);
+    const thumbFile = path.join(process.cwd(), "public", thumbPublic.replace(/^\//, ""));
     if (!fs.existsSync(imageFile)) {
       errors.push(`${file}: image not found at public${data.image}`);
     }
     if (!data.image.endsWith(".webp") || !fs.existsSync(thumbFile)) {
-      errors.push(`${file}: add a 360px WebP thumbnail at public${data.image.replace(/\.webp$/, "-sm.webp")}`);
+      errors.push(`${file}: add a 360px WebP thumbnail at public${thumbPublic}`);
     }
     if (data.top5) {
       const previous = top5.get(data.top5);

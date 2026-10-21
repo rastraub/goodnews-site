@@ -4,7 +4,10 @@
  * Photos, feeds, and sitemaps can sit longer because a new deploy replaces the CDN copy.
  */
 
-/** Story photos keep a stable URL. A month skips repeat downloads; a replaced file shows up after that. */
+/**
+ * Story photos stay cached for 30 days at whatever URL was published.
+ * A replacement has to use a new filename (`slug-v2.webp`). Overwriting the file leaves readers on the old photo.
+ */
 export const IMAGE_CACHE_CONTROL = "public, max-age=2592000, stale-while-revalidate=31536000";
 
 /** Feeds update when the morning job deploys. Browsers may hold a copy for an hour. */

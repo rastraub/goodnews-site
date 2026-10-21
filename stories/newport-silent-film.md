@@ -12,7 +12,7 @@ tags:
   - students
 sourceName: "WMUR"
 sourceUrl: "https://www.wmur.com/article/lost-silent-film-found-japan-new-hampshire/74196858"
-image: "/images/stories/newport-silent-film.webp"
+image: "/images/stories/newport-silent-film-v2.webp"
 imageAlt: "People seated in a dark room watching a movie on a large screen"
 imageCaption: "Illustrative photo of an audience watching a film. This is not the Newport screening of Van-ar-chy."
 imageCredit: "Arturo Chavez, U.S. Navy / Wikimedia Commons"

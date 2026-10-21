@@ -14,7 +14,7 @@ tags:
   - students
 sourceName: "Sarawak Daily"
 sourceUrl: "https://sarawakdaily.com/sabal-forest-reserve-tree-planting-700-saplings/"
-image: "/images/stories/serian-sabal-trees.webp"
+image: "/images/stories/serian-sabal-trees-v2.webp"
 imageAlt: "Hands pressing soil around a newly planted pine seedling"
 imageCaption: "Illustrative photo of a seedling being planted. These are not the meranti saplings at Sabal."
 imageCredit: "U.S. Forest Service / Wikimedia Commons"

@@ -4,6 +4,7 @@ import { parseEmailInterest } from "../lib/email";
 import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
 import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
 import { feedImageReport } from "../lib/feed-image";
+import { largeJpegPath, storyThumbPath } from "../lib/images";
 import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
@@ -699,7 +700,21 @@ function assertFeeds() {
   }
 }
 
+function assertImageVariants() {
+  const versioned = "/images/stories/pony-v2.webp";
+  if (storyThumbPath(versioned) !== "/images/stories/pony-v2-sm.webp") {
+    throw new Error("Thumbnail path dropped the version stem.");
+  }
+  if (largeJpegPath(versioned) !== "/images/stories/pony-v2-1600.jpg") {
+    throw new Error("Large JPEG path dropped the version stem.");
+  }
+  if (storyThumbPath("/images/stories/pony.webp") !== "/images/stories/pony-sm.webp") {
+    throw new Error("Unversioned thumbnail path changed.");
+  }
+}
+
 const stories = loadAllStories();
+assertImageVariants();
 assertSchemaRejectsGarbage();
 assertCountryRules();
 assertWorldSpotlight();

@@ -75,7 +75,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `tags` | yes on a new story | Two to five labels from `lib/tags.ts`, such as `animal-rescue` or `school-lunch`. A topic page is created only after at least three stories share that tag. Validation rejects a tag that is not in the vocabulary, and it rejects a list that is not two to five labels. Omitting `tags` entirely still builds, so a file that lands on `main` before it is tagged does not take the site down. Do not rely on that. Set the tags. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
-| `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. A `pony-1600.jpg` is optional. See Photos. |
+| `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. A `pony-1600.jpg` is optional. When you replace a photo, use a new name such as `pony-v2.webp`. See Photos. |
 | `imageAlt` | yes | Describe the actual photo. |
 | `imageCaption` | yes | Shown under the photo. Say when it is not the real subject. |
 | `imageCredit` | yes | Photographer and source. |
@@ -149,7 +149,11 @@ About one in four stories in a daily batch should come from outside the United S
 
 ## Photos
 
-Store images in `public/images/stories/` as WebP. Each story needs the full photo (`pony.webp`, about 840px wide) and a thumbnail (`pony-sm.webp`, about 360px wide). Do not upscale a smaller photo to invent the larger size. Listing pages are paginated and cards use the thumbnail through `srcSet`, so a large archive does not request every full photo at once. Use photos you have the right to use, credit them, and do not present a stranger's face as the person in the story. A caption should say when a photo is illustrative.
+Store images in `public/images/stories/` as WebP. Each story needs the full photo (`pony.webp`, about 840px wide) and a thumbnail (`pony-sm.webp`, about 360px wide). Do not upscale a smaller photo to invent the larger size.
+
+Browsers and the CDN keep `/images` for 30 days, so overwriting `pony.webp` does not change what readers see. A replacement gets the next version in the filename: `pony-v2.webp`, `pony-v2-sm.webp`, and `pony-v2-1600.jpg`. Set `image` to the new WebP. The thumbnail and the large JPEG are that same path with `.webp` swapped for `-sm.webp` and `-1600.jpg`, which means the version stays in the stem, ahead of the extension. The one after that is `pony-v3`. Do not reuse the old filename.
+
+Listing pages are paginated and cards use the thumbnail through `srcSet`, so a large archive does not request every full photo at once. Use photos you have the right to use, credit them, and do not present a stranger's face as the person in the story. A caption should say when a photo is illustrative.
 
 The photo has to evoke the story's emotion and its subject. Prefer people, animals, or action. Do not use a generic empty building, an empty gym, an empty classroom, an empty pool, a vacant playground, a vacant street, or a plain exterior for a story about a person, an animal, or something that happened. Prefer a relevant scene over a literal picture of the town, the campus, or the building where it took place. A pep rally should look like a crowd celebrating, not an empty gym in another state. A swim lesson should show people in the water, not a pool under construction. A mural should show the art or someone painting, not a highway. A trail story should show a hiker or the woods, not a sign by itself. Skip product shots on a white background, parked vehicles with nobody in them, and generic signage. If the photo is not the actual scene, the caption has to include the words "Illustrative photo". Do not use a copyrighted news photo of the real people, and do not use a photo with an identifiable child's face.
 
