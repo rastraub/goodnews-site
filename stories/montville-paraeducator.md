@@ -14,7 +14,7 @@ tags:
   - kids
 sourceName: "NBC Connecticut"
 sourceUrl: "https://www.nbcconnecticut.com/news/local/montville-middle-school-paraeducator-named-paraeducator-of-the-year/3786615/"
-image: "/images/stories/montville-paraeducator.webp"
+image: "/images/stories/montville-paraeducator-v2.webp"
 imageAlt: "A teacher speaking to students seated at desks, seen mostly from behind"
 imageCaption: "Illustrative photo of a teacher with a class. This is not Lisa Atkinson, and these are not her students."
 imageCredit: "U.S. Fish and Wildlife Service Southeast Region / Wikimedia Commons"

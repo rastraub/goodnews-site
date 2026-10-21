@@ -14,7 +14,7 @@ tags:
   - wildlife-conservation
 sourceName: "The Korea Herald"
 sourceUrl: "https://www.koreaherald.com/article/10890636"
-image: "/images/stories/seongju-forest-sounds.webp"
+image: "/images/stories/seongju-forest-sounds-v2.webp"
 imageAlt: "A hiker seen from behind walking along a fallen log in a forest"
 imageCaption: "Illustrative photo of a walk in the woods. This is not the Gayasan listening trail."
 imageCredit: "Jon Flobrant / Wikimedia Commons"

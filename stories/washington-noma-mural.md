@@ -12,7 +12,7 @@ tags:
   - students
 sourceName: "University of the District of Columbia"
 sourceUrl: "https://www.udc.edu/news/2026/10/students-turn-classroom-idea-into-mural-that-invites-noma-to-explore-its-past"
-image: "/images/stories/washington-noma-mural.webp"
+image: "/images/stories/washington-noma-mural-v2.webp"
 imageAlt: "An artist on a ladder painting a large outdoor mural"
 imageCaption: "Illustrative photo of an artist painting a mural. This is not the NoMa mural, and the UDC students are not pictured."
 imageCredit: "John H. White, U.S. National Archives / Wikimedia Commons"

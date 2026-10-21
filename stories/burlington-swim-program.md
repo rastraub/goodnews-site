@@ -13,7 +13,7 @@ tags:
   - youth-sports
 sourceName: "WCAX"
 sourceUrl: "https://www.wcax.com/2026/10/20/burlington-elementary-students-learn-swim-through-first-of-its-kind-program/"
-image: "/images/stories/burlington-swim-program.webp"
+image: "/images/stories/burlington-swim-program-v2.webp"
 imageAlt: "A swim instructor in the water with learners seen from behind during an indoor lesson"
 imageCaption: "Illustrative photo of a swim lesson. This is not the Burlington YMCA, and these are not the fourth graders in the story."
 imageCredit: "Tulane Public Relations / Wikimedia Commons"

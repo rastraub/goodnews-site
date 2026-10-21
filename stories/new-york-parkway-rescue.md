@@ -13,7 +13,7 @@ tags:
   - kindness
 sourceName: "CBS New York"
 sourceUrl: "https://www.cbsnews.com/newyork/news/good-samaritan-nypd-officers-reunite-after-henry-hudson-parkway-fiery-crash/"
-image: "/images/stories/new-york-parkway-rescue.webp"
+image: "/images/stories/new-york-parkway-rescue-v2.webp"
 imageAlt: "Firefighters standing with a fire engine outside the station"
 imageCaption: "Illustrative photo of firefighters with their engine. This is not the Henry Hudson Parkway rescue, and the people in the story are not pictured."
 imageCredit: "Hanyou23 / Wikimedia Commons"
