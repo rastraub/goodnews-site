@@ -22,7 +22,6 @@ howToHelp:
     url: "https://www.sif.sc/"
     kind: learn
 featured: false
-worldPick: true
 cheers: 0
 draft: false
 editorApproved: true
