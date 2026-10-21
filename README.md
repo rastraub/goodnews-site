@@ -91,6 +91,7 @@ Sitemaps and feeds:
 
 - `https://www.tazzora.com/sitemap.xml`
 - `https://www.tazzora.com/news-sitemap.xml` (stories from the last 48 hours)
+- `https://www.tazzora.com/good-news-index` (monthly editions; each month also has `/good-news-index/YYYY-MM/index.csv`)
 - `https://www.tazzora.com/rss.xml`
 - `https://www.tazzora.com/atom.xml`
 - `https://www.tazzora.com/smartnews.xml` (SmartNews only; the other feeds do not use the SmartNews namespace)
@@ -106,6 +107,14 @@ English stays at the site root. `lib/i18n.ts` is the hreflang list for a future 
 State-and-category pages (`/state/colorado/animals`), city pages, and topic pages are added to the sitemap only after at least three stories support them. Country pages with fewer stories stay on `/world` and are left out of the sitemap.
 
 The project is the App Router. No extra Vercel config file is required. Do not add `middleware.ts`: it runs on every request. Story photos stay as plain images (`images.unoptimized`) because they are already sized WebP files. Pages, feeds, and sitemaps are static build output with long cache headers; the only functions are the forms (`/api/subscribe`, `/api/submit`, `/api/cheer`) and a search query.
+
+## Good News Index
+
+`/good-news-index` is the archive of monthly editions, starting with October 2026. `/good-news-index/YYYY-MM` is that month, generated at build time from published story files. A later month appears on the next build once it has a published story. Do not hand-edit ranks or totals.
+
+The open month is marked month to date and shows the newest story date in the edition. Counts are stories Tazzora published: by state (and per 1 million residents), category, topic, classroom flag, How to help link, and country. The population denominator is the July 1, 2024 U.S. Census resident estimate in `lib/population.ts` (`NST-EST2024-POP`). The index is not a measure of how good a state is.
+
+A production deploy pings IndexNow for the landing page and each edition, the same way it pings weekly roundups. The news sitemap stays stories from the last 48 hours. The index is a dataset page, so it is in `sitemap.xml` and not in `news-sitemap.xml`.
 
 ## What's left
 
