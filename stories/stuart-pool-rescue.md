@@ -21,7 +21,7 @@ howToHelp:
   - label: "American Heart Association"
     url: "https://www.heart.org/"
     kind: learn
-featured: true
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

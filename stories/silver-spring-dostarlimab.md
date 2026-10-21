@@ -21,7 +21,6 @@ howToHelp:
     url: "https://www.cancer.gov/types/colorectal"
     kind: learn
 featured: false
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true

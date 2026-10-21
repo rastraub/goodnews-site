@@ -21,7 +21,6 @@ howToHelp:
     url: "https://www.ramusa.org/"
     kind: volunteer
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
