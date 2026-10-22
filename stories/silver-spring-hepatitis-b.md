@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.niddk.nih.gov/health-information/liver-disease/viral-hepatitis/hepatitis-b"
     kind: learn
 featured: false
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true
