@@ -5,6 +5,7 @@ import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
+import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { weeksToPrerender } from "@/lib/weeks";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
@@ -56,6 +57,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const weeks = weeksToPrerender();
   const newestWeek = weeks[weeks.length - 1];
+  const thanks = thanksBoard(stories);
+  const thanksLatest = thanks.slots.reduce<string | undefined>((latest, slot) => {
+    const date = slot.story?.date;
+    if (!date) return latest;
+    return !latest || date > latest ? date : latest;
+  }, undefined);
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -75,6 +82,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: newestWeek?.latest ?? siteLatest,
       changeFrequency: "daily" as const,
       priority: 0.7,
+    },
+    {
+      url: absoluteUrl(THANKS_PATH),
+      lastModified: thanksLatest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
     },
     ...weeks
       .slice()

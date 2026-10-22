@@ -6,6 +6,7 @@ import { StoryCard } from "@/components/story-card";
 import { toCard } from "@/lib/present";
 import { STORY_PAGE_SIZE } from "@/lib/paging";
 import { getPublishedStories, stateCounts } from "@/lib/stories";
+import { THANKS_PATH } from "@/lib/thanks";
 import { getStateByCode, stateName, STATES } from "@/lib/states";
 
 export const metadata: Metadata = {
@@ -32,7 +33,13 @@ export default function LocalPage() {
           <div className="shead">
             <div>
               <h2>All 50 states</h2>
-              <p>Plus Washington, D.C. States with a gold count have a story up right now.</p>
+              <p>
+                Plus Washington, D.C. States with a gold count have a story up right now.{" "}
+                <Link href={THANKS_PATH} style={{ color: "var(--blue-d)", fontWeight: 700 }}>
+                  50 States of Thanks
+                </Link>{" "}
+                gathers one gratitude story from each.
+              </p>
             </div>
           </div>
           <div className="state-index">

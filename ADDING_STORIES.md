@@ -182,6 +182,29 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **For classrooms.** When a story is appropriate to read aloud with children about ages 6 to 12, set `kidFriendly: true` in that story's front matter, write `kidSummary` in about 60 to 110 plain words, and add two or three `kidQuestions`. Stay accurate to the source. Do not invent facts or quotes. Skip the flag for death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, and anything a teacher would hesitate to read to a class. Do not force one into the batch. Do not backfill classroom text into `data/story-enrichment.json`. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list. Do not add a child to any list, and do not add ads or anything else that identifies a child.
 6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
+8. While the Thanksgiving hub is open, run `npm run thanks-gaps` and aim a real kindness or gratitude story at a state that is still missing. Do not force a weak story just to close a gap. See 50 States of Thanks below.
+
+## 50 States of Thanks
+
+`/50-states-of-thanks` is the Thanksgiving hub for 2026. It picks one published United States story for each state and Washington, D.C. The pick prefers gratitude, kindness, neighbors, giving back, community, veterans, and thank-you moments, and it prefers a recent people-centered story when two of them fit. A state with nothing that fits shows a link to `/submit` instead of an empty card. The page is rebuilt with the rest of the site, so a morning batch fills a gap on the next deploy. It is in the sitemap and in the IndexNow ping.
+
+Editors can pin a story in `data/thanks-overrides.json`. Leave the file as `{}` to keep the automatic picks. A pin is the story slug. The story has to be published and filed in that state (`state` or `alsoStates`):
+
+```json
+{
+  "DE": "dover-veterans-home"
+}
+```
+
+A bad code, or a slug that is not filed in that state, fails `npm run validate-stories` and the build.
+
+The homepage banner runs from November 1 through November 30, 2026. The date is America/Denver, the same clock as the morning edition. It is a single line so the Story of the Day headline stays put. Set `thanksSeason.banner` to `false` in `lib/thanks.ts` to hide the banner sooner. The footer link and the link on `/local` stay, so the page is still easy to find after the banner comes down.
+
+To see which states are still open:
+
+```bash
+npm run thanks-gaps
+```
 
 ## Health & Tech
 
