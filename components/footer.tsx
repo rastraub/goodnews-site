@@ -49,6 +49,7 @@ export function Footer() {
               <li><Link href="/about">About</Link></li>
               <li><Link href="/about#how-we-verify">How we verify</Link></li>
               <li><Link href="/editorial-standards">Editorial standards</Link></li>
+              <li><Link href="/sources">Newsrooms we credit</Link></li>
               <li><Link href="/about#no-politics">Our no-politics rule</Link></li>
               <li><Link href="/corrections">Corrections</Link></li>
             </ul>
