@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.foodbanklarimer.org/"
     kind: donate
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
