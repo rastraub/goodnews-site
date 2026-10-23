@@ -3,6 +3,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { kidPlaces } from "@/lib/kids";
 import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
+import { getOutlets } from "@/lib/outlets";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { weeksToPrerender } from "@/lib/weeks";
@@ -13,6 +14,7 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
+  { path: "/sources", changeFrequency: "daily", priority: 0.6 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
   { path: "/editorial-standards", changeFrequency: "monthly", priority: 0.6 },
@@ -115,6 +117,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.6,
     })),
+    ...getOutlets().flatMap((outlet) => {
+      if (!outlet.pagePath) return [];
+      return [
+        {
+          url: absoluteUrl(outlet.pagePath),
+          lastModified: outlet.latest,
+          changeFrequency: "weekly" as const,
+          priority: 0.5,
+        },
+      ];
+    }),
     ...stories.map((story) => ({
       url: absoluteUrl(`/story/${story.slug}`),
       lastModified: story.date,
