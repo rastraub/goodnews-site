@@ -7,7 +7,7 @@ import { hreflangAlternates } from "./i18n";
 import { pageCount, pagePath } from "./paging";
 import { getStateByCode } from "./states";
 import { compareStories, getPublishedStories, type Story } from "./stories";
-import { siteConfig, socialLinks } from "@/site.config";
+import { ownerPlace, siteConfig, socialLinks } from "@/site.config";
 
 /** About 3:00 a.m. Mountain Daylight Time, when the morning edition goes out. */
 export function publishedIso(date: string): string {
@@ -148,6 +148,28 @@ export function listingMeta(options: {
 
 type Crumb = { name: string; path: string };
 
+function ownerAddress() {
+  const place = ownerPlace();
+  if (!place) return undefined;
+  return {
+    "@type": "PostalAddress" as const,
+    addressLocality: place.city,
+    addressRegion: place.state,
+  };
+}
+
+/** SBBnet, Inc. News apps read this as the publication's parent organization. */
+function ownerOrganization(withId: boolean) {
+  const address = ownerAddress();
+  return {
+    "@type": "Organization" as const,
+    ...(withId ? { "@id": `${siteConfig.url}/#owner` } : {}),
+    name: siteConfig.owner.name,
+    email: siteConfig.contactEmail,
+    ...(address ? { address } : {}),
+  };
+}
+
 function breadcrumbNode(crumbs: Crumb[]) {
   return {
     "@type": "BreadcrumbList",
@@ -186,6 +208,7 @@ export function siteGraphJsonLd() {
           },
         ],
         sameAs: socialLinks().map((social) => social.href),
+        parentOrganization: { "@id": `${siteConfig.url}/#owner` },
         publishingPrinciples: absoluteUrl("/editorial-standards"),
         correctionsPolicy: absoluteUrl("/corrections"),
         actionableFeedbackPolicy: absoluteUrl("/contact"),
@@ -198,6 +221,7 @@ export function siteGraphJsonLd() {
           url: absoluteUrl("/contact"),
         },
       },
+      ownerOrganization(true),
       {
         "@type": "Organization",
         "@id": `${siteConfig.url}/#editorial-team`,
@@ -283,12 +307,14 @@ export function storyJsonLd(story: Story) {
           "@type": "NewsMediaOrganization",
           name: siteConfig.name,
           url: siteConfig.url,
+          email: siteConfig.contactEmail,
           logo: {
             "@type": "ImageObject",
             url: absoluteUrl(PUBLISHER_LOGO.path),
             width: PUBLISHER_LOGO.width,
             height: PUBLISHER_LOGO.height,
           },
+          parentOrganization: ownerOrganization(false),
         },
         mainEntityOfPage: { "@type": "WebPage", "@id": url },
         url,
