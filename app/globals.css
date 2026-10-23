@@ -402,10 +402,46 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .teacher-note{color:var(--muted);font-size:14.5px;margin:0 0 8px}
 .print-source{font-size:14.5px;color:var(--ink2)}
 .print-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:22px}
+.home-pack-link{margin:14px 0 0;font-size:14px;font-weight:600}
+.home-pack-link a{color:var(--blue-d)}
+.pack h3{font-family:var(--font-serif);font-size:22px;margin:18px 0 6px;font-weight:600}
+.pack-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 8px;padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:18px}
+.pack-actions .btn-ink{height:52px;padding:0 26px;font-size:17px}
+.pack-actions .hint{flex-basis:100%;margin:0;color:var(--muted);font-size:13.5px}
+.pack-teacher,.pack-challenge{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin-top:22px}
+.pack-teacher h2,.pack-challenge h2,.pack-contents h2{font-family:var(--font-serif);font-size:28px;margin:0 0 8px;font-weight:600}
+.pack-teacher p,.pack-challenge p{font-size:17px;line-height:1.6}
+.pack-contents{margin-top:22px}
+.pack-story{margin-top:36px;padding-top:8px;border-top:1px solid var(--line)}
+.where{display:flex;align-items:flex-start;gap:8px;font-weight:600;margin:8px 0}
+.where .ico{width:18px;height:18px;flex:none;margin-top:3px;color:var(--ink)}
+.where-inline{color:var(--ink2);font-weight:500}
+.vocab{margin:8px 0 16px}
+.vocab p{font-size:18px;line-height:1.5}
+.pack .caption{margin-top:8px}
+@page {
+  size: auto;
+  margin: 0.6in;
+}
 @media print {
   .strip, header.nav, .catbar, .menu-panel, footer, .skip, .no-print { display: none !important; }
-  body { background: #fff; }
+  html, body { background: #fff !important; color: #000 !important; }
+  .page-block, .page-hero { padding: 0 !important; }
+  .wrap { padding: 0 !important; max-width: none; }
   .print-sheet { max-width: none; }
-  .print-sheet h1 { font-size: 28pt; }
-  .print-source a[href]::after { content: " (" attr(href) ")"; font-weight: 400; }
+  .print-sheet h1, .pack h1 { font-size: 22pt; color: #000; margin: 0 0 8pt; }
+  .pack, .pack p, .pack li, .pack h2, .pack h3, .kicker, .lede, .byline, .teacher-note, .read-aloud, .caption, .where, .where-inline { color: #000 !important; }
+  .pack h2 { font-size: 16pt; }
+  .pack h3 { font-size: 13pt; margin: 10pt 0 4pt; }
+  .read-aloud, .questions li, .pack-teacher p, .pack-challenge p, .vocab p { font-size: 12pt; line-height: 1.45; }
+  .pack-teacher, .pack-challenge { background: #fff; border: 1pt solid #000; border-radius: 0; box-shadow: none; padding: 10pt 12pt; }
+  .pack-story { border-top: 0; margin-top: 0; padding-top: 0; break-before: page; page-break-before: always; break-inside: avoid; page-break-inside: avoid; }
+  .pack-challenge { break-before: page; page-break-before: always; }
+  .pack-teacher, .print-figure, .vocab { break-inside: avoid; page-break-inside: avoid; }
+  .pack h2, .pack h3 { break-after: avoid; page-break-after: avoid; }
+  .kicker .dot { background: #000 !important; }
+  .print-figure { margin: 8pt 0; }
+  .print-figure img { max-height: 2.1in; width: 100%; object-fit: cover; border-radius: 0; filter: grayscale(1) !important; }
+  a { color: #000 !important; text-decoration: underline; }
+  .print-source a[href]::after { content: " (" attr(href) ")"; font-weight: 400; font-size: 9pt; word-break: break-all; }
 }

@@ -9,6 +9,7 @@ import { StoryCard } from "@/components/story-card";
 import { EmphaticTitle, StoryBody } from "@/components/story-body";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
+import { packByStart } from "@/lib/classroom-pack";
 import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
@@ -18,6 +19,7 @@ import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHand
 import { getCountry } from "@/lib/countries";
 import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
+import { weekStart } from "@/lib/weeks";
 import { siteConfig } from "@/site.config";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -79,6 +81,7 @@ export default async function StoryPage({ params }: Props) {
     const hub = getHubByPath(path);
     return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
   });
+  const friday = packByStart(weekStart(story.date));
 
   return (
     <article className="story-page">
@@ -161,6 +164,12 @@ export default async function StoryPage({ params }: Props) {
                 For a teacher to read with a class. <Link href="/kids/print">Print the story of the day</Link>
                 {" · "}
                 <Link href="/kids">All classroom stories</Link>
+                {friday ? (
+                  <>
+                    {" · "}
+                    <Link href={friday.path}>This week&apos;s Good News Friday pack</Link>
+                  </>
+                ) : null}
               </p>
             </section>
           ) : null}

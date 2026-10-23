@@ -68,6 +68,7 @@ export default function WeekIndexPage() {
           <Link href="/week/rss.xml">Week RSS</Link>
           <Link href="/stories">All stories</Link>
           <Link href="/kids">For classrooms</Link>
+          <Link href="/classroom">Good News Friday</Link>
         </p>
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>

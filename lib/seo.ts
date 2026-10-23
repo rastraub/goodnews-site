@@ -300,6 +300,66 @@ export function storyJsonLd(story: Story) {
   };
 }
 
+const CLASSROOM_LEVEL = "Ages 6–11 (grades 1–6)";
+
+/** Collection page that is also a free classroom resource. */
+export function classroomJsonLd(options: {
+  name: string;
+  description: string;
+  path: string;
+  crumbs: Crumb[];
+  resources: { name: string; path: string }[];
+  learningResourceType: "lesson plan" | "collection of lesson plans";
+  timeRequired?: string;
+}) {
+  const itemType = options.learningResourceType === "lesson plan" ? "reading passage" : "lesson plan";
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["CollectionPage", "LearningResource"],
+        "@id": `${absoluteUrl(options.path)}#resource`,
+        name: options.name,
+        description: options.description,
+        url: absoluteUrl(options.path),
+        inLanguage: "en-US",
+        isAccessibleForFree: true,
+        educationalLevel: CLASSROOM_LEVEL,
+        learningResourceType: options.learningResourceType,
+        ...(options.timeRequired ? { timeRequired: options.timeRequired } : {}),
+        audience: {
+          "@type": "EducationalAudience",
+          educationalRole: "teacher",
+        },
+        author: {
+          "@type": "Organization",
+          name: siteConfig.editor.name,
+          url: absoluteUrl("/about#masthead"),
+        },
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+        mainEntity: {
+          "@type": "ItemList",
+          numberOfItems: options.resources.length,
+          itemListElement: options.resources.slice(0, 40).map((resource, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            item: {
+              "@type": "LearningResource",
+              name: resource.name,
+              url: absoluteUrl(resource.path),
+              educationalLevel: CLASSROOM_LEVEL,
+              learningResourceType: itemType,
+              isAccessibleForFree: true,
+            },
+          })),
+        },
+      },
+      breadcrumbNode(options.crumbs),
+    ],
+  };
+}
+
 export function listingJsonLd(options: {
   name: string;
   description: string;

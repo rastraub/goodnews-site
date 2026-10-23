@@ -69,6 +69,7 @@ export default function KidsPrintPage() {
               <Link href={`/story/${story.slug}`}>Read the full story</Link>
               {placePath ? <Link href={placePath}>More classroom stories from this place</Link> : null}
               <Link href="/kids">All classroom stories</Link>
+              <Link href="/classroom">Good News Friday packs</Link>
             </div>
           </>
         ) : (
