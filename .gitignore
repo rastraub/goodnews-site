@@ -9,3 +9,4 @@ data/submissions/inbox.jsonl
 *.log
 tsconfig.tsbuildinfo
 .DS_Store
+public/images/web-stories/

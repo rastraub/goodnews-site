@@ -6,6 +6,7 @@ import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { weeksToPrerender } from "@/lib/weeks";
+import { listWebStories } from "@/lib/web-stories";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
@@ -121,6 +122,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.8,
       images: [absoluteUrl(story.image)],
+    })),
+    {
+      url: absoluteUrl("/web-stories"),
+      lastModified: siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
+    ...listWebStories(stories).map((edition, index) => ({
+      url: absoluteUrl(edition.path),
+      lastModified: edition.modified,
+      changeFrequency: (index === 0 ? "daily" : "weekly") as "daily" | "weekly",
+      priority: index === 0 ? 0.6 : 0.5,
+      images: [absoluteUrl(edition.posterPath)],
     })),
   ];
 }
