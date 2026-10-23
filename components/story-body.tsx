@@ -1,3 +1,5 @@
+import { spokenText } from "@/lib/listen-text";
+
 const LINK = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
 
 function RichText({ text }: { text: string }) {
@@ -22,13 +24,17 @@ export function StoryBody({ markdown }: { markdown: string }) {
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean);
+  let spokenIndex = 0;
   return (
     <div className="prose">
-      {blocks.map((block, index) => (
-        <p key={index}>
-          <RichText text={block} />
-        </p>
-      ))}
+      {blocks.map((block, index) => {
+        const id = spokenText(block) ? `speak-p-${spokenIndex++}` : undefined;
+        return (
+          <p key={index} id={id}>
+            <RichText text={block} />
+          </p>
+        );
+      })}
     </div>
   );
 }
@@ -37,15 +43,17 @@ export function EmphaticTitle({
   title,
   emphasis,
   as: Tag = "h1",
+  id,
 }: {
   title: string;
   emphasis?: string;
   as?: "h1" | "h2" | "h3";
+  id?: string;
 }) {
-  if (!emphasis || !title.includes(emphasis)) return <Tag>{title}</Tag>;
+  if (!emphasis || !title.includes(emphasis)) return <Tag id={id}>{title}</Tag>;
   const index = title.indexOf(emphasis);
   return (
-    <Tag>
+    <Tag id={id}>
       {title.slice(0, index)}
       <em>{emphasis}</em>
       {title.slice(index + emphasis.length)}

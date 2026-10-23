@@ -34,6 +34,10 @@ The check fails if the name, domain, or social handles appear in source files ot
 
 Set the public URL with `url` (it follows `domain` today). Point the real domain at the Vercel project when the name is final.
 
+## Listen
+
+Story pages and classroom pages can read aloud in the browser, using the device's built-in speech. No speech service, API key, or audio file is required. The controls stay hidden when the browser cannot speak. Speed and voice choices are saved on the device. See [ADDING_STORIES.md](ADDING_STORIES.md) for what the Kid version reads.
+
 ## Add a story
 
 See [ADDING_STORIES.md](ADDING_STORIES.md). Short version: add `stories/your-slug.md` and a credited image in `public/images/stories/`, then run `npm run validate-stories`. A daily job can publish by committing those files.
