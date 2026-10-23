@@ -189,6 +189,9 @@ export default async function StoryPage({ params }: Props) {
           <section className="side-card">
             <h2>Share this story</h2>
             <ShareButtons title={story.title} path={`/story/${story.slug}`} />
+            <p className="featured-kit-link">
+              <Link href={`/featured/${story.slug}`}>Featured in this story? Get your badge</Link>
+            </p>
           </section>
         </aside>
       </div>

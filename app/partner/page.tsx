@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { pageAlternates } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
@@ -19,6 +20,9 @@ export default function PartnerPage() {
         </p>
         <p>
           Write <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a> with the idea and the place you care about.
+        </p>
+        <p>
+          If a story already covered your newsroom, nonprofit, school, or reporting, that is separate from a sponsorship. The badge and the embed code are on <Link href="/featured">featured on {siteConfig.name}</Link>.
         </p>
       </div>
     </div>

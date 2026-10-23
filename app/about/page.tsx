@@ -106,6 +106,13 @@ export default function AboutPage() {
           </p>
         </section>
 
+        <section id="featured">
+          <h2>If we covered you</h2>
+          <p>
+            Newsrooms, nonprofits, schools, and reporters named in a story can use a badge that links back. The <Link href="/featured">featured kit</Link> has the image, the embed code, and short text for a post. A local site can also add a <Link href="/widgets">headline widget</Link>.
+          </p>
+        </section>
+
         <p style={{ marginTop: 18 }}>
           <Link className="btn btn-ink" href="/submit">Submit a story</Link>
         </p>
