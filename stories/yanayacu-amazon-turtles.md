@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.cima.org.pe/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "In October 2026, people in Peru's Amazon put freshwater turtles back into rivers around Cordillera Azul National Park. Peru21 reported that the releases added up to 14,645 turtles: 14,146 taricayas, 454 charapas, and 45 teparos. On October 16 alone, 6,640 taricayas and charapas went into Quebrada Carnaval and the Cushabatay and Ucayali rivers. Other releases had started on October 9. Peru's park service, Sernanp, did the work with CIMA-Cordillera Azul. These turtles are still taken for eggs and meat. This news is about animals going back into the river. It does not say how many live there now."
 kidQuestions:
