@@ -13,6 +13,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { getStateByCode, stateName } from "@/lib/states";
 import { placeLabel, toCard, type StoryCardModel } from "@/lib/present";
 import { getHero, getPublishedStories, getTop5, stateCounts } from "@/lib/stories";
+import { listWebStories } from "@/lib/web-stories";
 import { siteConfig } from "@/site.config";
 
 const SHELF_ALL = 24;
@@ -46,6 +47,7 @@ export default function HomePage() {
   const top5 = getTop5(stories);
   const cards = stories.map(toCard);
   const counts = stateCounts(stories);
+  const latestWebStory = listWebStories(stories)[0];
   const chips = counts.slice(0, 4).map((item) => ({
     href: `/state/${getStateByCode(item.code)?.slug ?? ""}`,
     label: stateName(item.code),
@@ -61,6 +63,11 @@ export default function HomePage() {
             <div>
               <h2>Today&apos;s Top 5</h2>
               <p>The five best things that happened in America, checked and ready.</p>
+              {latestWebStory ? (
+                <a className="web-story-link" href={latestWebStory.path}>
+                  Today&apos;s web story
+                </a>
+              ) : null}
             </div>
             <span className="pill-time">
               <svg className="ico" aria-hidden="true">

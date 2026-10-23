@@ -75,6 +75,8 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 .shead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}
 .shead h2,.section-title{font-family:var(--font-serif);font-weight:600;font-size:38px;letter-spacing:-.02em;line-height:1.1}
 .shead p{color:var(--ink2);margin-top:6px;font-size:16px}
+.web-story-link{display:inline-block;margin-top:8px;font-size:13.5px;font-weight:600;color:var(--blue-d)}
+.web-story-link:hover{text-decoration:underline}
 .more{font-weight:600;font-size:15px;color:var(--blue-d);display:flex;align-items:center;gap:6px;white-space:nowrap}
 
 .world-spot{padding:8px 0 36px}
