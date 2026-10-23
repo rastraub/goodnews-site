@@ -32,7 +32,7 @@ export function SubmitForm() {
       }
       setStatus("success");
       setFields(EMPTY);
-      setMessage("Thank you. An editor checks every tip before anything is published.");
+      setMessage("Thank you. We received your tip.");
     } catch {
       setStatus("error");
       setMessage("We couldn't save that tip. Please try again.");

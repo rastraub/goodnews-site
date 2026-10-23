@@ -25,8 +25,21 @@ export const siteConfig = {
   editor: {
     name: "Tazzora Editorial Team",
     blurb:
-      "Verified good news from the United States and countries around the world. Every story is checked against the original report, linked to that source, and kept free of politics.",
+      "Verified good news from the United States and countries around the world. Every story is checked against the original report, linked to that source, and kept free of politics. Editors review published stories and correct errors in public.",
   },
+  /**
+   * Legal owner of the publication. Not a person.
+   * City and state live in OWNER_LOCATION and stay off the page until set.
+   */
+  owner: {
+    name: "SBBnet, Inc.",
+  },
+  /**
+   * How a published story is checked. The daily run publishes stories.
+   * Do not claim a human signs off before publication.
+   */
+  verification:
+    "Every story is checked against its original report: names, places, numbers, and quotes must match the source, which we link on every story. Our editors review published stories and correct errors in public.",
   /**
    * Accounts this publication controls. A blank handle is omitted from the
    * footer and from NewsMediaOrganization.sameAs. Fill one in only after
@@ -42,6 +55,24 @@ export const siteConfig = {
 } as const;
 
 export type SiteConfig = typeof siteConfig;
+
+/**
+ * TODO: Set the city and state where SBBnet, Inc. operates.
+ * Do not invent a location. Leave both empty until they are known.
+ * About copy and NewsMediaOrganization JSON-LD omit the place until both are non-empty.
+ */
+export const OWNER_LOCATION: { city: string; state: string } = {
+  city: "",
+  state: "",
+};
+
+/** City and state for the owner, or undefined while OWNER_LOCATION is unset. */
+export function ownerPlace(): { city: string; state: string } | undefined {
+  const city = OWNER_LOCATION.city.trim();
+  const state = OWNER_LOCATION.state.trim();
+  if (!city || !state) return undefined;
+  return { city, state };
+}
 
 const SOCIAL_PROFILES = [
   { key: "x", label: "X", short: "X", href: (handle: string) => `https://x.com/${handle}` },

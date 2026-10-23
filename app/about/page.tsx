@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { pageAlternates } from "@/lib/seo";
-import { siteConfig } from "@/site.config";
+import { ownerPlace, siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "About",
@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  const place = ownerPlace();
   return (
     <div className="page-block">
       <div className="wrap page-hero prose-page">
@@ -64,8 +65,8 @@ export default function AboutPage() {
             <div className="step">
               <div className="n">4</div>
               <div>
-                <h3>Approve</h3>
-                <p>A human editor reads the summary against the original and signs off before anything is published.</p>
+                <h3>Check</h3>
+                <p>{siteConfig.verification}</p>
               </div>
             </div>
             <div className="step">
@@ -99,7 +100,15 @@ export default function AboutPage() {
         <section id="funding">
           <h2>Independence</h2>
           <p>
-            {siteConfig.name} is an independent publication. A reader membership, meant to keep the site ad-free, is planned, and billing is not open yet. A sponsor may underwrite a clearly labeled series. Sponsors do not choose, edit, or kill stories.
+            {siteConfig.name} is an independent publication owned and operated by {siteConfig.owner.name}. It is not affiliated with any political party, campaign, or advocacy group. Editorial decisions are made by the {siteConfig.editor.name}. Contact: <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a>.
+          </p>
+          {place ? (
+            <p>
+              {siteConfig.owner.name} is in {place.city}, {place.state}.
+            </p>
+          ) : null}
+          <p>
+            A reader membership, meant to keep the site ad-free, is planned, and billing is not open yet. A sponsor may underwrite a clearly labeled series. Sponsors do not choose, edit, or kill stories.
           </p>
           <p>
             The rules on the <Link href="/editorial-standards">editorial standards</Link> page apply either way. Questions about a partnership start at <Link href="/partner">partner with us</Link>.

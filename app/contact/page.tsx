@@ -21,7 +21,7 @@ export default function ContactPage() {
         </p>
         <h2>Story tips</h2>
         <p>
-          The <Link href="/submit">submission form</Link> is the fastest way to send a neighbor, a clinic, a rescue, or a town. Include a link to a news report if you have one. We publish only what we can verify.
+          The <Link href="/submit">submission form</Link> is the fastest way to send a neighbor, a clinic, a rescue, or a town. Include a link to a news report if you have one. A story we publish is checked against its original report, and we link that source.
         </p>
         <h2>Corrections</h2>
         <p>

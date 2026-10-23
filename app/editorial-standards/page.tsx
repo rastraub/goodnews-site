@@ -5,7 +5,7 @@ import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "Editorial standards",
-  description: `How ${siteConfig.name} chooses, checks, corrects, and labels stories. The editor signs off before publication.`,
+  description: `How ${siteConfig.name} chooses, checks, corrects, and labels stories. Every story is checked against its original report. Editors review published stories and correct errors in public.`,
   alternates: pageAlternates("/editorial-standards"),
 };
 
@@ -26,7 +26,7 @@ export default function EditorialStandardsPage() {
 
         <h2>What we publish</h2>
         <p>
-          We look for true, hopeful stories from the United States and from other countries: neighbors, rescuers, animals, classrooms, clinics, and scientific or medical advances that are already helping people or have been shown in human trials. We skip rumors, fundraising appeals with no reported outcome, and anything whose goodness depends on a political side. The same check applies outside the United States. A story still needs a reputable report, a real place, and a reading of that report.
+          We look for true, hopeful stories from the United States and from other countries: neighbors, rescuers, animals, classrooms, clinics, and scientific or medical advances that are already helping people or have been shown in human trials. We skip rumors, fundraising appeals with no reported outcome, and anything whose goodness depends on a political side. The same check applies outside the United States. A story still needs a reputable report, a real place, and a summary that matches that report.
         </p>
         <p>
           The no-politics rule is absolute. Candidates, parties, elections, legislation, and culture-war topics stay out, even when the ending sounds happy. The plain-language version lives on the <Link href="/about#no-politics">about page</Link>.
@@ -37,7 +37,7 @@ export default function EditorialStandardsPage() {
           <li>Every published story names the original newsroom and links to the report.</li>
           <li>Names, places, numbers, and quotations in our summary have to appear in that report. We do not invent quotes or fill gaps from memory.</li>
           <li>A second source is welcome. It is not a substitute for reading the one we cite.</li>
-          <li>The {siteConfig.editor.name} signs off before publication. Research tools can suggest a story. They cannot publish one.</li>
+          <li>{siteConfig.verification}</li>
         </ul>
 
         <h2>Bylines</h2>
