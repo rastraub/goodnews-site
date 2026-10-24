@@ -24,7 +24,7 @@ howToHelp:
   - label: "TEENS, Inc."
     url: "https://www.teensinc.org/"
     kind: learn
-featured: true
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

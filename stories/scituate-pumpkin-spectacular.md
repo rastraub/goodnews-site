@@ -27,7 +27,6 @@ howToHelp:
     url: "https://www.specialolympics.org/"
     kind: donate
 featured: false
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
