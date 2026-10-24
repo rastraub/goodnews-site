@@ -3,6 +3,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { kidPlaces } from "@/lib/kids";
 import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
+import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { weeksToPrerender } from "@/lib/weeks";
@@ -121,6 +122,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.8,
       images: [absoluteUrl(story.image)],
+    })),
+    ...explainerSitemapEntries(),
+  ];
+}
+
+function explainerSitemapEntries(): MetadataRoute.Sitemap {
+  const explainers = getPublishedExplainers();
+  const latest = explainers.reduce<string | undefined>((newest, explainer) => {
+    const modified = explainerModifiedDate(explainer);
+    return !newest || modified > newest ? modified : newest;
+  }, undefined);
+  return [
+    {
+      url: absoluteUrl(EXPLAINER_INDEX_PATH),
+      ...(latest ? { lastModified: latest } : {}),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    ...explainers.map((explainer) => ({
+      url: absoluteUrl(explainerPath(explainer.slug)),
+      lastModified: explainerModifiedDate(explainer),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     })),
   ];
 }

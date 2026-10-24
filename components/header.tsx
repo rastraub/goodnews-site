@@ -16,6 +16,7 @@ const PRIMARY = [
 const MORE = [
   { href: "/kids", label: "Kids" },
   { href: "/topics", label: "Topics" },
+  { href: "/explainers", label: "Explainers" },
 ];
 
 export function Header({ edition }: { edition: string }) {

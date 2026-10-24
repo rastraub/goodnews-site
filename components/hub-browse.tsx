@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
+import { explainerPath, explainersForTag } from "@/lib/explainers";
 import { getHubByPath, getHubIndex, storiesForHub, type Hub } from "@/lib/hubs";
 import { pageCount, pagePath, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
@@ -59,6 +60,7 @@ export function HubBrowse({ path, page }: { path: string; page: number }) {
   if (page > pages) notFound();
   const stories = storiesForHub(hub);
   const links = relatedLinks(hub);
+  const topicExplainers = hub.kind === "topic" ? explainersForTag(hub.params.slug) : [];
   const current = pagePath(hub.path, page);
 
   return (
@@ -93,6 +95,15 @@ export function HubBrowse({ path, page }: { path: string; page: number }) {
         <p className="kicker">{hub.kicker}</p>
         <h1>{hub.heading}</h1>
         <p className="lede">{hub.description}</p>
+        {topicExplainers.length ? (
+          <p className="link-pills">
+            {topicExplainers.map((explainer) => (
+              <Link key={explainer.slug} href={explainerPath(explainer.slug)}>
+                Learn how this works: {explainer.shortTitle}
+              </Link>
+            ))}
+          </p>
+        ) : null}
         {links.length ? (
           <p className="link-pills">
             {links.map((link) => (

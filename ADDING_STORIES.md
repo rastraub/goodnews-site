@@ -180,7 +180,7 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
    - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
    - **For classrooms.** When a story is appropriate to read aloud with children about ages 6 to 12, set `kidFriendly: true` in that story's front matter, write `kidSummary` in about 60 to 110 plain words, and add two or three `kidQuestions`. Stay accurate to the source. Do not invent facts or quotes. Skip the flag for death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, and anything a teacher would hesitate to read to a class. Do not force one into the batch. Do not backfill classroom text into `data/story-enrichment.json`. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list. Do not add a child to any list, and do not add ads or anything else that identifies a child.
-6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
+6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request. Explainers are a separate folder. Do not paste an explainer into a story. If the story is about a topic that already has one, the story page links it. See Good News Explainers below.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 
 ## Health & Tech
@@ -191,3 +191,61 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
 - The source has to be highly respected: a major newsroom, a peer-reviewed journal, a university, or a public-health authority such as the NIH, FDA, or CDC. A company press release is not enough on its own.
 - Skip a story that is essentially marketing for a product, a supplement, or a clinic. Skip anti-aging miracle claims.
 - The summary has to say plainly what was shown and where the evidence stops. If survival was not measured, say so. If follow-up is short, or only a few patients have had the next step, say so.
+
+## Good News Explainers
+
+Explainers are evergreen guides, not news stories. They live in `explainers/`, one Markdown file per page. The filename is the slug. `explainers/how-honor-flights-work.md` becomes `/explainers/how-honor-flights-work`. The index is `/explainers`.
+
+They are not in the RSS feeds or the news sitemap. They are in the main sitemap, and a production deploy includes them in the IndexNow ping. The byline is always the editorial team from `site.config.ts`. Do not put a person's name on an explainer.
+
+```yaml
+---
+title: "How a community fridge works"
+shortTitle: "Community fridges"
+dek: "One or two sentences that say what the page explains."
+date: "2026-10-24"
+schema: Article
+tags:
+  - food-banks
+  - food-rescue
+keywords:
+  - community fridge
+kidSummary: "A short read-aloud version, about 60 to 110 words, with no invented facts."
+safety:
+  - "A practical caution a reader should see before they try this."
+  - "Another caution. Two to six notes."
+howToHelp:
+  - label: "A national organization's real page"
+    url: "https://example.org/help"
+    kind: learn
+sources:
+  - label: "The page a fact in the body came from"
+    url: "https://example.org/source"
+draft: false
+---
+```
+
+Use `schema: HowTo` only when the page is a real sequence of steps, and then add `steps` with a `name` and a `text` for each one. The page renders those steps and the HowTo structured data. A page that explains how something works, without a sequence a reader performs, stays `schema: Article` and does not get `steps`.
+
+`howToHelp` uses the same `kind` values as a story: `donate`, `volunteer`, `thank`, or `learn`. Link only official sites of well-known national organizations, or a government page. Do not invent a local URL. Do not invent statistics. If you state a fact, link the source in the body and list that same URL under `sources`. Every `https` link in the body has to be in `sources` or `howToHelp`. Links to other explainers use a site path such as `/explainers/how-food-banks-rescue-food`.
+
+The body is original prose under the front matter, at least 220 words, with `##` sections such as "What it is", "How it works", and "How to help". Write it in plain language. The safety notes and the kid summary are not part of that word count. They render in their own blocks.
+
+### How archive linking works
+
+A published story shows up in "Stories from the archive", and the story page shows "Learn how this works", when the story is not in `excludeStories` and any of these is true:
+
+1. Its slug is listed in `includeStories`. Pins are shown first, in that order. This is the editor override. Use it when the wording of a real story does not contain the keyword.
+2. A keyword of more than one word appears in the title or the deck.
+3. Any keyword appears in the title or the deck, and the story shares a tag with the explainer.
+4. A keyword of more than one word appears in the story body, and the story shares a tag.
+
+Single words are not searched in the body, so a passing "foster" or "liver" does not attach the wrong guide. Image captions and credits are not searched. `excludeStories` always wins, including over a pin. A typo in either list fails validation, because the slug has to be a real story file. A pin has to be a published story.
+
+The explainer page lists at most six stories. Pins take the first slots. The rest are the strongest automatic matches. A story page can still link the explainer when the story matches but did not make that six. The story page shows at most two explainers.
+
+`tags` do a second job. On a topic hub such as `/topic/food-banks`, any explainer that lists that tag gets a "Learn how this works" link. Use the specific tags from `lib/tags.ts`. Do not add a broad tag only to collect more stories. Keywords plus a pin are the precise tools.
+
+Pick a new explainer when the archive already has several stories about that kind of help. A topic with one clear story can still be a page if the story is really about that system, as with a community fridge. Do not add a guide for a topic the archive does not cover.
+
+Set `draft: true` until the sources are checked. A draft is validated and left off the site. `date` is the day you published the explainer. Set `updated` when you change a fact. Run `npm run validate-stories` before you commit. The check fails if an explainer links no archive story, if a HowTo has no steps, or if the sitemap is missing the pages.
