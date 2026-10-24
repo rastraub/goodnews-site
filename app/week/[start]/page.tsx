@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
+import { ListenControls } from "@/components/listen-controls";
 import { StoryCard } from "@/components/story-card";
+import { kidListSegments, listenCardId } from "@/lib/listen-text";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { toCard } from "@/lib/present";
 import type { Story } from "@/lib/stories";
@@ -33,11 +35,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-function Cards({ stories }: { stories: Story[] }) {
+function Cards({ stories, listen }: { stories: Story[]; listen?: boolean }) {
   return (
     <div className="grid">
       {stories.map((story) => (
-        <StoryCard key={story.slug} story={toCard(story)} />
+        <StoryCard key={story.slug} story={toCard(story)} listenId={listen ? listenCardId(story.slug) : undefined} />
       ))}
     </div>
   );
@@ -168,8 +170,9 @@ export default async function WeekPage({ params }: Props) {
                 </svg>
               </Link>
             </p>
+            <ListenControls label="Read all aloud" groupLabel="Read this week's classroom summaries aloud" segments={kidListSegments(week.kids)} />
             <div style={{ marginTop: 18 }}>
-              <Cards stories={week.kids} />
+              <Cards stories={week.kids} listen />
             </div>
           </section>
         ) : null}

@@ -7,6 +7,7 @@ import { feedImageReport } from "../lib/feed-image";
 import { largeJpegPath, storyThumbPath } from "../lib/images";
 import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
+import { assertListenText } from "../lib/listen-text";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
   MAX_PRERENDERED_WEEKS,
@@ -715,6 +716,7 @@ function assertImageVariants() {
 
 const stories = loadAllStories();
 assertImageVariants();
+assertListenText();
 assertSchemaRejectsGarbage();
 assertCountryRules();
 assertWorldSpotlight();
