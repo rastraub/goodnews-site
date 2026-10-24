@@ -2,6 +2,7 @@ import { getCategory } from "../lib/categories";
 import { getCountry } from "../lib/countries";
 import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
 import { kidPlaceForStory } from "../lib/kids";
+import { explainerPaths } from "../lib/explainers";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
@@ -18,6 +19,7 @@ async function main() {
   }
 
   const urls = new Set(STATIC_PATHS.map((path) => (path === "/" ? siteConfig.url : `${siteConfig.url}${path}`)));
+  for (const path of explainerPaths()) urls.add(`${siteConfig.url}${path}`);
   for (const week of weeksToPrerender()) urls.add(`${siteConfig.url}${week.path}`);
   const recent = getPublishedStories().filter((story) => isWithinHours(story.date, 48));
   for (const story of recent) {

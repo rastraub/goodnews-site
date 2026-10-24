@@ -16,6 +16,7 @@ import { placeLabel, toCard } from "@/lib/present";
 import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
+import { explainerPath, explainersForStory } from "@/lib/explainers";
 import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { siteConfig } from "@/site.config";
@@ -79,6 +80,7 @@ export default async function StoryPage({ params }: Props) {
     const hub = getHubByPath(path);
     return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
   });
+  const explainers = explainersForStory(story);
 
   return (
     <article className="story-page">
@@ -172,6 +174,18 @@ export default async function StoryPage({ params }: Props) {
                 </Link>
               ))}
             </p>
+          ) : null}
+          {explainers.length ? (
+            <section className="explainer-callout">
+              <h2>Learn how this works</h2>
+              <ul>
+                {explainers.map((explainer) => (
+                  <li key={explainer.slug}>
+                    <Link href={explainerPath(explainer.slug)}>{explainer.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ) : null}
         </div>
         <aside className="story-side">
