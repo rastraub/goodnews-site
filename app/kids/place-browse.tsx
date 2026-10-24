@@ -7,6 +7,7 @@ import { getCountryBySlug } from "@/lib/countries";
 import { kidStoriesInCountry, kidStoriesInState } from "@/lib/kids";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
+import { latestQuiz } from "@/lib/quiz";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { getStateBySlug } from "@/lib/states";
 import type { Story } from "@/lib/stories";
@@ -51,6 +52,7 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
   if (!place || !place.stories.length || page > pageCount(place.stories.length)) notFound();
   const path = page <= 1 ? place.path : `${place.path}/page/${page}`;
   const title = `Good news for kids in ${place.name}`;
+  const quiz = latestQuiz();
 
   return (
     <div className="page-block">
@@ -82,6 +84,9 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
         </p>
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
+          {quiz ? (
+            <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
+          ) : null}
           <Link href="/kids">All classroom stories</Link>
         </p>
       </div>

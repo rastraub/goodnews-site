@@ -5,6 +5,7 @@ import { EmailSignup } from "@/components/email-signup";
 import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { getKidStories, kidPlaces } from "@/lib/kids";
+import { latestQuiz } from "@/lib/quiz";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
@@ -33,6 +34,7 @@ export function KidsBrowse({ page }: { page: number }) {
   if (page > pageCount(stories.length)) notFound();
   const places = kidPlaces(stories);
   const path = page <= 1 ? "/kids" : `/kids/page/${page}`;
+  const quiz = latestQuiz();
 
   return (
     <div className="page-block">
@@ -63,6 +65,9 @@ export function KidsBrowse({ page }: { page: number }) {
         </p>
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
+          {quiz ? (
+            <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
+          ) : null}
           <a href="#teachers">Teacher email</a>
         </p>
         {places.length ? (

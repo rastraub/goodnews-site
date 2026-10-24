@@ -38,6 +38,19 @@ Set the public URL with `url` (it follows `domain` today). Point the real domain
 
 See [ADDING_STORIES.md](ADDING_STORIES.md). Short version: add `stories/your-slug.md` and a credited image in `public/images/stories/`, then run `npm run validate-stories`. A daily job can publish by committing those files.
 
+## Good News Quiz
+
+Each Monday-start week since launch gets a static quiz at `/quiz` and `/quiz/YYYY-MM-DD`. Questions are built at deploy time from that week's story files. There is no model call and no quiz API. Kid mode uses stories marked `kidFriendly`. The byline is the editorial team in `site.config.ts`.
+
+How the questions are chosen, how wrong answers are picked, and how share text stays spoiler-free is written up in [docs/good-news-quiz.md](docs/good-news-quiz.md).
+
+- `https://www.tazzora.com/quiz`
+- `https://www.tazzora.com/quiz/2026-10-05`
+- `https://www.tazzora.com/quiz/2026-10-12`
+- `https://www.tazzora.com/quiz/2026-10-19`
+
+A new week appears on the next production build after that Monday's stories are in the repo. The current week stays in the set and updates when new stories land.
+
 ## Email
 
 Copy `.env.example` to `.env.local`.

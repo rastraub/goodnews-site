@@ -25,6 +25,17 @@ import {
 } from "../lib/weeks";
 import { storySchema } from "../lib/story-schema";
 import { getPublishedStories, loadAllStories } from "../lib/stories";
+import { quizShareText, quizShareUrl } from "../lib/quiz-copy";
+import {
+  MAX_QUIZ_QUESTIONS,
+  MIN_QUIZ_QUESTIONS,
+  buildQuizzes,
+  quizChoiceLabel,
+  quizJsonLd,
+  type QuizQuestion,
+  type QuizSource,
+} from "../lib/quiz";
+import { stateName } from "../lib/states";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
@@ -713,6 +724,203 @@ function assertImageVariants() {
   }
 }
 
+function sampleQuizStory(partial: Partial<QuizSource> & Pick<QuizSource, "slug" | "date">): QuizSource {
+  return {
+    title: `Neighbors kept a library hour going ${partial.slug}`,
+    shortTitle: `Library hour ${partial.slug}`,
+    city: "Denver",
+    country: "US",
+    state: "CO",
+    alsoStates: [],
+    category: "community",
+    image: `/images/stories/${partial.slug}.webp`,
+    imageAlt: `People outside a small library for ${partial.slug}`,
+    kidFriendly: false,
+    ...partial,
+  };
+}
+
+function givesAway(prompt: string, answer: string): boolean {
+  const escaped = answer.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (escaped.length < 2) return false;
+  return new RegExp(`\\b${escaped}\\b`, "i").test(prompt);
+}
+
+function assertQuizQuestion(question: QuizQuestion, bySlug: Map<string, QuizSource>, kidOnly: boolean) {
+  if (question.choices.length !== 4) throw new Error(`${question.id} should have 4 choices.`);
+  if (question.choices.map((choice) => choice.id).join("") !== "abcd") {
+    throw new Error(`${question.id} should label choices a through d.`);
+  }
+  const answer = question.choices.find((choice) => choice.id === question.answerId);
+  const subject = bySlug.get(question.storySlug);
+  if (!answer || !subject) throw new Error(`${question.id} is missing its answer or story.`);
+  if (answer.sourceSlug !== subject.slug) throw new Error(`${question.id} answer should come from its own story.`);
+  if (quizChoiceLabel(subject, question.kind) !== answer.label) {
+    throw new Error(`${question.id} answer label does not match the story.`);
+  }
+  if (question.kind !== "headline" && givesAway(question.prompt, answer.label)) {
+    throw new Error(`${question.id} prompt gives away the answer.`);
+  }
+  const bannedStates = new Set((subject.alsoStates ?? []).map((code) => stateName(code)).filter(Boolean));
+  const labels = new Set<string>();
+  for (const choice of question.choices) {
+    const key = choice.label.toLowerCase();
+    if (labels.has(key)) throw new Error(`${question.id} repeats a choice.`);
+    labels.add(key);
+    const source = bySlug.get(choice.sourceSlug);
+    if (!source) throw new Error(`${question.id} uses a choice from an unknown story.`);
+    if (quizChoiceLabel(source, question.kind) !== choice.label) {
+      throw new Error(`${question.id} choice was not taken from that story.`);
+    }
+    if (choice.id !== question.answerId && choice.sourceSlug === subject.slug) {
+      throw new Error(`${question.id} uses the same story as a wrong answer.`);
+    }
+    if (question.kind === "state" && choice.id !== question.answerId && bannedStates.has(choice.label)) {
+      throw new Error(`${question.id} offers another state from the same story as a wrong answer.`);
+    }
+    if (question.kind === "photo" && choice.image !== source.image) {
+      throw new Error(`${question.id} photo choice does not use that story's photo.`);
+    }
+    if (kidOnly && !source.kidFriendly) throw new Error(`${question.id} kid-mode choice is not a classroom story.`);
+  }
+}
+
+function assertQuizShape(questions: QuizQuestion[], bySlug: Map<string, QuizSource>, kidOnly: boolean) {
+  if (questions.length < MIN_QUIZ_QUESTIONS || questions.length > MAX_QUIZ_QUESTIONS) {
+    throw new Error(`A quiz should have 5 to 7 questions. Got ${questions.length}.`);
+  }
+  questions.forEach((question, index) => {
+    if (question.id !== `q${index + 1}`) throw new Error("Question ids should stay in play order.");
+    assertQuizQuestion(question, bySlug, kidOnly);
+  });
+}
+
+function assertQuizzes() {
+  if (quizShareText(6, 7) !== `I got 6/7 on this week's ${siteConfig.name} Good News Quiz`) {
+    throw new Error("Share text should be the spoiler-free score line.");
+  }
+  if (quizShareUrl("/quiz/2026-10-19", false) !== `${siteConfig.url}/quiz/2026-10-19`) {
+    throw new Error("Share link should be the quiz page.");
+  }
+  if (quizShareUrl("/quiz/2026-10-19", true) !== `${siteConfig.url}/quiz/2026-10-19?kids=1`) {
+    throw new Error("Kid mode share link should keep the score text and add the kid flag.");
+  }
+
+  const diverse = [
+    sampleQuizStory({ slug: "meal-one", date: "2026-10-06", city: "Denver", state: "CO", category: "community", kidFriendly: true }),
+    sampleQuizStory({ slug: "meal-two", date: "2026-10-07", city: "Saint Paul", state: "MN", category: "heroes", kidFriendly: true }),
+    sampleQuizStory({ slug: "meal-three", date: "2026-10-08", city: "Austin", state: "TX", category: "animals", kidFriendly: true }),
+    sampleQuizStory({
+      slug: "meal-four",
+      date: "2026-10-09",
+      city: "Portland",
+      state: "OR",
+      category: "science",
+      kidFriendly: true,
+      alsoStates: ["WA"],
+    }),
+    sampleQuizStory({ slug: "meal-five", date: "2026-10-10", city: "Augusta", state: "ME", category: "health-tech", kidFriendly: true }),
+    sampleQuizStory({ slug: "meal-six", date: "2026-10-06", city: "Kyoto", country: "JP", state: undefined, category: "animals", kidFriendly: true }),
+    sampleQuizStory({ slug: "meal-seven", date: "2026-10-11", city: "Nairobi", country: "KE", state: undefined, category: "community" }),
+    sampleQuizStory({ slug: "meal-eight", date: "2026-10-05", city: "Savannah", state: "GA", category: "heroes", alsoStates: ["SC"] }),
+  ];
+  const lone = sampleQuizStory({
+    slug: "lone-hour",
+    date: "2026-10-13",
+    city: "Boulder",
+    state: "CO",
+    category: "community",
+    kidFriendly: true,
+  });
+  const made = buildQuizzes([...diverse, lone], "2026-10-20");
+  if (made.length !== 2 || made[0]?.start !== "2026-10-05" || made[1]?.start !== "2026-10-12" || made[1]?.inProgress) {
+    throw new Error("Sample weeks should make two finished quizzes.");
+  }
+  if (!made[0]?.kidQuestions.length || !made[1]?.kidQuestions.length) {
+    throw new Error("Sample weeks with classroom stories should include kid mode.");
+  }
+  const during = buildQuizzes([...diverse, lone], "2026-10-07");
+  if (during.length !== 1 || during[0]?.start !== "2026-10-05" || !during[0]?.inProgress) {
+    throw new Error("The open week should be the only quiz while that week is in progress.");
+  }
+  if (buildQuizzes([sampleQuizStory({ slug: "too-early", date: "2026-09-29" })], "2026-10-20").length) {
+    throw new Error("A week before launch should not get a quiz.");
+  }
+  if (buildQuizzes([sampleQuizStory({ slug: "too-late", date: "2026-10-26" })], "2026-10-20").length) {
+    throw new Error("A week that has not started should not get a quiz.");
+  }
+  const thin = buildQuizzes(
+    [
+      sampleQuizStory({ slug: "thin-one", date: "2026-10-06", city: "Denver", state: "CO" }),
+      sampleQuizStory({ slug: "thin-two", date: "2026-10-07", city: "Denver", state: "CO" }),
+    ],
+    "2026-10-20",
+  );
+  if (thin.length) throw new Error("Two stories that share a place cannot fill four choices.");
+  if (
+    buildQuizzes(
+      [sampleQuizStory({ slug: "draft-only", date: "2026-10-06", draft: true, city: "Boise", state: "ID" })],
+      "2026-10-20",
+    ).length
+  ) {
+    throw new Error("Draft stories should stay out of the quiz.");
+  }
+
+  const published = getPublishedStories();
+  const bySlug = new Map<string, QuizSource>(published.map((story) => [story.slug, story]));
+  const real = buildQuizzes(published);
+  if (JSON.stringify(real) !== JSON.stringify(buildQuizzes(published))) {
+    throw new Error("Quiz generation should be deterministic.");
+  }
+  const today = weekStart(mountainDay());
+  const launch = launchWeekStart();
+  const counts = new Map<string, number>();
+  for (const story of published) {
+    const start = weekStart(story.date);
+    if (start < launch || start > today) continue;
+    counts.set(start, (counts.get(start) ?? 0) + 1);
+  }
+  const got = new Set(real.map((quiz) => quiz.start));
+  for (const [start, count] of counts) {
+    if (count >= 10 && !got.has(start)) {
+      throw new Error(`Week ${start} has ${count} stories and should have a quiz.`);
+    }
+  }
+  for (const start of got) {
+    if (!counts.has(start)) throw new Error(`Quiz ${start} does not match a published week.`);
+  }
+  for (const quiz of real) {
+    if (quiz.path !== `/quiz/${quiz.start}` || weekStart(quiz.start) !== quiz.start) {
+      throw new Error(`Quiz path should be the Monday date. Got ${quiz.path}.`);
+    }
+    if (quiz.inProgress !== (quiz.start === today)) throw new Error("The open week flag should follow Mountain Time.");
+    assertQuizShape(quiz.questions, bySlug, false);
+    if (quiz.kidStoryCount >= 8 && quiz.kidQuestions.length < MIN_QUIZ_QUESTIONS) {
+      throw new Error(`${quiz.start} has classroom stories but no kid-mode quiz.`);
+    }
+    if (quiz.kidQuestions.length) assertQuizShape(quiz.kidQuestions, bySlug, true);
+    const data = quizJsonLd(quiz);
+    const node = data["@graph"].find((item) => {
+      const kind = item["@type"];
+      return Array.isArray(kind) && kind.includes("Quiz") && kind.includes("LearningResource");
+    });
+    if (!node || !("author" in node)) throw new Error("Quiz structured data should be a Quiz and a LearningResource.");
+    const author = node.author as { "@type"?: string; name?: string };
+    if (author["@type"] !== "Organization" || author.name !== siteConfig.editor.name) {
+      throw new Error("The quiz byline should be the editorial organization, not a person.");
+    }
+    const parts = node.hasPart as { acceptedAnswer?: { text?: string }; suggestedAnswer?: { text?: string }[] }[];
+    if (parts.length !== quiz.questions.length) throw new Error("Structured data should list every question.");
+    parts.forEach((part, index) => {
+      const answer = quiz.questions[index]?.choices.find((choice) => choice.id === quiz.questions[index]?.answerId);
+      if (part.acceptedAnswer?.text !== answer?.label) throw new Error("Structured data should name the accepted answer.");
+      if (part.suggestedAnswer?.some((choice) => choice.text === answer?.label)) {
+        throw new Error("Structured data should not list the right answer twice.");
+      }
+    });
+  }
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -721,6 +929,7 @@ assertWorldSpotlight();
 assertHubs();
 assertKidClassrooms();
 assertWeeks();
+assertQuizzes();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertEnrichmentMerge();
 assertLoadedCountries(stories);
