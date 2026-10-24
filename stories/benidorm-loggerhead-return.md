@@ -26,7 +26,6 @@ howToHelp:
     url: "https://fundacionoceanografic.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "On October 22, 2026, seven loggerhead sea turtles went back into the sea at Poniente Beach in Benidorm, Spain. They hatched on August 7, 2025, on Levante Beach. Of 37 hatchlings, 30 were released the same day at a nearby cove. Seven, chosen at random, went to an aquarium in Valencia for a year and two months so they could grow larger. About 150 primary pupils came to watch, including a class of 8- and 9-year-olds. Mario Romero of Fundación Oceanogràfic said anyone who finds a nest should call 112, leave the eggs alone, and keep lights and noise down. These are one nest's turtles going home."
 kidQuestions:
