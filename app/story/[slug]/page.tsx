@@ -9,14 +9,14 @@ import { StoryCard } from "@/components/story-card";
 import { EmphaticTitle, StoryBody } from "@/components/story-body";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
-import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
+import { cityHubForStory, getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { placeLabel, toCard } from "@/lib/present";
 import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
-import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
+import { getStory, relatedStories, storiesToPrerender, type Story } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { siteConfig } from "@/site.config";
 
@@ -96,7 +96,7 @@ export default async function StoryPage({ params }: Props) {
           <div className="kicker">
             {category?.label}
             <span className="dot" />
-            <span className="place">{placeLabel(story)}</span>
+            <span className="place"><PlaceName story={story} /></span>
           </div>
           <EmphaticTitle title={story.title} emphasis={story.emphasis} />
           <p className="dek">{story.dek}</p>
@@ -215,5 +215,28 @@ export default async function StoryPage({ params }: Props) {
         </section>
       ) : null}
     </article>
+  );
+}
+
+function PlaceName({ story }: { story: Story }) {
+  const hub = cityHubForStory(story);
+  const label = placeLabel(story);
+  if (!hub) return label;
+  const at = label.toLowerCase().indexOf(story.city.toLowerCase());
+  if (at < 0) {
+    return (
+      <>
+        <Link href={hub.path}>{story.city}</Link>
+        {" · "}
+        {label}
+      </>
+    );
+  }
+  return (
+    <>
+      {label.slice(0, at)}
+      <Link href={hub.path}>{label.slice(at, at + story.city.length)}</Link>
+      {label.slice(at + story.city.length)}
+    </>
   );
 }

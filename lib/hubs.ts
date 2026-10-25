@@ -1,3 +1,4 @@
+import { canonicalCityName, cityKey, citySlug, describeCity, MIN_CITY_INDEX_STORIES } from "./cities";
 import { getCategory } from "./categories";
 import { getCountry } from "./countries";
 import { MAX_PRERENDERED_PAGES, pageCount } from "./paging";
@@ -5,7 +6,12 @@ import { getPublishedStories, type Story } from "./stories";
 import { getStateByCode, type StateInfo } from "./states";
 import { getTag } from "./tags";
 
-/** A hub is published only when it has enough stories to be a real page. */
+export { MIN_CITY_INDEX_STORIES };
+
+/**
+ * State-topic and tag hubs are published only with this many stories.
+ * City pages render from the first story and are indexable at MIN_CITY_INDEX_STORIES.
+ */
 export const MIN_HUB_STORIES = 3;
 
 /**
@@ -43,6 +49,8 @@ export type Hub = {
   latest: string;
   storySlugs: string[];
   crumbs: HubCrumb[];
+  /** City pages with one story are real URLs but stay out of the index. */
+  indexable: boolean;
   stateSlug?: string;
   countrySlug?: string;
   categorySlug?: string;
@@ -72,8 +80,11 @@ type Bucket = {
   path: string;
   params: Record<string, string>;
   latest: string;
+  earliest: string;
   slugs: Set<string>;
   cities: string[];
+  nameCounts: Map<string, number>;
+  categoryCounts: Map<string, number>;
   stateSlug?: string;
   countrySlug?: string;
   categorySlug?: string;
@@ -84,6 +95,17 @@ type Bucket = {
   categoryDescription?: string;
   topicSlug?: string;
 };
+
+function emptyBucketFields() {
+  return {
+    latest: "",
+    earliest: "",
+    slugs: new Set<string>(),
+    cities: [] as string[],
+    nameCounts: new Map<string, number>(),
+    categoryCounts: new Map<string, number>(),
+  };
+}
 
 export function slugify(value: string): string {
   return value
@@ -114,14 +136,34 @@ function storyWord(count: number): string {
 }
 
 function rememberCity(bucket: Bucket, city: string) {
-  if (bucket.cities.length >= 3 || bucket.cities.includes(city)) return;
+  const key = cityKey(city);
+  if (!key) return;
+  const existing = bucket.cities.findIndex((item) => cityKey(item) === key);
+  if (existing >= 0) {
+    const current = bucket.cities[existing];
+    if (canonicalCityName(new Map([[city, 1], [current, 1]])) === city) bucket.cities[existing] = city;
+    return;
+  }
+  if (bucket.cities.length >= 3) return;
   bucket.cities.push(city);
 }
 
 function touch(bucket: Bucket, story: HubStory) {
   bucket.slugs.add(story.slug);
-  if (story.date > bucket.latest) bucket.latest = story.date;
+  if (!bucket.latest || story.date > bucket.latest) bucket.latest = story.date;
+  if (!bucket.earliest || story.date < bucket.earliest) bucket.earliest = story.date;
+  bucket.nameCounts.set(story.city, (bucket.nameCounts.get(story.city) ?? 0) + 1);
+  bucket.categoryCounts.set(story.category, (bucket.categoryCounts.get(story.category) ?? 0) + 1);
   rememberCity(bucket, story.city);
+}
+
+function categoryBreakdown(counts: Map<string, number>) {
+  return [...counts.entries()]
+    .flatMap(([slug, count]) => {
+      const category = getCategory(slug);
+      return category ? [{ label: category.label, count }] : [];
+    })
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
 function stateCategoryBucket(state: StateInfo, categorySlug: string): Bucket | undefined {
@@ -131,9 +173,7 @@ function stateCategoryBucket(state: StateInfo, categorySlug: string): Bucket | u
     kind: "state-category",
     path: `/state/${state.slug}/${category.slug}`,
     params: { slug: state.slug, category: category.slug },
-    latest: "",
-    slugs: new Set(),
-    cities: [],
+    ...emptyBucketFields(),
     stateSlug: state.slug,
     categorySlug: category.slug,
     stateName: state.name,
@@ -155,9 +195,7 @@ function cityBucket(options: {
     kind: "city",
     path: options.path,
     params: options.params,
-    latest: "",
-    slugs: new Set(),
-    cities: [],
+    ...emptyBucketFields(),
     stateSlug: options.stateSlug,
     countrySlug: options.countrySlug,
     cityName: options.cityName,
@@ -168,7 +206,8 @@ function cityBucket(options: {
 
 function finish(bucket: Bucket): Hub | undefined {
   const count = bucket.slugs.size;
-  if (count < MIN_HUB_STORIES || !bucket.latest) return undefined;
+  const minimum = bucket.kind === "city" ? 1 : MIN_HUB_STORIES;
+  if (count < minimum || !bucket.latest || !bucket.earliest) return undefined;
   const places = listPhrase(bucket.cities);
   if (bucket.kind === "state-category" && bucket.stateName && bucket.categoryLabel && bucket.categoryDescription) {
     const where = places ? `, including ${places}` : "";
@@ -190,13 +229,15 @@ function finish(bucket: Bucket): Hub | undefined {
         { name: bucket.stateName, path: `/state/${bucket.stateSlug}` },
         { name: bucket.categoryLabel, path: bucket.path },
       ],
+      indexable: true,
       stateSlug: bucket.stateSlug,
       categorySlug: bucket.categorySlug,
     };
   }
   if (bucket.kind === "city" && bucket.cityName) {
+    const cityName = canonicalCityName(bucket.nameCounts) || bucket.cityName;
     const region = bucket.stateName ?? bucket.countryName ?? "";
-    const place = region ? `${bucket.cityName}, ${region}` : bucket.cityName;
+    const place = region ? `${cityName}, ${region}` : cityName;
     const parent = bucket.stateSlug
       ? { name: bucket.stateName ?? "Local", path: `/state/${bucket.stateSlug}` }
       : { name: bucket.countryName ?? "World", path: bucket.countrySlug ? `/country/${bucket.countrySlug}` : "/world" };
@@ -207,9 +248,16 @@ function finish(bucket: Bucket): Hub | undefined {
       kind: bucket.kind,
       path: bucket.path,
       params: bucket.params,
-      title: `Good news ${place}`,
+      title: `Good news in ${place}`,
       heading: `Good news from ${place}.`,
-      description: `Good news from ${place}: ${count} verified ${storyWord(count)}, each one checked and linked to the original report.`,
+      description: describeCity({
+        city: cityName,
+        region,
+        count,
+        earliest: bucket.earliest,
+        latest: bucket.latest,
+        categories: categoryBreakdown(bucket.categoryCounts),
+      }),
       kicker: region || "City",
       linkLabel: place,
       count,
@@ -219,8 +267,9 @@ function finish(bucket: Bucket): Hub | undefined {
         { name: "Today", path: "/" },
         root,
         parent,
-        { name: bucket.cityName, path: bucket.path },
+        { name: cityName, path: bucket.path },
       ],
+      indexable: count >= MIN_CITY_INDEX_STORIES,
       stateSlug: bucket.stateSlug,
       countrySlug: bucket.countrySlug,
     };
@@ -248,6 +297,7 @@ function finish(bucket: Bucket): Hub | undefined {
         { name: "Topics", path: "/topics" },
         { name: label, path: bucket.path },
       ],
+      indexable: true,
     };
   }
   return undefined;
@@ -287,14 +337,14 @@ export function buildHubs(stories: HubStory[]): HubIndex {
         touch(bucket, story);
       }
       const state = getStateByCode(story.state);
-      const citySlug = slugify(story.city);
-      if (state && citySlug) {
-        const key = `${state.code}:${citySlug}`;
+      const slug = citySlug(story.city);
+      if (state && slug) {
+        const key = `${state.code}:${slug}`;
         let bucket = cities.get(key);
         if (!bucket) {
           bucket = cityBucket({
-            path: `/state/${state.slug}/city/${citySlug}`,
-            params: { slug: state.slug, city: citySlug },
+            path: `/state/${state.slug}/city/${slug}`,
+            params: { slug: state.slug, city: slug },
             cityName: story.city,
             stateSlug: state.slug,
             stateName: state.name,
@@ -304,14 +354,14 @@ export function buildHubs(stories: HubStory[]): HubIndex {
         touch(bucket, story);
       }
     } else if (country) {
-      const citySlug = slugify(story.city);
-      if (citySlug) {
-        const key = `${country.code}:${citySlug}`;
+      const slug = citySlug(story.city);
+      if (slug) {
+        const key = `${country.code}:${slug}`;
         let bucket = cities.get(key);
         if (!bucket) {
           bucket = cityBucket({
-            path: `/country/${country.slug}/city/${citySlug}`,
-            params: { slug: country.slug, city: citySlug },
+            path: `/country/${country.slug}/city/${slug}`,
+            params: { slug: country.slug, city: slug },
             cityName: story.city,
             countrySlug: country.slug,
             countryName: country.name,
@@ -329,9 +379,7 @@ export function buildHubs(stories: HubStory[]): HubIndex {
           kind: "topic",
           path: `/topic/${tag}`,
           params: { slug: tag },
-          latest: "",
-          slugs: new Set(),
-          cities: [],
+          ...emptyBucketFields(),
           topicSlug: tag,
         };
         topics.set(tag, bucket);
@@ -366,6 +414,11 @@ export function buildHubs(stories: HubStory[]): HubIndex {
       byCountrySlug.set(hub.countrySlug, list);
     }
   }
+
+  const byCityName = (a: Hub, b: Hub) =>
+    b.count - a.count || a.linkLabel.localeCompare(b.linkLabel) || a.path.localeCompare(b.path);
+  for (const group of byStateSlug.values()) group.cities.sort(byCityName);
+  for (const list of byCountrySlug.values()) list.sort(byCityName);
 
   const countries: CountryStat[] = [...countryCounts.entries()].flatMap(([code, stat]) => {
     const country = getCountry(code);
@@ -432,9 +485,33 @@ export function storiesForHub(hub: Hub, stories: Story[] = getPublishedStories()
   });
 }
 
-export function hubPathsForStory(story: Pick<Story, "slug" | "city" | "country" | "state" | "alsoStates" | "category" | "tags">): string[] {
+export function cityHubForStory(
+  story: Pick<Story, "city" | "country" | "state">,
+  index: HubIndex = getHubIndex(),
+): Hub | undefined {
+  const slug = citySlug(story.city);
+  if (!slug) return undefined;
+  if (story.country === "US") {
+    const state = getStateByCode(story.state);
+    if (!state) return undefined;
+    return index.byPath.get(`/state/${state.slug}/city/${slug}`);
+  }
+  const country = getCountry(story.country);
+  if (!country) return undefined;
+  return index.byPath.get(`/country/${country.slug}/city/${slug}`);
+}
+
+export function indexableHubs(index: HubIndex = getHubIndex()): Hub[] {
+  return [...index.stateCategories, ...index.cities, ...index.topics].filter((hub) => hub.indexable);
+}
+
+export function hubPathsForStory(
+  story: Pick<Story, "slug" | "city" | "country" | "state" | "alsoStates" | "category" | "tags">,
+  options?: { indexableOnly?: boolean },
+): string[] {
   const index = getHubIndex();
   const paths: string[] = [];
+  const allow = (hub: Hub | undefined): hub is Hub => Boolean(hub && (!options?.indexableOnly || hub.indexable));
   if (story.country === "US") {
     const codes = [story.state, ...story.alsoStates].filter((code): code is string => Boolean(code));
     const seen = new Set<string>();
@@ -444,25 +521,14 @@ export function hubPathsForStory(story: Pick<Story, "slug" | "city" | "country" 
       const state = getStateByCode(code);
       if (!state) continue;
       const category = index.byPath.get(`/state/${state.slug}/${story.category}`);
-      if (category) paths.push(category.path);
-    }
-    const state = getStateByCode(story.state);
-    const citySlug = slugify(story.city);
-    if (state && citySlug) {
-      const city = index.byPath.get(`/state/${state.slug}/city/${citySlug}`);
-      if (city) paths.push(city.path);
-    }
-  } else {
-    const country = getCountry(story.country);
-    const citySlug = slugify(story.city);
-    if (country && citySlug) {
-      const city = index.byPath.get(`/country/${country.slug}/city/${citySlug}`);
-      if (city) paths.push(city.path);
+      if (allow(category)) paths.push(category.path);
     }
   }
+  const city = cityHubForStory(story, index);
+  if (allow(city)) paths.push(city.path);
   for (const tag of story.tags) {
     const topic = index.byPath.get(`/topic/${tag}`);
-    if (topic) paths.push(topic.path);
+    if (allow(topic)) paths.push(topic.path);
   }
   return paths;
 }

@@ -59,6 +59,8 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 .kicker{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d);display:flex;align-items:center;gap:10px}
 .kicker .dot{width:4px;height:4px;border-radius:50%;background:#D8CDBB}
 .kicker .place{color:var(--muted);letter-spacing:.06em}
+.kicker .place a{color:inherit;text-decoration:underline;text-underline-offset:.18em}
+.kicker .place a:hover{color:var(--ink)}
 .hero h1,.page-hero h1,.story-main h1{font-family:var(--font-serif);font-weight:600;font-size:50px;line-height:1.06;letter-spacing:-.022em;margin:18px 0 20px;font-variation-settings:"SOFT" 50,"opsz" 96}
 .hero h1 em,.story-main h1 em{font-style:italic;color:var(--blue-d);font-weight:500}
 .hero p.dek,.dek{font-size:19px;color:var(--ink2);line-height:1.6;max-width:560px}

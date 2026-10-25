@@ -26,7 +26,7 @@ async function main() {
     if (state) urls.add(`${siteConfig.url}/state/${state.slug}`);
     const country = getCountry(story.country);
     if (country && countryIsIndexable(country.code)) urls.add(`${siteConfig.url}/country/${country.slug}`);
-    for (const path of hubPathsForStory(story)) urls.add(`${siteConfig.url}${path}`);
+    for (const path of hubPathsForStory(story, { indexableOnly: true })) urls.add(`${siteConfig.url}${path}`);
     if (story.country !== "US") urls.add(`${siteConfig.url}/world`);
     if (getCategory(story.category)) urls.add(`${siteConfig.url}/category/${story.category}`);
     if (story.kidFriendly) {

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
 import { kidPlaces } from "@/lib/kids";
-import { getHubIndex } from "@/lib/hubs";
+import { getHubIndex, indexableHubs } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
@@ -109,7 +109,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.5,
     })),
-    ...[...hubs.stateCategories, ...hubs.cities, ...hubs.topics].map((hub) => ({
+    ...indexableHubs(hubs).map((hub) => ({
       url: absoluteUrl(hub.path),
       lastModified: hub.latest,
       changeFrequency: "daily" as const,

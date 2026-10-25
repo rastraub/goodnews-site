@@ -10,6 +10,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { cityKey } from "@/lib/cities";
 import { getHubIndex } from "@/lib/hubs";
 import { kidStoriesInState } from "@/lib/kids";
 import { getByState, stateCounts } from "@/lib/stories";
@@ -21,8 +22,12 @@ function stateDescription(name: string) {
 
 function uniqueCities(stories: { city: string }[]) {
   const cities: string[] = [];
+  const seen = new Set<string>();
   for (const story of stories) {
-    if (!cities.includes(story.city)) cities.push(story.city);
+    const key = cityKey(story.city);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    cities.push(story.city);
   }
   return cities;
 }
@@ -114,11 +119,14 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
           <>
             <h2 className="side-title">Cities</h2>
             <p className="link-pills">
-              {cityHubs.map((hub) => (
-                <Link key={hub.path} href={hub.path}>
-                  {hub.crumbs[hub.crumbs.length - 1]?.name ?? hub.linkLabel}
-                </Link>
-              ))}
+              {cityHubs.map((hub) => {
+                const name = hub.crumbs[hub.crumbs.length - 1]?.name ?? hub.linkLabel;
+                return (
+                  <Link key={hub.path} href={hub.path}>
+                    {name} · {hub.count}
+                  </Link>
+                );
+              })}
             </p>
           </>
         ) : null}

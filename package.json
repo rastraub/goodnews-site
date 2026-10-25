@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "validate-stories": "tsx scripts/validate-stories.ts",
+    "city-report": "tsx scripts/city-report.ts",
     "feed-images": "tsx scripts/generate-feed-images.ts"
   },
   "dependencies": {
