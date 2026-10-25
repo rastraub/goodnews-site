@@ -352,6 +352,12 @@ export const TAGS = [
     title: "Good news about food rescue",
     intro: "Produce and leftover meals kept out of the trash and pointed at someone who will eat them.",
   },
+  {
+    slug: "archaeology",
+    label: "Archaeology",
+    title: "Good news about archaeology",
+    intro: "Digs, shipwrecks, and finds that add a piece to the human story.",
+  },
 ] as const;
 
 export type TagSlug = (typeof TAGS)[number]["slug"];

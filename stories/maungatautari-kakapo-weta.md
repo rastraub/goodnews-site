@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.doc.govt.nz/nature/native-animals/birds/birds-a-z/kakapo/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Radio New Zealand reported on October 22, 2026, that two male kākāpō had joined three birds already living at Sanctuary Mountain Maungatautari in the Waikato. Five kākāpō are now in this mainland trial, inside a predator-proof fence about 47 kilometres long. The national population is 325 after a strong breeding season. The Department of Conservation, Ngāi Tahu, and local iwi are working together on the trial. The same week, 122 Mahoenui giant wētā raised at Ōtorohanga Kiwi House with Ngāti Maniapoto were released at the sanctuary. A year earlier, 192 of these large insects had been moved there."
 kidQuestions:
