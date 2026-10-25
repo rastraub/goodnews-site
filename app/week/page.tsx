@@ -65,6 +65,7 @@ export default function WeekIndexPage() {
           is over.
         </p>
         <p className="link-pills">
+          <Link href="/on-this-day">Good news on this day</Link>
           <Link href="/week/rss.xml">Week RSS</Link>
           <Link href="/stories">All stories</Link>
           <Link href="/kids">For classrooms</Link>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
 import { editionYear } from "@/lib/format";
+import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { siteConfig, socialLinks } from "@/site.config";
 
 export function Footer() {
@@ -31,6 +32,7 @@ export function Footer() {
               <li><Link href="/local">Local</Link></li>
               <li><Link href="/world">World</Link></li>
               <li><Link href="/week">This week</Link></li>
+              <li><Link href={ON_THIS_DAY_TODAY_PATH}>Good news on this day</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/topics">Topics</Link></li>
               {CATEGORIES.map((category) => (

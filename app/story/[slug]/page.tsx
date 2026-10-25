@@ -10,6 +10,7 @@ import { EmphaticTitle, StoryBody } from "@/components/story-body";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
 import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
+import { monthDayFromIso, monthDayLabel, onThisDayPath } from "@/lib/calendar-day";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { placeLabel, toCard } from "@/lib/present";
@@ -79,6 +80,13 @@ export default async function StoryPage({ params }: Props) {
     const hub = getHubByPath(path);
     return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
   });
+  const anniversary = monthDayFromIso(story.date);
+  if (anniversary) {
+    hubLinks.push({
+      href: onThisDayPath(anniversary.month, anniversary.day),
+      label: `Good news on ${monthDayLabel(anniversary.month, anniversary.day)}`,
+    });
+  }
 
   return (
     <article className="story-page">

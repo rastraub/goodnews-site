@@ -5,6 +5,8 @@ import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
+import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
+import { parseMonthDaySlug } from "@/lib/calendar-day";
 import { weeksToPrerender } from "@/lib/weeks";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
@@ -122,5 +124,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       images: [absoluteUrl(story.image)],
     })),
+    {
+      url: absoluteUrl(ON_THIS_DAY_INDEX_PATH),
+      lastModified: siteLatest && siteLatest > onThisDayUpdated() ? siteLatest : onThisDayUpdated(),
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    },
+    ...allOnThisDayPaths().map((path) => {
+      const day = parseMonthDaySlug(path.slice("/on-this-day/".length));
+      const seeded = day ? Boolean(getOnThisDay(day.month, day.day)) : false;
+      return {
+        url: absoluteUrl(path),
+        lastModified: day ? onThisDayLastModified(day.month, day.day) : onThisDayUpdated(),
+        changeFrequency: "weekly" as const,
+        priority: seeded ? 0.6 : 0.4,
+      };
+    }),
   ];
 }

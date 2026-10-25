@@ -34,6 +34,10 @@ The check fails if the name, domain, or social handles appear in source files ot
 
 Set the public URL with `url` (it follows `domain` today). Point the real domain at the Vercel project when the name is final.
 
+## Good news on this day
+
+`/on-this-day` is a calendar of evergreen pages, one for every month and day, including February 29. `/on-this-day/october-25` pairs verified historical milestones with archive stories published on that date. `/on-this-day/today` opens the page for the current date in America/Denver. Milestones live in `data/on-this-day.json`. See [ADDING_STORIES.md](ADDING_STORIES.md) for the citation rule. A day with no milestone still renders.
+
 ## Add a story
 
 See [ADDING_STORIES.md](ADDING_STORIES.md). Short version: add `stories/your-slug.md` and a credited image in `public/images/stories/`, then run `npm run validate-stories`. A daily job can publish by committing those files.

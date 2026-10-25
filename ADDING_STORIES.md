@@ -191,3 +191,46 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
 - The source has to be highly respected: a major newsroom, a peer-reviewed journal, a university, or a public-health authority such as the NIH, FDA, or CDC. A company press release is not enough on its own.
 - Skip a story that is essentially marketing for a product, a supplement, or a clinic. Skip anti-aging miracle claims.
 - The summary has to say plainly what was shown and where the evidence stops. If survival was not measured, say so. If follow-up is short, or only a few patients have had the next step, say so.
+
+## Good news on this day
+
+`/on-this-day` is a calendar. `/on-this-day/october-25` is one evergreen page. `/on-this-day/today` sends a reader to the page for the current date in America/Denver. The pages are static. Historical milestones live in `data/on-this-day.json`, not in a story file.
+
+A day page shows three things:
+
+- Verified milestones for that month and day, each with a year, a one- or two-sentence account, a one-sentence read-aloud line, and at least one source link.
+- Two classroom questions.
+- Archive stories whose publish date falls on that month and day in any year. If the archive has none, the page says so.
+
+### Citation rule
+
+Do not add a milestone you cannot verify. Open the source and check that it states the year and the facts you are about to write. If it does not, leave the entry out. Do not guess a date, a number, or a name.
+
+Every citation has to be `https` and a specific page, not a homepage, on a reputable host. Use Britannica, NASA, the Smithsonian, the Library of Congress, the National Archives, the National Park Service, WHO, the United Nations, a university, a government site, a scientific journal, or a major newspaper. The host list is enforced in `lib/on-this-day-schema.ts`. Wikipedia can help you find a lead. It is not a citation. Do not cite it.
+
+Skip war, battles, disasters, crimes, and anniversaries that are mostly about harm, even when something good came later. Keep the wording plain enough for a teacher to read with children about ages 6 to 12. The read-aloud line is one sentence. The account is one or two. The two prompts are questions.
+
+October 25 through December 31 must keep two to four milestones each. Other days can be added the same way. A day with no file entry still has a page, with the archive stories and a short note.
+
+```json
+{
+  "month": 12,
+  "day": 17,
+  "prompts": [
+    "Why might a short first flight still matter years later?",
+    "What is something hard your class could try, even if the first attempt is small?"
+  ],
+  "entries": [
+    {
+      "year": 1903,
+      "text": "On December 17, 1903, at Kill Devil Hills, North Carolina, Wilbur and Orville Wright made the first sustained flights of a heavier-than-air machine under the pilot's control. Orville's first flight lasted 12 seconds, and Wilbur's longest flight that morning lasted 59 seconds.",
+      "kidLine": "Two brothers flew the first powered airplane, and the longest flight that morning lasted 59 seconds.",
+      "sources": [
+        { "name": "Library of Congress", "url": "https://www.loc.gov/item/today-in-history/december-17/" }
+      ]
+    }
+  ]
+}
+```
+
+`updated` at the top of the file is the day the milestone list was last checked. `npm run validate-stories` rejects a bad year, a missing citation, a third sentence, a homepage link, a host that is not on the list, and a gap in the October 25 through December 31 window.
