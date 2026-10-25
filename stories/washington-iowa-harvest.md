@@ -25,8 +25,7 @@ howToHelp:
   - label: "Practical Farmers of Iowa"
     url: "https://practicalfarmers.org/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

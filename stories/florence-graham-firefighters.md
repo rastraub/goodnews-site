@@ -24,7 +24,6 @@ howToHelp:
     url: "https://florence-ky.gov/our-services/fire-ems/"
     kind: thank
 featured: false
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
