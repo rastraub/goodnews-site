@@ -24,8 +24,20 @@ import {
   type WeekSource,
 } from "../lib/weeks";
 import { storySchema } from "../lib/story-schema";
+import { compareStateStories, pickStateStories, type StateHubStory } from "../lib/state-story-hub";
 import { getPublishedStories, loadAllStories } from "../lib/stories";
+import {
+  buildVeteransDayHub,
+  getVeteransDayHub,
+  isVeteranStory,
+  loadVeteransDayPins,
+  parseVeteransDayPins,
+  veteranStoryQuality,
+  veteransDayInSeason,
+  VETERANS_DAY_PATH,
+} from "../lib/veterans-day";
 import { worldSpotlight } from "../lib/world-pick";
+import sitemap from "../app/sitemap";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
 import { siteConfig, socialLinks } from "../site.config";
@@ -700,6 +712,296 @@ function assertFeeds() {
   }
 }
 
+function veteranFixture(partial: Partial<StateHubStory> & Pick<StateHubStory, "slug" | "state">): StateHubStory {
+  return {
+    date: "2026-10-01",
+    title: "Neighbors helped a veteran in a concrete way",
+    dek: "The help was specific, finished, and reported by a local newsroom.",
+    country: "US",
+    alsoStates: [],
+    tags: ["veterans"],
+    ...partial,
+  };
+}
+
+function assertVeteransDayHub() {
+  if (
+    !isVeteranStory({
+      country: "US",
+      tags: ["kindness"],
+      title: "A Navy veteran in Omaha got a new ramp",
+      dek: "Neighbors built the ramp over a weekend.",
+    })
+  ) {
+    throw new Error("A military veteran in the headline should qualify.");
+  }
+  if (
+    !isVeteranStory({
+      country: "US",
+      tags: ["community"],
+      title: "The 36th honor flight landed in Fresno",
+      dek: "Travelers came home to a crowd at the airport.",
+    })
+  ) {
+    throw new Error("An honor flight should qualify even without the veterans tag.");
+  }
+  if (
+    isVeteranStory({
+      country: "US",
+      tags: ["kids"],
+      title: "A 16-year NBA veteran hosted a free basketball camp for Jackson kids",
+      dek: "Dozens of children spent the morning at a camp.",
+    })
+  ) {
+    throw new Error("A sports veteran should not qualify.");
+  }
+  if (
+    isVeteranStory({
+      country: "US",
+      tags: ["food-banks"],
+      title: "Students collected 3,200 pounds of food",
+      dek: "The drive delivered food to a county food bank.",
+    })
+  ) {
+    throw new Error("A headline that never mentions veterans should not qualify.");
+  }
+  if (
+    isVeteranStory({
+      country: "CA",
+      tags: ["veterans"],
+      title: "A veteran story outside the United States",
+      dek: "This hub is for states and Washington, D.C.",
+    })
+  ) {
+    throw new Error("Stories outside the United States should stay off the hub.");
+  }
+  if (
+    isVeteranStory({
+      country: "US",
+      tags: ["veterans"],
+      title: "A draft story about veterans in Ohio",
+      dek: "Drafts stay off the site until they are published.",
+      draft: true,
+    })
+  ) {
+    throw new Error("A draft should not qualify.");
+  }
+  if (
+    !isVeteranStory({
+      country: "US",
+      tags: ["veterans"],
+      title: "An award for free home repairs in Boston",
+      dek: "The nonprofit repairs homes for seniors, veterans, and families.",
+    })
+  ) {
+    throw new Error("The veterans tag should qualify a story.");
+  }
+
+  const newer = veteranFixture({ slug: "co-new", state: "CO", date: "2026-10-20", title: "A stand down served veterans in Colorado" });
+  const older = veteranFixture({
+    slug: "co-old",
+    state: "CO",
+    date: "2026-10-01",
+    title: "A home for veterans opened in Colorado",
+    featured: true,
+  });
+  const walk = veteranFixture({
+    slug: "id-walk",
+    state: "ID",
+    date: "2026-10-19",
+    title: "A veteran is walking to the coast",
+    alsoStates: ["OR", "FL"],
+  });
+  const texasHome = veteranFixture({ slug: "tx-home", state: "TX", date: "2026-09-01", title: "Texas veterans got a repaired home" });
+  const newerPassThrough = veteranFixture({
+    slug: "nm-new",
+    state: "NM",
+    date: "2026-10-20",
+    title: "A newer honor flight crossed a state line",
+    alsoStates: ["TX"],
+  });
+  const featuredSameDay = veteranFixture({
+    slug: "ga-featured",
+    state: "GA",
+    date: "2026-10-20",
+    title: "Georgia veterans were welcomed home",
+    featured: true,
+  });
+  const plainSameDay = veteranFixture({ slug: "ga-plain", state: "GA", date: "2026-10-20", title: "Neighbors wrote veterans a note" });
+  const ranked = veteranFixture({ slug: "wa-ranked", state: "WA", date: "2026-10-12", title: "A veteran in Washington got a ramp", top5: 2 });
+  const unranked = veteranFixture({ slug: "wa-plain", state: "WA", date: "2026-10-12", title: "A veteran in Washington got a meal" });
+  const honor = veteranFixture({
+    slug: "al-honor",
+    state: "AL",
+    date: "2026-10-08",
+    title: "An honor flight left Alabama",
+    dek: "Veterans flew to the memorials.",
+  });
+  const plainHonorTie = veteranFixture({
+    slug: "al-plain",
+    state: "AL",
+    date: "2026-10-08",
+    title: "Neighbors helped a veteran in Alabama",
+    dek: "The crew finished the yard work.",
+  });
+  const nba = veteranFixture({
+    slug: "ms-nba",
+    state: "MS",
+    tags: ["kids"],
+    title: "A 16-year NBA veteran hosted a free basketball camp for Jackson kids",
+    dek: "Dozens of children spent the morning at a camp.",
+  });
+
+  const fixture = [
+    newer,
+    older,
+    walk,
+    texasHome,
+    newerPassThrough,
+    featuredSameDay,
+    plainSameDay,
+    ranked,
+    unranked,
+    honor,
+    plainHonorTie,
+    nba,
+  ];
+  const picked = pickStateStories({
+    stories: fixture,
+    qualifies: isVeteranStory,
+    quality: veteranStoryQuality,
+  });
+  const slot = (code: string) => {
+    const found = picked.slots.find((item) => item.state.code === code);
+    if (!found) throw new Error(`Missing slot ${code}`);
+    return found;
+  };
+  if (picked.slots.length !== 51) throw new Error("The hub should have one slot for every state and D.C.");
+  if (slot("CO").story?.slug !== "co-new") throw new Error("A newer home-state story should beat an older featured one.");
+  if (slot("GA").story?.slug !== "ga-featured") throw new Error("On the same day, featured should win.");
+  if (slot("WA").story?.slug !== "wa-ranked") throw new Error("On the same day, a Top 5 rank should win.");
+  if (slot("AL").story?.slug !== "al-honor") throw new Error("On a full tie, the stronger veteran headline should win.");
+  if (slot("TX").story?.slug !== "tx-home") throw new Error("A home-state story should beat a newer story that only passes through.");
+  if (slot("NM").story?.slug !== "nm-new") throw new Error("New Mexico should keep its own story.");
+  if (slot("ID").story?.slug !== "id-walk" || slot("OR").story?.slug !== "id-walk" || slot("FL").story?.slug !== "id-walk") {
+    throw new Error("A story should fill its home state and any alsoStates that have no story of their own.");
+  }
+  if (slot("MS").story) throw new Error("Mississippi should stay open when the only candidate is a sports veteran.");
+  if (picked.slots.some((item) => item.story && item.story.state !== item.state.code && !item.story.alsoStates.includes(item.state.code))) {
+    throw new Error("A slot used a story that is not filed in that state.");
+  }
+
+  const pinned = pickStateStories({
+    stories: fixture,
+    pins: { CO: "co-old" },
+    qualifies: isVeteranStory,
+    quality: veteranStoryQuality,
+  });
+  const pinnedCo = pinned.slots.find((item) => item.state.code === "CO");
+  if (!pinnedCo?.pinned || pinnedCo.story?.slug !== "co-old") throw new Error("A valid pin should replace the automatic pick.");
+
+  const badPin = pickStateStories({
+    stories: fixture,
+    pins: { CO: "ms-nba", NY: "id-walk", ZZ: "co-new", ME: "missing" },
+    qualifies: isVeteranStory,
+    quality: veteranStoryQuality,
+  });
+  if (badPin.pinErrors.length !== 4) throw new Error(`Expected 4 pin errors, got ${badPin.pinErrors.join(" | ")}`);
+  const badCo = badPin.slots.find((item) => item.state.code === "CO");
+  if (badCo?.story?.slug !== "co-new" || badCo.pinned) throw new Error("A bad pin should fall back to the automatic pick.");
+  if (badPin.slots.find((item) => item.state.code === "NY")?.story) {
+    throw new Error("A story should not be pinned onto a state it is not filed in.");
+  }
+
+  const empty = pickStateStories({ stories: [], qualifies: isVeteranStory });
+  if (empty.slots.length !== 51 || empty.slots.some((item) => item.story) || empty.pinErrors.length) {
+    throw new Error("An empty archive should leave every state open.");
+  }
+
+  if (!veteransDayInSeason("2026-11-01") || !veteransDayInSeason("2026-11-11") || !veteransDayInSeason("2026-11-12")) {
+    throw new Error("The Veterans Day banner should show from November 1 through November 12.");
+  }
+  if (veteransDayInSeason("2026-10-26") || veteransDayInSeason("2026-10-31") || veteransDayInSeason("2026-11-13")) {
+    throw new Error("The Veterans Day banner should stay off outside November 1 through November 12.");
+  }
+  if (veteransDayInSeason("November 11")) throw new Error("A banner date has to be YYYY-MM-DD.");
+
+  if (Object.keys(parseVeteransDayPins({})).length !== 0) throw new Error("An empty pin file should mean no pins.");
+  for (const value of [{ va: "anchorage-honor-flight" }, { VA: "Not A Slug" }, { VA: 1 }, ["VA"]]) {
+    let threw = false;
+    try {
+      parseVeteransDayPins(value);
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`Pins should reject ${JSON.stringify(value)}`);
+  }
+
+  const pins = loadVeteransDayPins();
+  const published = getPublishedStories();
+  const live = getVeteransDayHub();
+  const rebuilt = buildVeteransDayHub(published, pins);
+  if (live.pinErrors.length || rebuilt.pinErrors.length) {
+    throw new Error(`Veterans Day pins: ${[...live.pinErrors, ...rebuilt.pinErrors].join("; ")}`);
+  }
+  if (live.slots.length !== 51 || live.covered.length + live.gaps.length !== 51) {
+    throw new Error("The live hub should cover every state slot exactly once.");
+  }
+  for (const item of live.slots) {
+    const pin = pins[item.state.code];
+    if (pin) {
+      if (!item.pinned || item.story?.slug !== pin) throw new Error(`Pin for ${item.state.code} did not apply.`);
+    } else if (item.pinned) {
+      throw new Error(`${item.state.code} is marked pinned without a config entry.`);
+    }
+    if (!item.story) continue;
+    if (!isVeteranStory(item.story)) throw new Error(`${item.story.slug} is on the hub without qualifying.`);
+    if (item.story.state !== item.state.code && !item.story.alsoStates.includes(item.state.code)) {
+      throw new Error(`${item.story.slug} is filed on ${item.state.code} without a matching state.`);
+    }
+    if (!item.pinned) {
+      const homes = published
+        .filter((story) => isVeteranStory(story) && story.state === item.state.code)
+        .sort((a, b) => compareStateStories(item.state.code, veteranStoryQuality, a, b));
+      if (homes.length && item.story.slug !== homes[0]?.slug) {
+        throw new Error(`${item.state.code} should use ${homes[0]?.slug}, not ${item.story.slug}.`);
+      }
+      if (!homes.length && item.story.state === item.state.code) {
+        throw new Error(`${item.state.code} used a home story that does not qualify.`);
+      }
+    }
+  }
+  const helpUrls = new Set<string>();
+  for (const link of live.help) {
+    if (helpUrls.has(link.url)) throw new Error(`Duplicate help link ${link.url}`);
+    helpUrls.add(link.url);
+    const owner = live.covered.find((item) => item.story?.slug === link.storySlug)?.story;
+    if (!owner?.howToHelp.some((item) => item.url === link.url && item.label === link.label)) {
+      throw new Error(`Help link ${link.url} is not on ${link.storySlug}.`);
+    }
+  }
+  if (!live.socialStory || !live.covered.some((item) => item.story?.slug === live.socialStory?.slug)) {
+    throw new Error("The social image has to be a story that is actually on the hub.");
+  }
+  if (!live.latest || live.latest !== live.socialStory.date) throw new Error("The hub date should match the social story.");
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.some((url) => url.endsWith(VETERANS_DAY_PATH))) throw new Error("The sitemap should include the Veterans Day hub.");
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("VETERANS_DAY_PATH")) throw new Error("IndexNow should ping the Veterans Day hub.");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+  if (!home.includes("VeteransDayBanner")) throw new Error("The homepage should mount the Veterans Day banner.");
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("VETERANS_DAY_PATH")) throw new Error("The footer should link to the Veterans Day hub.");
+
+  const missing = live.gaps.map((item) => item.state.name);
+  console.log(
+    missing.length
+      ? `Veterans Day: ${live.covered.length} of ${live.slots.length} places covered. Still open: ${missing.join(", ")}`
+      : `Veterans Day: all ${live.slots.length} places covered.`,
+  );
+}
+
 function assertImageVariants() {
   const versioned = "/images/stories/pony-v2.webp";
   if (storyThumbPath(versioned) !== "/images/stories/pony-v2-sm.webp") {
@@ -715,6 +1017,7 @@ function assertImageVariants() {
 
 const stories = loadAllStories();
 assertImageVariants();
+assertVeteransDayHub();
 assertSchemaRejectsGarbage();
 assertCountryRules();
 assertWorldSpotlight();

@@ -106,7 +106,23 @@ function drawPins(root: HTMLDivElement, home: string | undefined, highlighted: s
   }
 }
 
-export function UsMap({ home, highlighted }: { home?: string; highlighted: string[] }) {
+const DEFAULT_LEGEND = [
+  { swatch: "#FFD36E", label: "New today" },
+  { swatch: "#F3B23C", label: "Your state" },
+];
+
+export function UsMap({
+  home,
+  highlighted,
+  legend = DEFAULT_LEGEND,
+  labels = true,
+}: {
+  home?: string;
+  highlighted: string[];
+  legend?: { swatch: string; label: string }[];
+  /** Name pins. Turn off when many states are highlighted and a grid lists them. */
+  labels?: boolean;
+}) {
   const markup = useMemo(() => renderUsMap(home?.toLowerCase(), highlighted.map((code) => code.toLowerCase())), [home, highlighted]);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -115,7 +131,13 @@ export function UsMap({ home, highlighted }: { home?: string; highlighted: strin
     if (!root) return;
     const homeCode = home?.toLowerCase();
     const codes = highlighted.map((code) => code.toLowerCase());
-    const draw = () => drawPins(root, homeCode, codes);
+    const draw = () => {
+      if (!labels) {
+        root.querySelector("#pins")?.replaceChildren();
+        return;
+      }
+      drawPins(root, homeCode, codes);
+    };
     draw();
     const media = window.matchMedia("(max-width: 700px)");
     media.addEventListener("change", draw);
@@ -124,21 +146,21 @@ export function UsMap({ home, highlighted }: { home?: string; highlighted: strin
       media.removeEventListener("change", draw);
       window.removeEventListener("resize", draw);
     };
-  }, [markup, home, highlighted]);
+  }, [markup, home, highlighted, labels]);
 
   return (
     <div className="map">
       <div className="map-canvas" ref={ref} dangerouslySetInnerHTML={{ __html: markup }} />
-      <div className="map-legend">
-        <span>
-          <i style={{ background: "#FFD36E" }} />
-          New today
-        </span>
-        <span>
-          <i style={{ background: "#F3B23C" }} />
-          Your state
-        </span>
-      </div>
+      {legend.length ? (
+        <div className="map-legend">
+          {legend.map((item) => (
+            <span key={item.label}>
+              <i style={{ background: item.swatch }} />
+              {item.label}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

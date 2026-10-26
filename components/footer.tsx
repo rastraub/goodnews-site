@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
 import { editionYear } from "@/lib/format";
+import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { siteConfig, socialLinks } from "@/site.config";
 
 export function Footer() {
@@ -32,6 +33,7 @@ export function Footer() {
               <li><Link href="/world">World</Link></li>
               <li><Link href="/week">This week</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
+              <li><Link href={VETERANS_DAY_PATH}>Veterans Day</Link></li>
               <li><Link href="/topics">Topics</Link></li>
               {CATEGORIES.map((category) => (
                 <li key={category.slug}>

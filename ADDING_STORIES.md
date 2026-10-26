@@ -183,6 +183,28 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
 6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 
+## Veterans Day hub
+
+`/veterans-day` stays up all year. It shows one kindness story about veterans for each state and Washington, D.C., chosen from stories already in the archive. November 11 does not turn the page off.
+
+A story qualifies when it has the `veterans` tag, or when the headline or deck says veteran or honor flight. A sports “veteran” (NBA, NFL, and the other leagues) does not qualify unless the tag is set. A passing mention in the body is not enough.
+
+The automatic pick prefers a story filed in that state over one that only lists the state in `alsoStates`. After that it takes the newest date, then `featured`, then a Top 5 rank, then a stronger veteran headline (honor flight, housing, a service dog, a medal). A state with no match shows an open card that links to `/submit`.
+
+To replace the pick for one state, edit `data/veterans-day-pins.json`. Keys are USPS codes, including `DC`. Values are story slugs. Leave a state out to keep the automatic pick. An empty object means every state is automatic.
+
+```json
+{
+  "VA": "altavista-valor-farm"
+}
+```
+
+The pinned story has to be published, has to qualify, and has to be filed in that state (`state` or `alsoStates`). A bad pin fails `npm run validate-stories` and the build. The card says “Pinned” when a pin is in use. The byline on the page stays the public masthead from `site.config.ts`.
+
+`npm run veterans-gaps` prints the states that still need a veteran story, plus the slug chosen for each covered state. The same open list is logged by `npm run validate-stories`. Open states do not fail the build. The daily run can use that list to fill the gaps.
+
+The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. The homepage shows a banner from November 1 through November 12, using the same New York date as the edition line, and only after a build during that window. The hub URL itself does not change.
+
 ## Health & Tech
 
 `health-tech` is displayed as "Health & Tech". It is for medical advances, longevity research with real human results, and technology that is already helping people. The bar is stricter than the other categories.

@@ -5,6 +5,7 @@ import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
+import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { weeksToPrerender } from "@/lib/weeks";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
@@ -56,6 +57,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const weeks = weeksToPrerender();
   const newestWeek = weeks[weeks.length - 1];
+  const veterans = getVeteransDayHub();
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -64,6 +66,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: page.changeFrequency,
       priority: page.priority,
     })),
+    {
+      url: absoluteUrl(VETERANS_DAY_PATH),
+      lastModified: veterans.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
     {
       url: absoluteUrl("/world"),
       ...(worldLatest ? { lastModified: worldLatest } : {}),
