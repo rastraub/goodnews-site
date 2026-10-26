@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.gw.govt.nz/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Radio New Zealand reported on October 23, 2026, that fernbirds were seen again at a wetland in Wellington. The birds had been missing from that part of the lower North Island for about 70 years. They are weak flyers, and they arrived on their own while people were checking the lakes. Local iwi and volunteers have been trapping predators and restoring the wetland."
 kidQuestions:
