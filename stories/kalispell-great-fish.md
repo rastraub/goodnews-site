@@ -24,7 +24,6 @@ howToHelp:
     url: "https://whitefishcommunityfoundation.org/initiatives/great-fish-community-challenge"
     kind: learn
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

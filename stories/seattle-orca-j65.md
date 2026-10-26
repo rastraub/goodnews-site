@@ -24,8 +24,7 @@ howToHelp:
   - label: "Orca Conservancy"
     url: "https://www.orcaconservancy.org/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true
