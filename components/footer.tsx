@@ -58,6 +58,7 @@ export function Footer() {
             <ul>
               <li><Link href="/subscribe">Daily Top 5 email</Link></li>
               <li><Link href="/kids#teachers">Teacher email</Link></li>
+              <li><Link href="/giving-tuesday">Giving Tuesday</Link></li>
               <li><Link href="/submit">Submit a story</Link></li>
               <li><Link href="/membership">Membership</Link></li>
               <li><Link href="/partner">Partner with us</Link></li>

@@ -24,7 +24,16 @@ import {
   type WeekSource,
 } from "../lib/weeks";
 import { storySchema } from "../lib/story-schema";
-import { getPublishedStories, loadAllStories } from "../lib/stories";
+import { getPublishedStories, loadAllStories, type Story } from "../lib/stories";
+import { GIVING_TUESDAY_PINS } from "../lib/giving-tuesday-pins";
+import {
+  buildGivingGuide,
+  freeActionOf,
+  isGivingTuesdaySeason,
+  organizationName,
+  type GivingStory,
+} from "../lib/giving-tuesday";
+import { STATES } from "../lib/states";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
@@ -713,6 +722,211 @@ function assertImageVariants() {
   }
 }
 
+function givingFixture(partial: {
+  slug: string;
+  state: string;
+  label: string;
+  url: string;
+  kind?: GivingStory["howToHelp"][number]["kind"];
+  tags?: string[];
+  date?: string;
+  city?: string;
+}): GivingStory {
+  return {
+    slug: partial.slug,
+    title: "A headline that is long enough",
+    dek: "A researched summary that is long enough to stand in for the story.",
+    date: partial.date ?? "2026-10-01",
+    city: partial.city ?? "Hometown",
+    country: "US",
+    state: partial.state,
+    category: "community",
+    tags: partial.tags ?? ["neighbors"],
+    sourceName: "Local Paper",
+    sourceUrl: "https://example.com/source",
+    image: "/images/stories/example.webp",
+    imageAlt: "An example photo",
+    howToHelp: [{ label: partial.label, url: partial.url, kind: partial.kind ?? "donate" }],
+  };
+}
+
+function assertGivingTuesday(stories: Story[]) {
+  if (isGivingTuesdaySeason("2026-10-26") || isGivingTuesdaySeason("2026-11-23")) {
+    throw new Error("The Giving Tuesday banner should stay down before November 24, 2026.");
+  }
+  if (!isGivingTuesdaySeason("2026-11-24") || !isGivingTuesdaySeason("2026-12-01") || !isGivingTuesdaySeason("2026-12-02")) {
+    throw new Error("The Giving Tuesday banner should run from November 24 through December 2, 2026.");
+  }
+  if (isGivingTuesdaySeason("2026-12-03") || isGivingTuesdaySeason("2027-11-24") || isGivingTuesdaySeason("2025-12-01")) {
+    throw new Error("The Giving Tuesday banner window is only November 24 through December 2, 2026.");
+  }
+  if (organizationName("Denver Zoo") !== "Denver Zoo") throw new Error("A bare organization label should stay whole.");
+  if (organizationName("Support the Denver Zoo") !== "Denver Zoo") {
+    throw new Error("A support label should keep the organization named in that label.");
+  }
+  if (organizationName("Donate food to Community Harvest Food Bank") !== "Community Harvest Food Bank") {
+    throw new Error("A donate-goods label should keep the organization named in that label.");
+  }
+  if (organizationName("Help Shoes That Fit provide new shoes") !== "Help Shoes That Fit provide new shoes") {
+    throw new Error("A label with a leftover verb should stay whole.");
+  }
+  if (organizationName("Learn first aid with the American Red Cross") !== "Learn first aid with the American Red Cross") {
+    throw new Error("A learn-more sentence should stay whole when it does not name an organization up front.");
+  }
+  if (freeActionOf({ kind: "volunteer", label: "Metro United Way" }) !== "volunteer") {
+    throw new Error("A volunteer link should be marked as costing nothing.");
+  }
+  if (freeActionOf({ kind: "donate", label: "Donate food to Community Harvest Food Bank" }) !== "goods") {
+    throw new Error("Donating food should be marked as goods.");
+  }
+  if (freeActionOf({ kind: "donate", label: "Give to the Lowcountry Food Bank" }) !== null) {
+    throw new Error("A money gift should not be marked as donated goods.");
+  }
+  if (freeActionOf({ kind: "thank", label: "Florence Fire/EMS" }) !== "thanks") {
+    throw new Error("A thank-you link should be marked as costing nothing.");
+  }
+  if (freeActionOf({ kind: "learn", label: "Denver Zoo" }) !== null) {
+    throw new Error("A learn-more link should not be marked as costing nothing.");
+  }
+  if (freeActionOf({ kind: "learn", label: "See how to help next year's Book Share" }) !== null) {
+    throw new Error("Book Share is a name in the label, not a share action.");
+  }
+
+  const animalStates = ["AL", "AK", "AZ", "AR", "CA", "CT"].map((state) =>
+    givingFixture({
+      slug: `animal-${state.toLowerCase()}`,
+      state,
+      label: `${state} Animal Shelter`,
+      url: `https://example.org/${state.toLowerCase()}-shelter`,
+      tags: ["dogs"],
+    }),
+  );
+  const mixed = buildGivingGuide(
+    [
+      ...animalStates,
+      givingFixture({
+        slug: "nm-animals",
+        state: "NM",
+        label: "New Mexico Animal Shelter",
+        url: "https://example.org/nm-animals",
+        tags: ["dogs"],
+        city: "Santa Fe",
+      }),
+      givingFixture({
+        slug: "nm-veterans",
+        state: "NM",
+        label: "New Mexico Veterans House",
+        url: "https://example.org/nm-veterans",
+        tags: ["veterans"],
+        city: "Santa Fe",
+      }),
+    ],
+    [],
+  );
+  const nm = mixed.picks.find((pick) => pick.stateCode === "NM");
+  if (nm?.slug !== "nm-veterans") {
+    throw new Error(`A state with two equal links should prefer the less-used cause. Got ${nm?.slug ?? "nothing"}.`);
+  }
+
+  const shared = "https://www.redcross.org/cpr";
+  const national = buildGivingGuide(
+    [
+      givingFixture({ slug: "al-rc", state: "AL", label: "American Red Cross", url: shared, kind: "learn", tags: ["first-responders"] }),
+      givingFixture({ slug: "ak-rc", state: "AK", label: "American Red Cross", url: shared, kind: "learn", tags: ["first-responders"] }),
+      givingFixture({ slug: "az-rc", state: "AZ", label: "American Red Cross", url: shared, kind: "learn", tags: ["first-responders"] }),
+      givingFixture({ slug: "co-rc", state: "CO", label: "American Red Cross", url: shared, kind: "learn", tags: ["first-responders"] }),
+      givingFixture({
+        slug: "co-local",
+        state: "CO",
+        label: "Hometown Pantry",
+        url: "https://hometownpantry.example/help",
+        tags: ["food-banks"],
+        city: "Denver",
+      }),
+    ],
+    [],
+  );
+  const co = national.picks.find((pick) => pick.stateCode === "CO");
+  if (co?.slug !== "co-local") {
+    throw new Error(`A local donate link should beat a repeated national learn link. Got ${co?.slug ?? "nothing"}.`);
+  }
+
+  const pinned = buildGivingGuide(
+    [
+      givingFixture({ slug: "auto-pick", state: "WY", label: "Local Shelter", url: "https://example.org/auto", tags: ["dogs"], date: "2026-10-02" }),
+      givingFixture({
+        slug: "editor-pick",
+        state: "WY",
+        label: "Pinned Pantry",
+        url: "https://example.org/pin",
+        tags: ["food-banks"],
+        date: "2026-01-01",
+      }),
+    ],
+    [{ state: "WY", slug: "editor-pick" }],
+  );
+  const wy = pinned.picks.find((pick) => pick.stateCode === "WY");
+  if (!wy || wy.slug !== "editor-pick" || !wy.pinned || wy.organization !== "Pinned Pantry") {
+    throw new Error("An editor pin should replace the automatic pick.");
+  }
+  if (pinned.gaps.length !== STATES.length - 1) throw new Error("States without a story should be gap cards.");
+
+  let missingPin = false;
+  try {
+    buildGivingGuide([givingFixture({ slug: "only-wy", state: "WY", label: "Wyoming Shelter", url: "https://example.org/wy" })], [
+      { state: "WY", slug: "missing-story" },
+    ]);
+  } catch {
+    missingPin = true;
+  }
+  if (!missingPin) throw new Error("A pin for a missing story should fail.");
+
+  let badUrl = false;
+  try {
+    buildGivingGuide([givingFixture({ slug: "only-wy", state: "WY", label: "Wyoming Shelter", url: "https://example.org/wy" })], [
+      { state: "WY", slug: "only-wy", url: "https://example.org/not-on-the-story" },
+    ]);
+  } catch {
+    badUrl = true;
+  }
+  if (!badUrl) throw new Error("A pin URL that is not on the story should fail.");
+
+  const guide = buildGivingGuide(stories, GIVING_TUESDAY_PINS);
+  if (guide.picks.length + guide.gaps.length !== STATES.length) {
+    throw new Error("Giving Tuesday should account for every state and Washington, D.C.");
+  }
+  const seen = new Set<string>();
+  for (const pick of [...guide.picks, ...guide.alternates]) {
+    if (seen.has(pick.stateCode) && guide.picks.includes(pick)) {
+      throw new Error(`Two featured picks for ${pick.stateCode}.`);
+    }
+    const story = stories.find((item) => item.slug === pick.slug);
+    if (!story || story.draft || story.country !== "US" || story.state !== pick.stateCode) {
+      throw new Error(`${pick.stateCode} features ${pick.slug}, which is not a published story in that state.`);
+    }
+    const help = story.howToHelp.find((item) => item.url === pick.helpUrl && item.label === pick.helpLabel && item.kind === pick.helpKind);
+    if (!help) throw new Error(`${pick.stateCode} features a how-to-help link that is not on ${pick.slug}.`);
+    if (!pick.helpLabel.includes(pick.organization) || !pick.organization) {
+      throw new Error(`${pick.stateCode} organization “${pick.organization}” is not taken from the help label.`);
+    }
+    if (pick.dek !== story.dek || pick.sourceName !== story.sourceName || pick.sourceUrl !== story.sourceUrl || pick.image !== story.image) {
+      throw new Error(`${pick.stateCode} changed the story's summary, source, or photo.`);
+    }
+    if (pick.freeAction !== freeActionOf(help)) throw new Error(`${pick.stateCode} free-action label does not match the link.`);
+    if (!pick.helpUrl.startsWith("https://")) throw new Error(`${pick.stateCode} help link is not https.`);
+  }
+  for (const pick of guide.picks) {
+    if (seen.has(pick.stateCode)) throw new Error(`Two featured picks for ${pick.stateCode}.`);
+    seen.add(pick.stateCode);
+  }
+  for (const gap of guide.gaps) {
+    const available = stories.some((story) => !story.draft && story.country === "US" && story.state === gap.code && story.howToHelp.length > 0);
+    if (available) throw new Error(`${gap.name} has a how-to-help link and should not be a gap.`);
+  }
+  const missing = guide.gaps.map((state) => state.code).join(", ");
+  console.log(`Giving Tuesday: ${guide.picks.length} of ${STATES.length}. Missing: ${missing || "none"}.`);
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -729,6 +943,7 @@ assertTipMail();
 assertOnlyMailbox();
 assertBrandLivesInOneFile();
 assertFeeds();
+assertGivingTuesday(stories);
 const published = stories.filter((story) => !story.draft);
 const images = feedImageReport(published.map((story) => story.image));
 console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);

@@ -13,6 +13,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
 npm run validate-stories   # check story files and the rename rule
+npm run giving-tuesday-coverage   # states still missing a Giving Tuesday pick
 npm run lint
 npm run build
 npm start

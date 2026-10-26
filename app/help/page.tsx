@@ -17,7 +17,9 @@ export default function HelpPage() {
       <div className="wrap page-hero">
         <p className="kicker">How to help</p>
         <h1>Turn a smile into action.</h1>
-        <p className="lede">Each story includes a practical next step. The links below go to the organizations named in the reporting, not to us.</p>
+        <p className="lede">
+          Each story includes a practical next step. The links below go to the organizations named in the reporting, not to us. For a featured way to help from each state, see the <Link href="/giving-tuesday">Giving Tuesday guide</Link>.
+        </p>
       </div>
       <div className="wrap" style={{ paddingTop: 12, display: "grid", gap: 18 }}>
         {stories.map((story) => (
