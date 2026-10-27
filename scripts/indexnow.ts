@@ -1,4 +1,6 @@
 import { getCategory } from "../lib/categories";
+import { goodNeighborPath } from "../lib/good-neighbor";
+import { ballotMonths } from "../lib/good-neighbor-data";
 import { getCountry } from "../lib/countries";
 import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
 import { kidPlaceForStory } from "../lib/kids";
@@ -9,7 +11,7 @@ import { getStateByCode } from "../lib/states";
 import { weeksToPrerender } from "../lib/weeks";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", "/topics"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", "/topics", "/good-neighbor", "/good-neighbor/winners"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -19,6 +21,7 @@ async function main() {
 
   const urls = new Set(STATIC_PATHS.map((path) => (path === "/" ? siteConfig.url : `${siteConfig.url}${path}`)));
   for (const week of weeksToPrerender()) urls.add(`${siteConfig.url}${week.path}`);
+  for (const month of ballotMonths()) urls.add(`${siteConfig.url}${goodNeighborPath(month)}`);
   const recent = getPublishedStories().filter((story) => isWithinHours(story.date, 48));
   for (const story of recent) {
     urls.add(`${siteConfig.url}/story/${story.slug}`);

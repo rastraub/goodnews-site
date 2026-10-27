@@ -1,5 +1,18 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
+import { GET, POST } from "../app/api/good-neighbor/route";
+import {
+  badgeLabel,
+  blockReason,
+  selectNominees,
+  voteShareText,
+  votingOpen,
+  winnerSlug,
+  type GoodNeighborSource,
+} from "../lib/good-neighbor";
+import { loadGoodNeighborOverrides } from "../lib/good-neighbor-data";
+import { castFileVote, countsFromRedis, requestIpHash, voteMode } from "../lib/good-neighbor-store";
 import { parseEmailInterest } from "../lib/email";
 import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
 import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
@@ -418,7 +431,7 @@ function assertWeeks() {
   console.log(`Weeks: ${weeks.length} roundups since ${launchWeekStart()} (${SITE_LAUNCH} launch). ${paths || "none yet"}.`);
 }
 
-function assertEnrichmentMerge() {
+function assertEnrichmentMerge(stories: ReturnType<typeof loadAllStories>) {
   const summary = "A classroom summary that is long enough for the schema when it is copied onto a story file.";
   const questions = ["What did the people in this story do?", "How could a class try something kind this week?"];
   const extra = {
@@ -713,22 +726,230 @@ function assertImageVariants() {
   }
 }
 
-const stories = loadAllStories();
-assertImageVariants();
-assertSchemaRejectsGarbage();
-assertCountryRules();
-assertWorldSpotlight();
-assertHubs();
-assertKidClassrooms();
-assertWeeks();
-assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
-assertEnrichmentMerge();
-assertLoadedCountries(stories);
-assertSeedSources(stories);
-assertTipMail();
-assertOnlyMailbox();
-assertBrandLivesInOneFile();
-assertFeeds();
-const published = stories.filter((story) => !story.draft);
-const images = feedImageReport(published.map((story) => story.image));
-console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);
+function neighborFixture(partial: Partial<GoodNeighborSource> & Pick<GoodNeighborSource, "slug" | "title">): GoodNeighborSource {
+  return {
+    dek: "Neighbors gave their afternoon and built something kind for the block.",
+    date: "2026-10-08",
+    category: "heroes",
+    tags: ["neighbors", "kindness"],
+    ...partial,
+  };
+}
+
+async function assertGoodNeighbor() {
+  if (voteShareText("Example", "Ada") !== "I voted for Ada on Example") {
+    throw new Error("The share line should say who the reader picked.");
+  }
+  if (!votingOpen("2026-10", "2026-10-01") || !votingOpen("2026-10", "2026-10-25")) {
+    throw new Error("Voting should be open on the 1st through the 25th.");
+  }
+  if (votingOpen("2026-10", "2026-10-26") || votingOpen("2026-09", "2026-10-10")) {
+    throw new Error("Voting should be closed after the 25th and for other months.");
+  }
+  if (badgeLabel("2026-10", ["2026-10"]) !== "Good Neighbor of October") {
+    throw new Error("The badge should name the month.");
+  }
+  if (badgeLabel("2026-10", ["2026-10", "2027-10"]) !== "Good Neighbor of October 2026") {
+    throw new Error("Two Octobers need the year on the badge.");
+  }
+  const nominees = [
+    { slug: "ada", date: "2026-10-02" },
+    { slug: "bea", date: "2026-10-03" },
+  ];
+  if (winnerSlug(nominees, { ada: 2, bea: 4 }, { open: true })) {
+    throw new Error("A winner should wait until the window closes.");
+  }
+  if (winnerSlug(nominees, { ada: 1, bea: 3 }, { open: false }) !== "bea") {
+    throw new Error("The higher tally should win.");
+  }
+  if (winnerSlug(nominees, { ada: 2, bea: 2 }, { open: false }) !== "ada") {
+    throw new Error("A tie should go to the earlier story.");
+  }
+  if (winnerSlug(nominees, { ada: 4 }, { open: false, editorWinner: "bea" }) !== "bea") {
+    throw new Error("An editor winner should replace the tally after the window closes.");
+  }
+  if (winnerSlug(nominees, {}, { open: false })) throw new Error("No votes should mean no winner.");
+
+  const kind = neighborFixture({ slug: "ada", title: "A neighbor gave a free afternoon" });
+  const duty = neighborFixture({
+    slug: "duty",
+    title: "Officers revived a baby",
+    dek: "NYPD officers stepped in and the baby is breathing.",
+    tags: ["police", "first-responders"],
+  });
+  const lab = neighborFixture({
+    slug: "lab",
+    title: "A campus lab shared a new result",
+    dek: "The university gave the finding to the public.",
+    category: "science",
+    tags: ["medical-research"],
+  });
+  if (blockReason(kind)) throw new Error("A neighbor giving time should be eligible.");
+  if (!blockReason(duty)) throw new Error("An on-duty rescue should stay off the ballot.");
+  if (!blockReason(lab)) throw new Error("A lab result should stay off the ballot.");
+  const pool = [kind, duty, lab, neighborFixture({ slug: "bea", title: "A student donated stuffed animals", dek: "The student gave them away for free." })];
+  const auto = selectNominees(pool, "2026-10");
+  if (auto.some((item) => item.slug === "duty" || item.slug === "lab")) {
+    throw new Error("Duty and institution stories should not be auto-picked.");
+  }
+  const pinned = selectNominees(pool, "2026-10", { "2026-10": { pin: ["lab"], exclude: ["ada"] } });
+  if (pinned[0]?.slug !== "lab" || pinned.some((item) => item.slug === "ada")) {
+    throw new Error("Pin should lead, and exclude should remove a story.");
+  }
+  const crowd = Array.from({ length: 15 }, (_, index) =>
+    neighborFixture({
+      slug: `meal-${index}`,
+      title: `A neighbor gave meal ${index} away`,
+      dek: "The neighbor gave the free meal to a family on the block.",
+      date: `2026-10-${String((index % 27) + 1).padStart(2, "0")}`,
+    }),
+  );
+  const capped = selectNominees(crowd, "2026-10");
+  if (capped.length < 8 || capped.length > 12) {
+    throw new Error(`A full month should land between 8 and 12 nominees, got ${capped.length}.`);
+  }
+
+  const overrides = loadGoodNeighborOverrides();
+  const live = selectNominees(getPublishedStories(), "2026-10", overrides);
+  if (live.length < 8 || live.length > 12) {
+    throw new Error(`October 2026 should have 8 to 12 nominees, got ${live.length}: ${live.map((item) => item.slug).join(", ")}`);
+  }
+  for (const nominee of live) {
+    if (!nominee.date.startsWith("2026-10")) throw new Error(`${nominee.slug} is outside October.`);
+    if (!nominee.pinned && blockReason(nominee)) {
+      throw new Error(`${nominee.slug} is on the ballot but blocked (${blockReason(nominee)}).`);
+    }
+  }
+  if (!live.some((nominee) => nominee.kidSummary)) {
+    throw new Error("October should include a nominee with a read-aloud summary.");
+  }
+  console.log(`Good Neighbor 2026-10: ${live.map((item) => item.slug).join(", ")}`);
+
+  if (voteMode() !== "off") throw new Error("Shared votes should be off unless the flag is fully set.");
+  const parsed = countsFromRedis(["ada", "2", "nope", "0", "bea", 3]);
+  if (parsed.ada !== 2 || parsed.bea !== 3 || parsed.nope) throw new Error("Redis totals should keep positive integer counts only.");
+  const ip = "203.0.113.44";
+  const hashed = requestIpHash(new Request("https://example.com/api/good-neighbor", { headers: { "x-forwarded-for": ip } }));
+  if (hashed.includes(ip) || !/^[a-f0-9]{64}$/.test(hashed)) {
+    throw new Error("The rate-limit key should be a hash, not the raw address.");
+  }
+
+  const previous = {
+    flag: process.env.GOOD_NEIGHBOR_VOTES,
+    salt: process.env.GOOD_NEIGHBOR_IP_SALT,
+    file: process.env.GOOD_NEIGHBOR_VOTE_FILE,
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  };
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "gn-"));
+  const file = path.join(dir, "votes.json");
+  const voter = "11111111-1111-4111-8111-111111111111";
+  try {
+    process.env.GOOD_NEIGHBOR_VOTES = "file";
+    process.env.GOOD_NEIGHBOR_IP_SALT = "test-salt-0123456789";
+    process.env.GOOD_NEIGHBOR_VOTE_FILE = file;
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (voteMode() !== "file") throw new Error("A file store with a salt should turn shared votes on.");
+    const first = await castFileVote({
+      month: "2026-10",
+      slug: "ada",
+      voterId: voter,
+      nomineeSlugs: ["ada", "bea"],
+      open: true,
+    });
+    if (!first.ok || first.duplicate || first.counts.ada !== 1) throw new Error("The first vote should count once.");
+    const again = await castFileVote({
+      month: "2026-10",
+      slug: "bea",
+      voterId: voter,
+      nomineeSlugs: ["ada", "bea"],
+      open: true,
+    });
+    if (!again.ok || !again.duplicate || again.choice !== "ada" || again.counts.ada !== 1 || again.counts.bea) {
+      throw new Error("A second vote from the same browser should keep the first choice.");
+    }
+    const closed = await castFileVote({
+      month: "2026-10",
+      slug: "bea",
+      voterId: "22222222-2222-4222-8222-222222222222",
+      nomineeSlugs: ["ada", "bea"],
+      open: false,
+    });
+    if (closed.ok || closed.status !== 403) throw new Error("A closed month should reject a vote.");
+    const raw = fs.readFileSync(file, "utf8");
+    if (raw.includes(voter) || raw.includes(ip)) throw new Error("The vote file should not store a voter id or an IP address.");
+
+    process.env.GOOD_NEIGHBOR_VOTES = "upstash";
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    if (voteMode() !== "off") throw new Error("Upstash without a URL should stay on the cheer fallback.");
+  } finally {
+    if (previous.flag === undefined) delete process.env.GOOD_NEIGHBOR_VOTES;
+    else process.env.GOOD_NEIGHBOR_VOTES = previous.flag;
+    if (previous.salt === undefined) delete process.env.GOOD_NEIGHBOR_IP_SALT;
+    else process.env.GOOD_NEIGHBOR_IP_SALT = previous.salt;
+    if (previous.file === undefined) delete process.env.GOOD_NEIGHBOR_VOTE_FILE;
+    else process.env.GOOD_NEIGHBOR_VOTE_FILE = previous.file;
+    if (previous.url === undefined) delete process.env.UPSTASH_REDIS_REST_URL;
+    else process.env.UPSTASH_REDIS_REST_URL = previous.url;
+    if (previous.token === undefined) delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    else process.env.UPSTASH_REDIS_REST_TOKEN = previous.token;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+
+  if (voteMode() !== "off") throw new Error("The vote flag should be restored after the store test.");
+  const honeypot = await POST(
+    new Request("http://localhost:3000/api/good-neighbor", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "http://localhost:3000", "x-forwarded-for": ip },
+      body: JSON.stringify({ month: "2026-10", slug: "ada", voterId: voter, company: "spam" }),
+    }),
+  );
+  const honeypotBody = (await honeypot.json()) as { ignored?: boolean };
+  if (!honeypot.ok || !honeypotBody.ignored) throw new Error("A filled honeypot should be ignored.");
+  const missing = await GET(new Request(`http://localhost:3000/api/good-neighbor?month=1999-01`, { headers: { "x-forwarded-for": "203.0.113.45" } }));
+  if (missing.status !== 404) throw new Error("An unknown month should 404.");
+  const evil = await POST(
+    new Request("http://localhost:3000/api/good-neighbor", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://evil.example", "x-forwarded-for": "203.0.113.46" },
+      body: JSON.stringify({ month: "2026-10", slug: "ada", voterId: voter }),
+    }),
+  );
+  if (evil.status !== 403) throw new Error("A cross-origin vote should be refused.");
+  const totals = await GET(new Request("http://localhost:3000/api/good-neighbor?month=2026-10", { headers: { "x-forwarded-for": ip } }));
+  const totalsText = await totals.text();
+  if (!totals.ok || totalsText.includes(ip) || totalsText.includes(voter)) {
+    throw new Error("Vote totals should not echo an address or a voter id.");
+  }
+  const payload = JSON.parse(totalsText) as { enabled?: boolean; counts?: unknown; winner?: unknown };
+  if (payload.enabled !== false || payload.winner) throw new Error("With storage off, October should not publish a winner.");
+}
+
+async function main() {
+  const stories = loadAllStories();
+  assertImageVariants();
+  assertSchemaRejectsGarbage();
+  assertCountryRules();
+  assertWorldSpotlight();
+  assertHubs();
+  assertKidClassrooms();
+  assertWeeks();
+  assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
+  assertEnrichmentMerge(stories);
+  assertLoadedCountries(stories);
+  assertSeedSources(stories);
+  assertTipMail();
+  assertOnlyMailbox();
+  assertBrandLivesInOneFile();
+  assertFeeds();
+  await assertGoodNeighbor();
+  const published = stories.filter((story) => !story.draft);
+  const images = feedImageReport(published.map((story) => story.image));
+  console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);
+}
+
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+});

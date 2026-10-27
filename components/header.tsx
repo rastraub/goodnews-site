@@ -16,6 +16,7 @@ const PRIMARY = [
 const MORE = [
   { href: "/kids", label: "Kids" },
   { href: "/topics", label: "Topics" },
+  { href: "/good-neighbor", label: "Good Neighbor" },
 ];
 
 export function Header({ edition }: { edition: string }) {
@@ -28,6 +29,7 @@ export function Header({ edition }: { edition: string }) {
     if (href === "/local") return pathname === "/local" || pathname.startsWith("/state/");
     if (href === "/world") return pathname === "/world" || pathname.startsWith("/country/");
     if (href === "/topics") return pathname === "/topics" || pathname.startsWith("/topic/");
+    if (href === "/good-neighbor") return pathname === "/good-neighbor" || pathname.startsWith("/good-neighbor/");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

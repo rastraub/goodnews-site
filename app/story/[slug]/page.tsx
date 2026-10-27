@@ -3,12 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CheerButton } from "@/components/cheer-button";
+import { LiveBadge } from "@/components/good-neighbor-results";
 import { JsonLd } from "@/components/json-ld";
 import { ShareButtons } from "@/components/share-buttons";
 import { StoryCard } from "@/components/story-card";
 import { EmphaticTitle, StoryBody } from "@/components/story-body";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
+import { closedNomination, recordedWinnerFor } from "@/lib/good-neighbor-data";
+import { votesEnabled } from "@/lib/good-neighbor-store";
 import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
@@ -75,6 +78,8 @@ export default async function StoryPage({ params }: Props) {
   const state = story.country === "US" ? getStateByCode(story.state) : undefined;
   const country = story.country === "US" ? undefined : getCountry(story.country);
   const related = relatedStories(story);
+  const neighborBadge = recordedWinnerFor(story.slug);
+  const neighborVote = !neighborBadge && votesEnabled() ? closedNomination(story.slug) : undefined;
   const hubLinks = hubPathsForStory(story).flatMap((path) => {
     const hub = getHubByPath(path);
     return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
@@ -98,6 +103,13 @@ export default async function StoryPage({ params }: Props) {
             <span className="dot" />
             <span className="place">{placeLabel(story)}</span>
           </div>
+          {neighborBadge ? (
+            <Link href={neighborBadge.href} className="gn-badge">
+              {neighborBadge.label}
+            </Link>
+          ) : neighborVote ? (
+            <LiveBadge slug={story.slug} month={neighborVote.month} href={neighborVote.href} label={neighborVote.label} />
+          ) : null}
           <EmphaticTitle title={story.title} emphasis={story.emphasis} />
           <p className="dek">{story.dek}</p>
           <div className="meta">

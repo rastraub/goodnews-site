@@ -191,3 +191,7 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
 - The source has to be highly respected: a major newsroom, a peer-reviewed journal, a university, or a public-health authority such as the NIH, FDA, or CDC. A company press release is not enough on its own.
 - Skip a story that is essentially marketing for a product, a supplement, or a clinic. Skip anti-aging miracle claims.
 - The summary has to say plainly what was shown and where the evidence stops. If survival was not measured, say so. If follow-up is short, or only a few patients have had the next step, say so.
+
+## Good Neighbor of the Month
+
+The ballot is built from the month's archive. To force a story on, or to drop one the automatic pick included, edit `data/good-neighbor.json`. `pin` and `exclude` are slug lists for that `YYYY-MM`. A pinned story is dated in that month and already published. At most 12 pins. `winner` is optional and is used after the 25th. The README has the file shape and the storage flag for shared vote totals. Until that flag is set, readers cheer a favorite in the browser and nothing about them is stored.
