@@ -25,7 +25,7 @@ howToHelp:
   - label: "Antelope Island State Park"
     url: "https://stateparks.utah.gov/parks/antelope-island/"
     kind: learn
-featured: true
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

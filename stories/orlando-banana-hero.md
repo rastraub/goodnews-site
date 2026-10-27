@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.orlando.gov/Our-Government/Departments-Offices/Orlando-Police-Department"
     kind: learn
 featured: false
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true
