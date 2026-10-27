@@ -33,6 +33,7 @@ export function Footer() {
               <li><Link href="/week">This week</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/topics">Topics</Link></li>
+              <li><Link href="/heroes">Hometown Heroes</Link></li>
               {CATEGORIES.map((category) => (
                 <li key={category.slug}>
                   <Link href={`/category/${category.slug}`}>{category.label}</Link>

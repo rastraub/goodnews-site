@@ -106,7 +106,15 @@ function drawPins(root: HTMLDivElement, home: string | undefined, highlighted: s
   }
 }
 
-export function UsMap({ home, highlighted }: { home?: string; highlighted: string[] }) {
+export function UsMap({
+  home,
+  highlighted,
+  legend,
+}: {
+  home?: string;
+  highlighted: string[];
+  legend?: { highlighted: string; selected?: string };
+}) {
   const markup = useMemo(() => renderUsMap(home?.toLowerCase(), highlighted.map((code) => code.toLowerCase())), [home, highlighted]);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -132,12 +140,14 @@ export function UsMap({ home, highlighted }: { home?: string; highlighted: strin
       <div className="map-legend">
         <span>
           <i style={{ background: "#FFD36E" }} />
-          New today
+          {legend?.highlighted ?? "New today"}
         </span>
-        <span>
-          <i style={{ background: "#F3B23C" }} />
-          Your state
-        </span>
+        {legend && !legend.selected ? null : (
+          <span>
+            <i style={{ background: "#F3B23C" }} />
+            {legend?.selected ?? "Your state"}
+          </span>
+        )}
       </div>
     </div>
   );

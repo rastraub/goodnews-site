@@ -317,6 +317,36 @@ export const TAGS = [
     intro: "Firefighters, officers, and rescue crews whose training turned into help on a real call.",
   },
   {
+    slug: "firefighters",
+    label: "Firefighters",
+    title: "Good news about firefighters",
+    intro: "Fire crews who got someone out of a fire, off a ladder, or through a call that needed them.",
+  },
+  {
+    slug: "police",
+    label: "Police",
+    title: "Good news about police",
+    intro: "Officers whose shift turned into a rescue, a medical save, or a specific act of kindness.",
+  },
+  {
+    slug: "ems",
+    label: "EMS",
+    title: "Good news about EMS",
+    intro: "Paramedics and EMTs whose care on a call changed what happened next.",
+  },
+  {
+    slug: "dispatch",
+    label: "Dispatch",
+    title: "Good news about 911 dispatch",
+    intro: "Dispatchers who coached a caller through the minutes before crews arrived.",
+  },
+  {
+    slug: "search-and-rescue",
+    label: "Search and rescue",
+    title: "Good news about search and rescue",
+    intro: "Search-and-rescue teams who found someone and brought them back.",
+  },
+  {
     slug: "cancer-support",
     label: "Cancer support",
     title: "Good news about cancer support",

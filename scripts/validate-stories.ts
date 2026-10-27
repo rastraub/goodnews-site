@@ -23,6 +23,7 @@ import {
   weekStart,
   type WeekSource,
 } from "../lib/weeks";
+import { isFirstResponderStory, responderTypeOf } from "../lib/first-responders";
 import { storySchema } from "../lib/story-schema";
 import { getPublishedStories, loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
@@ -700,6 +701,27 @@ function assertFeeds() {
   }
 }
 
+function assertFirstResponders() {
+  const tagged = { tags: ["first-responders", "kindness"] };
+  if (!isFirstResponderStory(tagged) || responderTypeOf(tagged)) {
+    throw new Error("A first-responders tag should qualify a story without forcing a type.");
+  }
+  const fire = { tags: ["firefighters", "first-responders"], firstResponder: "fire" };
+  if (responderTypeOf(fire) !== "fire" || !isFirstResponderStory(fire)) {
+    throw new Error("firstResponder should set the responder type.");
+  }
+  const fromTag = { tags: ["search-and-rescue", "trails"] };
+  if (!isFirstResponderStory(fromTag) || responderTypeOf(fromTag) !== "search-and-rescue") {
+    throw new Error("A search-and-rescue tag should classify the story.");
+  }
+  const bad = storySchema.safeParse(minimalStory({ state: "OH", firstResponder: "cop" }));
+  if (bad.success) throw new Error("Unknown firstResponder values should fail.");
+  const good = storySchema.safeParse(minimalStory({ state: "OH", firstResponder: "ems" }));
+  if (!good.success || good.data.firstResponder !== "ems") {
+    throw new Error("ems should be a valid firstResponder value.");
+  }
+}
+
 function assertImageVariants() {
   const versioned = "/images/stories/pony-v2.webp";
   if (storyThumbPath(versioned) !== "/images/stories/pony-v2-sm.webp") {
@@ -716,6 +738,7 @@ function assertImageVariants() {
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
+assertFirstResponders();
 assertCountryRules();
 assertWorldSpotlight();
 assertHubs();

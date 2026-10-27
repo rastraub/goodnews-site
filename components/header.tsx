@@ -10,6 +10,7 @@ const PRIMARY = [
   { href: "/", label: "Today" },
   { href: "/local", label: "Local" },
   { href: "/world", label: "World" },
+  { href: "/heroes", label: "Hometown Heroes" },
   ...CATEGORIES.map((category) => ({ href: `/category/${category.slug}`, label: category.label })),
 ];
 

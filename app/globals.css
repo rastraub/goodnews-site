@@ -31,12 +31,12 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .strip .promise span{display:flex;align-items:center;gap:7px}
 
 header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);position:relative;z-index:5}
-.nav .wrap{display:flex;align-items:center;height:84px;gap:28px}
+.nav .wrap{display:flex;align-items:center;height:auto;min-height:84px;gap:28px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:12px;flex:none}
 .logo svg{width:44px;height:44px}
 .logo .name{font-family:var(--font-serif);font-weight:650;font-size:23px;letter-spacing:-.01em;line-height:1}
 .logo .name small{display:block;max-width:220px;font-family:var(--font-sans);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d);margin-top:5px;line-height:1.35}
-.links{display:flex;gap:14px;font-size:15px;font-weight:500;color:var(--ink2);margin-left:auto}
+.links{display:flex;flex-wrap:wrap;gap:10px 14px;font-size:15px;font-weight:500;color:var(--ink2);margin-left:auto}
 .links a{position:relative;padding:6px 0}
 .links a.on{color:var(--ink)}
 .links a.on:after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:3px;border-radius:3px;background:var(--gold)}
@@ -165,8 +165,8 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 
 .latest{padding:0 0 88px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tabs button{font-size:14px;font-weight:600;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink2);cursor:pointer}
-.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tabs button,.tabs a{font-size:14px;font-weight:600;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink2);cursor:pointer}
+.tabs button.on,.tabs a.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
 .card{background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;border:1px solid #F3ECE1;content-visibility:auto;contain-intrinsic-size:auto 460px}
 .card .ph{aspect-ratio:4/3;position:relative;overflow:hidden;display:block;background:#F6F1E8}
@@ -266,8 +266,9 @@ footer a:hover{color:#fff}
 .success-banner{background:#E8F5EE;color:#1C6B4A;border-radius:16px;padding:16px 18px;font-weight:600}
 
 .state-index{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.state-index a{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.state-index a,.state-index > span{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .state-index a.has{box-shadow:var(--shadow)}
+.state-index a[aria-current="page"]{outline:2px solid var(--gold);outline-offset:2px}
 .state-index .count{color:var(--gold-d);font-size:13px;font-weight:700}
 .region-block{margin-top:36px}
 .region-block h2{margin-bottom:12px}
@@ -309,7 +310,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .catbar{display:flex}
   .menu-panel.open{display:grid;padding:8px 20px 16px;background:var(--cream);border-bottom:1px solid var(--line)}
   .menu-panel.open a{padding:12px 4px;font-weight:600;border-bottom:1px solid var(--line)}
-  .nav .wrap{height:72px}
+  .nav .wrap{height:72px;min-height:0;flex-wrap:nowrap}
   .logo .name{font-size:18px}
   .logo svg{width:36px;height:36px}
 }
@@ -321,7 +322,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .strip .date{display:none}
   .strip .promise{gap:14px}
   .strip .promise .hide-m{display:none}
-  .nav .wrap{height:64px;gap:12px}
+  .nav .wrap{height:64px;min-height:0;gap:12px;flex-wrap:nowrap}
   .logo svg{width:30px;height:30px}
   .logo{gap:8px}
   .logo .name{font-size:16px;letter-spacing:-.015em}

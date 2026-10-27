@@ -13,6 +13,7 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
+  { path: "/heroes", changeFrequency: "daily", priority: 0.8 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
   { path: "/editorial-standards", changeFrequency: "monthly", priority: 0.6 },

@@ -73,6 +73,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `place` | no | Overrides the default "City, State" or "City, Country" label. |
 | `category` | yes | `heroes`, `animals`, `science`, `community`, or `health-tech`. |
 | `tags` | yes on a new story | Two to five labels from `lib/tags.ts`, such as `animal-rescue` or `school-lunch`. A topic page is created only after at least three stories share that tag. Validation rejects a tag that is not in the vocabulary, and it rejects a list that is not two to five labels. Omitting `tags` entirely still builds, so a file that lands on `main` before it is tagged does not take the site down. Do not rely on that. Set the tags. |
+| `firstResponder` | no | `fire`, `police`, `ems`, `dispatch`, or `search-and-rescue`. Set it when the story is about firefighters, police, EMTs or paramedics, 911 dispatchers, or search-and-rescue. `/heroes` lists a story when this field is set, when it is tagged `first-responders`, or when it carries `firefighters`, `police`, `ems`, `dispatch`, or `search-and-rescue`. |
 | `sourceName` | yes | The newsroom that reported it. |
 | `sourceUrl` | yes | `https` link to the original article. Use the URL exactly. |
 | `image` | yes | WebP path under `public`, for example `/images/stories/pony.webp`. Also add `pony-sm.webp`, about 360px wide, for thumbnails. A `pony-1600.jpg` is optional. When you replace a photo, use a new name such as `pony-v2.webp`. See Photos. |

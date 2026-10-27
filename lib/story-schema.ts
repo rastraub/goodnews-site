@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CATEGORIES } from "./categories";
 import { getCountry } from "./countries";
 import { getStateByCode } from "./states";
+import { FIRST_RESPONDER_SLUGS } from "./first-responders";
 import { isTag } from "./tags";
 
 const categorySlugs = CATEGORIES.map((category) => category.slug) as [
@@ -54,6 +55,7 @@ export const storySchema = z
       .max(5)
       .optional()
       .default([]),
+    firstResponder: z.enum(FIRST_RESPONDER_SLUGS).optional(),
     sourceName: z.string().min(2),
     sourceUrl: z.string().url().refine((url) => url.startsWith("https://"), "Source URL must use https"),
     image: z.string().regex(/^\/images\/.+\.webp$/),
