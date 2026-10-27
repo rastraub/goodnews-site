@@ -26,7 +26,6 @@ howToHelp:
     url: "https://spea.pt/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The Guardian reported on October 25, 2026, that people on Corvo, a small island in Portugal's Azores, turn the streetlights off for five nights each autumn. Young Cory's shearwaters leave the nest and try to fly to the ocean by the stars. Bright lights can pull them into the village instead. Neighbors walk the streets at night, let fallen birds rest in boxes, and release them the next day from a cliff near the water. Corvo is the only Azores island that switches off all of its public lights for the birds. Many people turn off lights at home too."
 kidQuestions:
