@@ -409,3 +409,29 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .print-sheet h1 { font-size: 28pt; }
   .print-source a[href]::after { content: " (" attr(href) ")"; font-weight: 400; }
 }
+
+.season-banner{padding:22px 0 0}
+.season-banner a{display:flex;align-items:center;gap:16px;background:var(--gold-l);border:1px solid #F0E0B8;border-radius:18px;padding:14px 18px}
+.season-banner .label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d);font-weight:700;flex:none}
+.season-banner strong{font-family:var(--font-serif);font-weight:600;font-size:20px;letter-spacing:-.01em;line-height:1.25}
+.season-banner .go{margin-left:auto;color:var(--blue-d);font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.fr-map-wrap{max-width:820px;margin:8px auto 18px}
+.fr-map-wrap .map{border-radius:28px;border:1px solid var(--line);overflow:hidden;min-height:280px}
+.fr-role{margin-top:28px}
+.fr-role h3{font-family:var(--font-serif);font-size:26px;font-weight:600;margin:0 0 12px}
+.fr-role,.card.fr-gap,.card[id^="fr-"],[id^="fr-"],[id^="role-"]{scroll-margin-top:24px}
+.state-index .open{color:var(--muted);font-size:13px;font-weight:600}
+.card.fr-gap{background:transparent;box-shadow:none;border:1px dashed #E4D8C4}
+.fr-gap .body{padding-bottom:22px}
+.fr-gap .btn{align-self:flex-start;margin-top:4px}
+.help-list .from{display:block;color:var(--muted);font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;margin-top:3px;line-height:1.4}
+.classroom-box h3{font-family:var(--font-serif);font-size:22px;margin:16px 0 8px;font-weight:600}
+.classroom-box p{margin:0 0 12px;line-height:1.6}
+.classroom-box a{color:var(--blue-d);font-weight:600}
+.fr-card{margin:8px 0 16px;border:1px dashed #E4D8C4;border-radius:16px;padding:18px 20px;background:#fffdf8}
+.fr-card p{font-family:var(--font-serif);font-size:20px;line-height:1.45;margin:0 0 10px}
+@media (max-width:700px){
+  .season-banner a{flex-wrap:wrap}
+  .season-banner .go{margin-left:0}
+  .fr-map-wrap{max-width:none}
+}

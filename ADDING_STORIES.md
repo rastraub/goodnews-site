@@ -183,6 +183,60 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
 6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 
+## First Responders Day hub
+
+`/first-responders-day` stays up all year. The page shows October 28 of the current edition year, so the URL does not change. The byline is `siteConfig.editor.name`. Do not put a personal name on this page.
+
+The hub is built from stories already in the archive. A story is eligible when it is tagged `first-responders`, or when it carries a role tag (`firefighters`, `police`, `ems`, `dispatch`, `search-and-rescue`). Drafts stay off.
+
+### What stays off the page
+
+Two filters run, and both have to pass.
+
+The keyword filter reads the title, deck, and body. A match rejects the story. The phrases are:
+
+- use of force, use-of-force, used force, excessive force, brutality, taser, pepper spray, officer-involved
+- shooting, gunfire, gunshot, shot and killed, opened fire
+- police pursuit, high-speed chase, car chase, police chase, pursued
+- suspect, arrested, under arrest, taken into custody, charged with, indicted, indictment, convicted
+- politics, political, partisan, campaign rally, on the ballot, election night
+
+`cardiac arrest` and `discharged` do not match. `suspected` does not match `suspect`. The list lives in `EXCLUSION_RULES` in `lib/first-responders-day.ts`.
+
+An automatic pick also has to read as a rescue, lifesaving help, a reunion, or a kindness or community moment. A budget item or a meeting agenda does not qualify even with the tag.
+
+The editor exclude list is `exclude` in `data/first-responders-day.json`. Those slugs are left off even when they would otherwise qualify. A slug that is not a published story fails `npm run validate-stories` and the build.
+
+A story about a shooting, a pursuit, a suspect, use of force, or politics cannot be pinned back on. A pin can keep a real first-responder story that the positive-phrase check would skip.
+
+### How a story is chosen
+
+Role groups are Firefighters, Police and deputies, EMS and flight crews, Dispatchers, and Search and rescue. A role tag wins. Otherwise the title and deck are scanned for the job. A passing mention in the body does not file the story, and "until firefighters arrived" does not make a neighbor's rescue a firefighter story. Each group shows up to six stories, best score first: a rescue or lifesaving act, then a reunion, then kindness. Pins from `roles` in the JSON file stay at the front and do not also appear in an automatic group. A group with no story shows an open card that links to `/submit`.
+
+The state section uses the shared one-story picker in `lib/state-story-hub.ts`. Home state wins, then the rescue and kindness score, then the newest date, then `featured`, then a Top 5 rank. A state with no match shows an open card linking to `/submit`. One story can fill a state it lists in `alsoStates` when that state has nothing of its own.
+
+To replace a state card, set `states` in `data/first-responders-day.json`. Keys are USPS codes, including `DC`. Values are story slugs. Leave a state out to keep the automatic pick.
+
+```json
+{
+  "exclude": ["orlando-banana-hero"],
+  "states": { "OH": "dayton-officer-mote" },
+  "roles": {
+    "fire": [],
+    "police": ["dayton-officer-mote"],
+    "ems": [],
+    "dispatch": [],
+    "search-and-rescue": []
+  }
+}
+```
+
+The pinned story has to be published, filed in that state (`state` or `alsoStates`), and clear the content filter. A bad pin or a bad exclude slug fails the build. The card says "Pinned" when a pin is in use.
+
+`npm run first-responders-gaps` prints each role group and the states that are still open. The same open list is logged by `npm run validate-stories`. Open states do not fail the build.
+
+The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. The homepage shows a banner from October 21 through October 29, using the same New York date as the edition line, every year, and only after a build during that window. `/topic/first-responders` links here all year. The hub URL itself does not change.
+
 ## Health & Tech
 
 `health-tech` is displayed as "Health & Tech". It is for medical advances, longevity research with real human results, and technology that is already helping people. The bar is stricter than the other categories.

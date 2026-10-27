@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "validate-stories": "tsx scripts/validate-stories.ts",
+    "first-responders-gaps": "tsx scripts/first-responders-day-gaps.ts",
     "feed-images": "tsx scripts/generate-feed-images.ts"
   },
   "dependencies": {

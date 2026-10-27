@@ -6,10 +6,11 @@ import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
 import { getStateByCode } from "../lib/states";
+import { FIRST_RESPONDERS_DAY_PATH } from "../lib/first-responders-day";
 import { weeksToPrerender } from "../lib/weeks";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", "/topics"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", "/topics", FIRST_RESPONDERS_DAY_PATH];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {

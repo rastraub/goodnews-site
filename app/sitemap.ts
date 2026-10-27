@@ -3,6 +3,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { kidPlaces } from "@/lib/kids";
 import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
+import { FIRST_RESPONDERS_DAY_PATH, getFirstRespondersDayHub } from "@/lib/first-responders-day";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { weeksToPrerender } from "@/lib/weeks";
@@ -56,6 +57,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const weeks = weeksToPrerender();
   const newestWeek = weeks[weeks.length - 1];
+  const responders = getFirstRespondersDayHub();
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -64,6 +66,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: page.changeFrequency,
       priority: page.priority,
     })),
+    {
+      url: absoluteUrl(FIRST_RESPONDERS_DAY_PATH),
+      lastModified: responders.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
     {
       url: absoluteUrl("/world"),
       ...(worldLatest ? { lastModified: worldLatest } : {}),
