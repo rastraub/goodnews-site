@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "validate-stories": "tsx scripts/validate-stories.ts",
+    "next-kindness-challenge": "tsx scripts/next-kindness-challenge.ts",
     "feed-images": "tsx scripts/generate-feed-images.ts"
   },
   "dependencies": {

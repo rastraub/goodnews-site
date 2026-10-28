@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { KindnessLinks } from "@/components/kindness-links";
 import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { getCountryBySlug } from "@/lib/countries";
@@ -84,6 +85,7 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
           <Link href="/kids/print">Print the story of the day</Link>
           <Link href="/kids">All classroom stories</Link>
         </p>
+        <KindnessLinks />
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>
         <StoryGrid stories={place.stories} page={page} base={place.path} />

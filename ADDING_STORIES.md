@@ -180,8 +180,51 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
    - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
    - **For classrooms.** When a story is appropriate to read aloud with children about ages 6 to 12, set `kidFriendly: true` in that story's front matter, write `kidSummary` in about 60 to 110 plain words, and add two or three `kidQuestions`. Stay accurate to the source. Do not invent facts or quotes. Skip the flag for death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, and anything a teacher would hesitate to read to a class. Do not force one into the batch. Do not backfill classroom text into `data/story-enrichment.json`. The kids pages and `/kids/print` use these fields. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The teacher email is a separate adult list. Do not add a child to any list, and do not add ads or anything else that identifies a child.
-6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
-7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
+6. Add next week's Kindness Challenge when that Monday is not in `data/kindness-challenges.json` yet. Run `npm run next-kindness-challenge`. It prints the next open Monday, the classroom story the fallback would use, and a JSON stub. Rewrite the stub so the challenge fits that story, then put it in the file. The rules are in "Weekly Kindness Challenge" below. If you skip the entry, the page still builds from the fallback.
+7. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request. A kindness challenge that points at a missing story fails here too.
+8. Commit the new stories, the images, the rank edits, and any kindness challenge entry, then push to `main`. The next deploy publishes them.
+
+## Weekly Kindness Challenge
+
+One page per Monday, at `/kindness-challenge` and `/kindness-challenge/YYYY-MM-DD`. The date is the Monday of that week, from the same helper as `/week`: `weekStart()` in `lib/weeks.ts`. The first page is the Monday of the launch week.
+
+Curated challenges live in `data/kindness-challenges.json`. Each entry needs:
+
+| Field | What to write |
+| --- | --- |
+| `week` | A Monday, `YYYY-MM-DD`. |
+| `storySlug` | A published story with `kidFriendly: true`. The build rejects a slug that is missing, still a draft, or not marked for classrooms. |
+| `challenge` | One short sentence. Free, safe, and something a child can do with people they already know. A thank-you note to a school custodian is the right size. Do not ask a child to knock on a stranger's door, to spend money, or to go anywhere alone. |
+| `why` | One or two kid-friendly sentences tied to that story. Do not invent facts. |
+| `school`, `home`, `neighborhood` | One easy way for each place. The neighborhood step stays with a grown-up the child lives with. |
+| `teacherNote` | How a teacher runs it. Say not to collect a child's name, age, school, or email. |
+| `shareText` | Spoiler-free. Describe the action, not the twist of the news story, and do not paste the story headline. |
+
+`npm run validate-stories` and `npm run build` both check that every `storySlug` exists. The pages, the sitemap, and the IndexNow ping use the same list.
+
+### What the daily run adds
+
+After the new stories are in, see whether the next Monday needs an entry:
+
+```bash
+npm run next-kindness-challenge
+```
+
+The script prints the first Monday from launch that is not in the file. When the weeks already on the site are full, that Monday is the one after the published window, so you can prepare it before it goes live. Paste the JSON into `challenges` in `data/kindness-challenges.json`, then rewrite the sentences in your own words so they fit the story. Prefer a new `kidFriendly` story from the batch when one is a real fit. Otherwise use an older classroom story tagged `kindness`. Run the script again to confirm that Monday is no longer listed.
+
+To pin the safe fallback without a rewrite:
+
+```bash
+npm run next-kindness-challenge -- --write
+```
+
+`--write` appends one entry. It does not replace a week that is already in the file. A rewritten entry is better. The stub is only there so a missed morning does not leave a hole.
+
+### Fallback
+
+If a Monday inside the published window has no curated entry, the page still builds. `pickFallbackStory()` in `lib/kindness.ts` chooses a published `kidFriendly` story tagged `kindness`, skipping stories already used by curated weeks when another one is free. If no classroom story has that tag, it uses any `kidFriendly` story. The action on that page comes from a fixed set of safe prompts. It does not invent details from the story. The window runs from launch week through eight Mondays after the current week.
+
+Check the page before you commit. The challenge has to stay positive, and a teacher should be able to hand it to children about ages 6 to 12.
 
 ## Health & Tech
 

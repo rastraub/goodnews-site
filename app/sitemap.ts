@@ -5,12 +5,14 @@ import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
+import { getKindnessChallenges } from "@/lib/kindness";
 import { weeksToPrerender } from "@/lib/weeks";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/local", changeFrequency: "daily", priority: 0.8 },
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
+  { path: "/kindness-challenge", changeFrequency: "weekly", priority: 0.7 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
@@ -84,6 +86,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: week.latest,
         changeFrequency: (week.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: week.inProgress ? 0.7 : 0.6,
+      })),
+    ...getKindnessChallenges()
+      .slice()
+      .reverse()
+      .map((challenge) => ({
+        url: absoluteUrl(challenge.path),
+        lastModified: challenge.story.date > challenge.week ? challenge.story.date : challenge.week,
+        changeFrequency: "weekly" as const,
+        priority: challenge.status === "this-week" ? 0.7 : 0.6,
       })),
     ...CATEGORIES.map((category) => ({
       url: absoluteUrl(`/category/${category.slug}`),

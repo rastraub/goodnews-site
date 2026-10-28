@@ -6,6 +6,7 @@ import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "..
 import { feedImageReport } from "../lib/feed-image";
 import { largeJpegPath, storyThumbPath } from "../lib/images";
 import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
+import { assertKindnessHelpers, getKindnessChallenges } from "../lib/kindness";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
@@ -713,6 +714,24 @@ function assertImageVariants() {
   }
 }
 
+function assertKindnessChallenges() {
+  assertKindnessHelpers();
+  const challenges = getKindnessChallenges();
+  if (challenges.length < 10) throw new Error("The kindness series should cover at least 10 weeks.");
+  const current = weekStart(mountainDay());
+  if (current >= launchWeekStart()) {
+    const live = challenges.find((item) => item.week === current);
+    if (!live) throw new Error("This week's kindness challenge should be on the site.");
+  }
+  const slugs = new Set<string>();
+  for (const item of challenges) {
+    if (!item.story.kidFriendly) throw new Error(`${item.path} is not tied to a classroom story.`);
+    if (!item.challenge.endsWith(".")) throw new Error(`${item.path} should be one sentence.`);
+    if (item.origin === "curated") slugs.add(item.story.slug);
+  }
+  if (slugs.size < 10) throw new Error("Curated kindness challenges should point at real stories.");
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -720,6 +739,7 @@ assertCountryRules();
 assertWorldSpotlight();
 assertHubs();
 assertKidClassrooms();
+assertKindnessChallenges();
 assertWeeks();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertEnrichmentMerge();

@@ -16,6 +16,7 @@ import { placeLabel, toCard } from "@/lib/present";
 import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
+import { challengesForStory } from "@/lib/kindness";
 import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { siteConfig } from "@/site.config";
@@ -75,6 +76,7 @@ export default async function StoryPage({ params }: Props) {
   const state = story.country === "US" ? getStateByCode(story.state) : undefined;
   const country = story.country === "US" ? undefined : getCountry(story.country);
   const related = relatedStories(story);
+  const inspired = challengesForStory(story.slug);
   const hubLinks = hubPathsForStory(story).flatMap((path) => {
     const hub = getHubByPath(path);
     return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
@@ -148,6 +150,21 @@ export default async function StoryPage({ params }: Props) {
             </a>
           </div>
           <StoryBody markdown={story.body} />
+          {inspired.length ? (
+            <section className="classroom-box" id="kindness-challenge">
+              <h2>Kindness Challenge</h2>
+              <p>
+                This story inspired {inspired.length === 1 ? "a weekly kindness challenge" : "weekly kindness challenges"} for classrooms and families.
+              </p>
+              <p className="link-pills">
+                {inspired.map((challenge) => (
+                  <Link key={challenge.week} href={challenge.path}>
+                    {challenge.status === "this-week" ? "This week's challenge" : challenge.rangeLabel}
+                  </Link>
+                ))}
+              </p>
+            </section>
+          ) : null}
           {story.kidFriendly && story.kidSummary && story.kidQuestions?.length ? (
             <section className="classroom-box" id="classroom">
               <h2>For the classroom</h2>

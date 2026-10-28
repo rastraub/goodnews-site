@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { EmailSignup } from "@/components/email-signup";
+import { KindnessLinks } from "@/components/kindness-links";
 import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { getKidStories, kidPlaces } from "@/lib/kids";
@@ -65,6 +66,7 @@ export function KidsBrowse({ page }: { page: number }) {
           <Link href="/kids/print">Print the story of the day</Link>
           <a href="#teachers">Teacher email</a>
         </p>
+        <KindnessLinks />
         {places.length ? (
           <div className="chips">
             {places.map((place) => (

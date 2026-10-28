@@ -7,6 +7,7 @@ import { placeLabel } from "@/lib/present";
 import { pageAlternates } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
+import { KindnessLinks } from "@/components/kindness-links";
 import { PrintButton } from "../print-button";
 
 export function generateMetadata(): Metadata {
@@ -64,6 +65,9 @@ export default function KidsPrintPage() {
               {" · "}
               <a href={`${siteConfig.url}/story/${story.slug}`}>Full story</a>
             </p>
+            <div className="no-print">
+              <KindnessLinks />
+            </div>
             <div className="print-actions no-print">
               <PrintButton />
               <Link href={`/story/${story.slug}`}>Read the full story</Link>

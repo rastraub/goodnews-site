@@ -92,6 +92,8 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 .week-promo h2{font-family:var(--font-serif);font-weight:600;font-size:26px;letter-spacing:-.02em;line-height:1.15;margin:4px 0 6px}
 .week-promo p{color:var(--ink2);font-size:15.5px}
 .week-promo .more{margin-top:8px}
+.kindness-promo{margin-top:16px}
+.kind-now{border-color:#E0B15A}
 .week-index{display:grid;gap:16px}
 .week-row{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:12px;box-shadow:var(--shadow);color:inherit}
 .week-row h2{font-family:var(--font-serif);font-weight:600;font-size:28px;letter-spacing:-.02em;line-height:1.15;margin:4px 0 8px}
@@ -402,10 +404,36 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .teacher-note{color:var(--muted);font-size:14.5px;margin:0 0 8px}
 .print-source{font-size:14.5px;color:var(--ink2)}
 .print-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:22px}
+.kindness-layout{max-width:860px;padding-top:8px}
+.kindness-layout h2{font-family:var(--font-serif);font-size:32px;margin:36px 0 10px;font-weight:600}
+.kindness-layout h3{font-family:var(--font-serif);font-size:26px;margin:8px 0;font-weight:600}
+.kindness-layout .why,.kindness-layout p{font-size:17.5px;line-height:1.6}
+.kindness-layout .why{color:var(--ink2);font-size:19px}
+.kind-ways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.kind-way{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.kind-way h3{font-family:var(--font-sans);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);margin:0 0 8px;font-weight:700}
+.kind-way p{margin:0;color:var(--ink2)}
+.kind-tracker{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin-top:28px}
+.kind-tracker h2{margin-top:0}
+.kind-days{list-style:none;margin:14px 0 0;display:grid;gap:10px}
+.kind-days li{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:12px;align-items:center}
+.kind-days label{display:flex;align-items:center;gap:10px;font-weight:600}
+.kind-days input{width:18px;height:18px;accent-color:var(--ink)}
+.kind-line{border-bottom:1px solid #D9D0C2;height:1.4em}
+.kind-tally{display:grid;gap:8px;margin-top:18px}
+.kind-tally input{height:72px;border:1.5px solid var(--ink);border-radius:12px;background:#fff;text-align:center;font-size:28px;font-weight:650}
+.kind-share-text{background:var(--gold-l);border-radius:16px;padding:14px 16px;font-weight:600}
+@media (max-width:700px){
+  .kind-ways,.kind-days li{grid-template-columns:1fr}
+  .kind-line{display:none}
+}
 @media print {
   .strip, header.nav, .catbar, .menu-panel, footer, .skip, .no-print { display: none !important; }
   body { background: #fff; }
   .print-sheet { max-width: none; }
   .print-sheet h1 { font-size: 28pt; }
   .print-source a[href]::after { content: " (" attr(href) ")"; font-weight: 400; }
+  .kind-ways{grid-template-columns:1fr}
+  .kind-tracker{border-color:#000}
+  .kind-days li,.kind-tally{break-inside:avoid}
 }
