@@ -58,7 +58,7 @@ export default async function KindnessChallengePage({ params }: Props) {
   return (
     <div className="page-block">
       <JsonLd data={kindnessJsonLd(challenge)} />
-      <div className="wrap page-hero">
+      <div className="wrap page-hero kindness-layout">
         <p className="crumbs">
           <Link href="/">Today</Link>
           <span aria-hidden="true">/</span>
