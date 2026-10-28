@@ -23,7 +23,7 @@ howToHelp:
   - label: "Colorado State atmospheric science"
     url: "https://www.atmos.colostate.edu/"
     kind: learn
-featured: true
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

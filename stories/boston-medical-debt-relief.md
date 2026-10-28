@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.atriusfoundation.org/medicaldebt"
     kind: learn
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

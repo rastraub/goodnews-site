@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.henryford.com/visitors/volunteer"
     kind: volunteer
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
