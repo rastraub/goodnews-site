@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.turtleconservationsociety.org.my/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The New Straits Times reported on October 24, 2026, that a village in Kemaman, Malaysia, released 690 baby southern river terrapins into the Kemaman River on October 3. That was the biggest single release since the project began in 2011. The Turtle Conservation Society of Malaysia had collected 1,673 eggs earlier in the year. 1,254 babies hatched and were raised for about four months before the strongest group went to the river. These turtles are critically endangered. Since 2011 the project has incubated 13,224 eggs and released more than 8,000 hatchlings. Families joined a coloring session and a bracelet workshop on release day."
 kidQuestions:
