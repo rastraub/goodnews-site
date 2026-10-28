@@ -39,10 +39,11 @@ export function heroStateCodes(story: {
   return [...new Set(codes)];
 }
 
-export function heroesPath(type: string, state: string): string {
+export function heroesPath(type: string, state: string, page = 1): string {
   const params = new URLSearchParams();
   if (type) params.set("type", type);
   if (state) params.set("state", state);
+  if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/heroes?${query}` : "/heroes";
 }
