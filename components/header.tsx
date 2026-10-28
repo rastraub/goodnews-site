@@ -14,6 +14,7 @@ const PRIMARY = [
 ];
 
 const MORE = [
+  { href: "/heroes", label: "Hometown Heroes" },
   { href: "/kids", label: "Kids" },
   { href: "/topics", label: "Topics" },
 ];
@@ -102,8 +103,13 @@ export function Header({ edition }: { edition: string }) {
         <Link href="/subscribe">Subscribe</Link>
       </div>
       <div className="catbar">
-        {[...PRIMARY, ...MORE].map((link) => (
+        {PRIMARY.map((link) => (
           <Link key={link.href} href={link.href} className={active(link.href) ? "on" : undefined}>
+            {link.label}
+          </Link>
+        ))}
+        {MORE.map((link) => (
+          <Link key={link.href} href={link.href} className={active(link.href) ? "hub on" : "hub"}>
             {link.label}
           </Link>
         ))}
