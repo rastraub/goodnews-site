@@ -66,6 +66,7 @@ export default function KidsPrintPage() {
             </p>
             <div className="print-actions no-print">
               <PrintButton />
+              <Link href="/morning-announcements">Morning announcements</Link>
               <Link href={`/story/${story.slug}`}>Read the full story</Link>
               {placePath ? <Link href={placePath}>More classroom stories from this place</Link> : null}
               <Link href="/kids">All classroom stories</Link>

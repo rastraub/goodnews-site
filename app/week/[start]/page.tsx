@@ -167,6 +167,13 @@ export default async function WeekPage({ params }: Props) {
                   <use href="#i-arrow" />
                 </svg>
               </Link>
+              {" · "}
+              <Link className="more" href="/morning-announcements">
+                Morning announcements
+                <svg className="ico" aria-hidden="true">
+                  <use href="#i-arrow" />
+                </svg>
+              </Link>
             </p>
             <div style={{ marginTop: 18 }}>
               <Cards stories={week.kids} />

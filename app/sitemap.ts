@@ -1,17 +1,19 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
 import { kidPlaces } from "@/lib/kids";
+import { indexableAnnouncementDays, loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "@/lib/morning-announcements";
 import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
-import { weeksToPrerender } from "@/lib/weeks";
+import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/local", changeFrequency: "daily", priority: 0.8 },
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
+  { path: MORNING_ANNOUNCEMENTS_PATH, changeFrequency: "daily", priority: 0.6 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
@@ -108,6 +110,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: place.latest,
       changeFrequency: "daily" as const,
       priority: 0.5,
+    })),
+    ...indexableAnnouncementDays(loadAnnouncementDays()).map((day) => ({
+      url: absoluteUrl(day.path),
+      lastModified: day.date,
+      changeFrequency: (day.date === mountainDay() ? "daily" : "weekly") as "daily" | "weekly",
+      priority: day.date === mountainDay() ? 0.6 : 0.5,
     })),
     ...[...hubs.stateCategories, ...hubs.cities, ...hubs.topics].map((hub) => ({
       url: absoluteUrl(hub.path),

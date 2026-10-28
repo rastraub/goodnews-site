@@ -160,6 +160,8 @@ export default async function StoryPage({ params }: Props) {
               <p>
                 For a teacher to read with a class. <Link href="/kids/print">Print the story of the day</Link>
                 {" · "}
+                <Link href="/morning-announcements">Morning announcements</Link>
+                {" · "}
                 <Link href="/kids">All classroom stories</Link>
               </p>
             </section>

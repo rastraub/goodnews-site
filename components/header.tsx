@@ -15,6 +15,7 @@ const PRIMARY = [
 
 const MORE = [
   { href: "/kids", label: "Kids" },
+  { href: "/morning-announcements", label: "Announcements" },
   { href: "/topics", label: "Topics" },
 ];
 

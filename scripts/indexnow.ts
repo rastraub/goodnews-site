@@ -2,6 +2,7 @@ import { getCategory } from "../lib/categories";
 import { getCountry } from "../lib/countries";
 import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
 import { kidPlaceForStory } from "../lib/kids";
+import { loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "../lib/morning-announcements";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
@@ -9,7 +10,7 @@ import { getStateByCode } from "../lib/states";
 import { weeksToPrerender } from "../lib/weeks";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", "/topics"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", MORNING_ANNOUNCEMENTS_PATH, "/topics"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -32,6 +33,11 @@ async function main() {
     if (story.kidFriendly) {
       urls.add(`${siteConfig.url}/kids`);
       urls.add(`${siteConfig.url}/kids/print`);
+      urls.add(`${siteConfig.url}${MORNING_ANNOUNCEMENTS_PATH}`);
+      const announcement = loadAnnouncementDays().find((day) => day.date === story.date);
+      if (announcement?.kind === "script" && announcement.script.indexable) {
+        urls.add(`${siteConfig.url}${announcement.path}`);
+      }
       const classroom = kidPlaceForStory(story);
       if (classroom) urls.add(`${siteConfig.url}${classroom}`);
       if (story.country === "US") {

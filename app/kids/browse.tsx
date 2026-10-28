@@ -63,6 +63,7 @@ export function KidsBrowse({ page }: { page: number }) {
         </p>
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
+          <Link href="/morning-announcements">Morning announcements</Link>
           <a href="#teachers">Teacher email</a>
         </p>
         {places.length ? (
