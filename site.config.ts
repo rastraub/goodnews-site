@@ -57,6 +57,19 @@ export const siteConfig = {
 export type SiteConfig = typeof siteConfig;
 
 /**
+ * Soft homepage prompt for heavy news cycles.
+ * `start` and `end` are inclusive calendar dates in `timeZone`.
+ * The banner stays off outside this window. Change the dates here.
+ */
+export const newsBreakBanner = {
+  path: "/news-break",
+  start: "2026-10-31",
+  end: "2026-11-06",
+  timeZone: "America/New_York",
+  label: "News feeling heavy? Take a good-news break.",
+} as const;
+
+/**
  * TODO: Set the city and state where SBBnet, Inc. operates.
  * Do not invent a location. Leave both empty until they are known.
  * About copy and NewsMediaOrganization JSON-LD omit the place until both are non-empty.

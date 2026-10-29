@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmailSignup } from "@/components/email-signup";
+import { NewsBreakBanner } from "@/components/news-break-banner";
 import { HomeLatest } from "@/components/home-latest";
 import { LocalExplorer } from "@/components/local-explorer";
 import { CheerButton } from "@/components/cheer-button";
@@ -54,6 +55,7 @@ export default function HomePage() {
 
   return (
     <>
+      <NewsBreakBanner />
       {hero ? <Hero story={hero} /> : null}
       <section className="top5">
         <div className="wrap">

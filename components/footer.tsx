@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
 import { editionYear } from "@/lib/format";
-import { siteConfig, socialLinks } from "@/site.config";
+import { newsBreakBanner, siteConfig, socialLinks } from "@/site.config";
 
 export function Footer() {
   const year = editionYear();
@@ -28,6 +28,7 @@ export function Footer() {
             <p className="flabel">Read</p>
             <ul>
               <li><Link href="/">Today</Link></li>
+              <li><Link href={newsBreakBanner.path}>A news break</Link></li>
               <li><Link href="/local">Local</Link></li>
               <li><Link href="/world">World</Link></li>
               <li><Link href="/week">This week</Link></li>

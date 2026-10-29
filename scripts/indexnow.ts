@@ -7,9 +7,9 @@ import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
 import { getStateByCode } from "../lib/states";
 import { weeksToPrerender } from "../lib/weeks";
-import { siteConfig } from "../site.config";
+import { newsBreakBanner, siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", "/topics"];
+const STATIC_PATHS = ["/", newsBreakBanner.path, "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", "/topics"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {

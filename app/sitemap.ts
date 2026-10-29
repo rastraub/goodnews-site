@@ -6,9 +6,11 @@ import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { weeksToPrerender } from "@/lib/weeks";
+import { newsBreakBanner } from "@/site.config";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
+  { path: newsBreakBanner.path, changeFrequency: "daily", priority: 0.8 },
   { path: "/local", changeFrequency: "daily", priority: 0.8 },
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
