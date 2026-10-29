@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
 import { kidPlaces } from "@/lib/kids";
+import { GIVING_TUESDAY_PATH, getGivingGuide } from "@/lib/giving-tuesday";
 import { getHubIndex, indexableHubs } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
@@ -80,6 +81,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }, undefined);
   const quizzes = quizzesToPrerender();
   const newestQuiz = quizzes[quizzes.length - 1];
+  const giving = getGivingGuide();
+  const givingLatest = giving.picks.reduce<string | undefined>((latest, pick) => {
+    if (!latest || pick.date > latest) return pick.date;
+    return latest;
+  }, undefined);
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -88,6 +94,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: page.changeFrequency,
       priority: page.priority,
     })),
+    {
+      url: absoluteUrl(GIVING_TUESDAY_PATH),
+      lastModified: givingLatest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
     {
       url: absoluteUrl("/world"),
       ...(worldLatest ? { lastModified: worldLatest } : {}),

@@ -474,6 +474,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .thanks-banner .kicker,.thanks-banner-count{display:none}
   .thanks-board{grid-template-columns:1fr;gap:18px}
   .thanks-slot h2{font-size:22px}
+  .give-grid{grid-template-columns:1fr}
+  .give-card h2{font-size:22px}
   .feed-groups h2{font-size:28px}
   .feed-row{grid-template-columns:1fr}
   .feed-actions{justify-content:flex-start}
@@ -695,6 +697,54 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .quiz-card h2,.quiz-signup h2{font-size:26px}
   .quiz-choices.photos{grid-template-columns:1fr 1fr}
 }
+.give-board{margin-top:22px}
+.give-index{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.give-index a{font-size:12.5px;font-weight:700;letter-spacing:.04em;padding:6px 8px;border-radius:8px;background:#fff;border:1px solid var(--line);color:var(--ink2)}
+.give-index a.is-gap{border-style:dashed;color:var(--muted)}
+.give-map{border-radius:24px;border:1px solid var(--line);overflow:hidden;margin:8px 0 22px;min-height:0}
+.give-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.give-state{display:contents}
+.give-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px 16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-width:0;scroll-margin-top:16px}
+.give-card .ph{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#F6F1E8}
+.give-card h2{font-family:var(--font-serif);font-weight:600;font-size:26px;line-height:1.2;letter-spacing:-.015em}
+.give-card h2 a:hover{color:var(--blue-d)}
+.give-dek{color:var(--ink2);font-size:15.5px;line-height:1.55}
+.give-link{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--cream);border-radius:14px;padding:12px 14px;font-weight:600}
+.give-link small,.give-kind{color:var(--gold-d);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.give-kind{margin:0}
+.give-link small{flex:none}
+.give-badge{align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green);background:#E8F5EE;border-radius:999px;padding:5px 10px}
+.give-pin{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-d)}
+.give-credit{font-size:14px;color:var(--muted);margin-top:auto}
+.give-credit a{color:var(--blue-d);font-weight:600}
+.give-gap{background:transparent;border-style:dashed;box-shadow:none}
+.give-disclaimer{font-size:14.5px;color:var(--muted);max-width:68ch;margin-top:14px}
+.give-share{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+.give-share p{font-weight:600;max-width:46ch}
+.season-banner{background:var(--ink);color:#F5EBDD}
+.season-banner .wrap{padding-top:12px;padding-bottom:12px}
+.season-banner p{font-size:15px}
+.season-banner a{color:var(--sun);font-weight:700}
+.give-board[data-cause="all"] [data-role="alternate"]{display:none}
+.give-board:not([data-cause="all"]) [data-giving-gap]{display:none}
+.give-board:not([data-cause="all"]) [data-giving-card]{display:none}
+.give-board[data-cause="veterans"] [data-causes~="veterans"],
+.give-board[data-cause="housing"] [data-causes~="housing"],
+.give-board[data-cause="food"] [data-causes~="food"],
+.give-board[data-cause="disaster"] [data-causes~="disaster"],
+.give-board[data-cause="environment"] [data-causes~="environment"],
+.give-board[data-cause="animals"] [data-causes~="animals"],
+.give-board[data-cause="kids"] [data-causes~="kids"],
+.give-board[data-cause="other"] [data-causes~="other"]{display:flex}
+.give-board[data-cause="veterans"] .give-state:has(> [data-role="featured"][data-causes~="veterans"]) > [data-role="alternate"],
+.give-board[data-cause="housing"] .give-state:has(> [data-role="featured"][data-causes~="housing"]) > [data-role="alternate"],
+.give-board[data-cause="food"] .give-state:has(> [data-role="featured"][data-causes~="food"]) > [data-role="alternate"],
+.give-board[data-cause="disaster"] .give-state:has(> [data-role="featured"][data-causes~="disaster"]) > [data-role="alternate"],
+.give-board[data-cause="environment"] .give-state:has(> [data-role="featured"][data-causes~="environment"]) > [data-role="alternate"],
+.give-board[data-cause="animals"] .give-state:has(> [data-role="featured"][data-causes~="animals"]) > [data-role="alternate"],
+.give-board[data-cause="kids"] .give-state:has(> [data-role="featured"][data-causes~="kids"]) > [data-role="alternate"],
+.give-board[data-cause="other"] .give-state:has(> [data-role="featured"][data-causes~="other"]) > [data-role="alternate"]{display:none}
+
 @media print {
   .strip, header.nav, .catbar, .menu-panel, footer, .skip, .no-print { display: none !important; }
   html, body { background: #fff !important; color: #000 !important; }

@@ -17,7 +17,7 @@ import { weeksToPrerender } from "../lib/weeks";
 import { listWebStories } from "../lib/web-stories";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {

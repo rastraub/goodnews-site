@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmailSignup } from "@/components/email-signup";
+import { GivingTuesdayBanner } from "@/components/giving-tuesday-banner";
 import { HomeLatest } from "@/components/home-latest";
 import { LocalExplorer } from "@/components/local-explorer";
 import { CheerButton } from "@/components/cheer-button";
@@ -64,6 +65,7 @@ export default function HomePage() {
   return (
     <>
       <ThanksBanner />
+      <GivingTuesdayBanner />
       {hero ? (
         <Hero story={hero} fridayHref={fridayHref} fridayLabel={fridayLabel} />
       ) : (

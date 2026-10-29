@@ -256,6 +256,41 @@ The cover says "Today's good news" and the date. Each story page uses that story
 
 `npm run build` crops a 3:4 poster from the lead photo with sharp, writes it under `public/images/web-stories/`, and runs the AMP validator. Those posters are build output. A new story file on `main` is enough.
 
+## Giving Tuesday
+
+`/giving-tuesday` is an evergreen guide: one featured way to help for each state and the District of Columbia. The title is "50 states, 50 ways to help." The page stays up after the day itself. A homepage banner appears only from November 24 through December 2, 2026, and then it comes down. The URL does not change.
+
+The guide does not add organizations, links, or claims. Every card is a `howToHelp` entry already on a published United States story, plus that story's summary, city, photo, and source. The story's own `state` is the state that counts. `alsoStates` does not fill a second state.
+
+### How a state is filled
+
+For each state, the build ranks that state's how-to-help links. A donate, volunteer, or thank-you link outranks a learn-more link. A link whose site appears in only one state outranks a site that shows up in several states. When two links are close, the picker spreads causes so one theme does not take every card. The cause labels are animals, kids, veterans, food, housing, disaster relief, and environment, and they come from the story's tags. A story in the animals section counts as animals even without a matching tag. Disaster relief is used only when the title, the summary, or the help label already says disaster relief, hurricane relief, wildfire relief, tornado relief, flood relief, or earthquake relief. Anything else stays in More.
+
+A card is marked "Costs nothing" only when that link's own data says so: the kind is volunteer or thank, the label asks the reader to volunteer, the label asks the reader to donate goods (food, coats, shoes, and the same kind of item), or the label starts with "Share". A gift of money is not marked that way.
+
+A state with no published story gets a gap card that links to `/submit`. Publishing a story there fills the card on the next deploy.
+
+### Pin a state
+
+Edit `lib/giving-tuesday-pins.ts` when a particular story should represent a state.
+
+```ts
+export const GIVING_TUESDAY_PINS = [
+  { state: "CO", slug: "the-story-slug" },
+  { state: "ME", slug: "another-story-slug", url: "https://example.org/the-exact-help-link" },
+];
+```
+
+`state` is the USPS code, including `DC`. `slug` is the filename without `.md`. The story must be published, in the United States, and its `state` must match the pin. `url` is optional. When you set it, copy it from that story's `howToHelp` list. The match is exact. When you omit it, the guide uses the strongest how-to-help link on that story. An empty list leaves every state on the automatic pick. A pin that does not match a real story fails `npm run validate-stories`.
+
+### Coverage
+
+```bash
+npm run giving-tuesday-coverage
+```
+
+The script prints how many states have a pick and lists any state that does not. It does not fail the build.
+
 ## Health & Tech
 
 `health-tech` is displayed as "Health & Tech". It is for medical advances, longevity research with real human results, and technology that is already helping people. The bar is stricter than the other categories.
