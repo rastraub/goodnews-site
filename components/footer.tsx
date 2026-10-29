@@ -5,6 +5,7 @@ import { editionYear } from "@/lib/format";
 import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { latestQuiz } from "@/lib/quiz";
 import { THANKS_PATH } from "@/lib/thanks";
+import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { siteConfig, socialLinks } from "@/site.config";
 
 export function Footer() {
@@ -42,6 +43,7 @@ export function Footer() {
               <li><Link href={ON_THIS_DAY_TODAY_PATH}>Good news on this day</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
+              <li><Link href={VETERANS_DAY_PATH}>Veterans Day</Link></li>
               <li><Link href="/topics">Topics</Link></li>
               <li><Link href="/explainers">Explainers</Link></li>
               {CATEGORIES.map((category) => (

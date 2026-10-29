@@ -14,6 +14,7 @@ import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
 import { quizzesToPrerender } from "@/lib/quiz";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
+import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
 
@@ -86,6 +87,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     if (!latest || pick.date > latest) return pick.date;
     return latest;
   }, undefined);
+  const veterans = getVeteransDayHub();
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -99,6 +101,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: givingLatest ?? siteLatest,
       changeFrequency: "weekly" as const,
       priority: 0.6,
+    },
+    {
+      url: absoluteUrl(VETERANS_DAY_PATH),
+      lastModified: veterans.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
     },
     {
       url: absoluteUrl("/world"),
