@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
+import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
 import { editionYear } from "@/lib/format";
 import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { latestQuiz } from "@/lib/quiz";
@@ -44,6 +45,7 @@ export function Footer() {
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href={VETERANS_DAY_PATH}>Veterans Day</Link></li>
+              <li><Link href={FIRST_RESPONDERS_DAY_PATH}>First Responders Day</Link></li>
               <li><Link href="/topics">Topics</Link></li>
               <li><Link href="/explainers">Explainers</Link></li>
               {CATEGORIES.map((category) => (

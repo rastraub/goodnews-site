@@ -6,6 +6,7 @@ import { LocalExplorer } from "@/components/local-explorer";
 import { CheerButton } from "@/components/cheer-button";
 import { EmphaticTitle } from "@/components/story-body";
 import { TopFiveCard } from "@/components/story-card";
+import { FirstRespondersDayBanner } from "@/components/first-responders-day-banner";
 import { IndexPromo } from "@/components/index-promo";
 import { OnThisDayPromo } from "@/components/on-this-day-promo";
 import { ThanksBanner } from "@/components/thanks-banner";
@@ -68,6 +69,7 @@ export default function HomePage() {
       <ThanksBanner />
       <GivingTuesdayBanner />
       <VeteransDayBanner />
+      <FirstRespondersDayBanner />
       {hero ? (
         <Hero story={hero} fridayHref={fridayHref} fridayLabel={fridayLabel} />
       ) : (

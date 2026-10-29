@@ -5,6 +5,7 @@ import { GIVING_TUESDAY_PATH, getGivingGuide } from "@/lib/giving-tuesday";
 import { getHubIndex, indexableHubs } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
+import { FIRST_RESPONDERS_DAY_PATH, getFirstRespondersDayHub } from "@/lib/first-responders-day";
 import { getOutlets } from "@/lib/outlets";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
@@ -88,6 +89,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return latest;
   }, undefined);
   const veterans = getVeteransDayHub();
+  const responders = getFirstRespondersDayHub();
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -105,6 +107,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: absoluteUrl(VETERANS_DAY_PATH),
       lastModified: veterans.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    {
+      url: absoluteUrl(FIRST_RESPONDERS_DAY_PATH),
+      lastModified: responders.latest ?? siteLatest,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     },

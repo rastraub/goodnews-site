@@ -1,0 +1,11 @@
+{
+  "exclude": [],
+  "states": {},
+  "roles": {
+    "fire": [],
+    "police": [],
+    "ems": [],
+    "dispatch": [],
+    "search-and-rescue": []
+  }
+}

@@ -16,7 +16,8 @@
     "validate-web-stories": "tsx scripts/validate-web-stories.ts",
     "city-report": "tsx scripts/city-report.ts",
     "giving-tuesday-coverage": "tsx scripts/giving-tuesday-coverage.ts",
-    "veterans-gaps": "tsx scripts/veterans-day-gaps.ts"
+    "veterans-gaps": "tsx scripts/veterans-day-gaps.ts",
+    "first-responders-gaps": "tsx scripts/first-responders-day-gaps.ts"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

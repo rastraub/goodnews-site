@@ -1,5 +1,23 @@
 import fs from "fs";
 import path from "path";
+import {
+  CLASSROOM_QUESTIONS,
+  EXCLUSION_RULES,
+  FIRST_RESPONDERS_DAY_PATH,
+  FIRST_RESPONDERS_RESOLUTION_URL,
+  THANK_YOU_LINKS,
+  assignedRoles,
+  buildFirstRespondersDayHub,
+  emptyEditorConfig,
+  exclusionLabel,
+  firstRespondersDayInSeason,
+  getFirstRespondersDayHub,
+  isFirstResponderCandidate,
+  loadFirstRespondersEditorConfig,
+  parseFirstRespondersEditorConfig,
+  readsAsPositive,
+  storyQualifies,
+} from "../lib/first-responders-day";
 import { parseEmailInterest } from "../lib/email";
 import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
 import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
@@ -1321,6 +1339,250 @@ function assertVeteransDayHub() {
   );
 }
 
+function assertFirstRespondersDay() {
+  const cardiac = {
+    title: "A deputy is home after cardiac arrest",
+    dek: "EMS resuscitated him and he was later discharged.",
+    body: "No further victims were suspected. Survival after cardiac arrest is uncommon.",
+  };
+  if (exclusionLabel(cardiac)) throw new Error("Cardiac arrest, discharged, and suspected must stay on the hub.");
+  const shooting = {
+    title: "Officers shot a suspect after a pursuit",
+    dek: "Police shot and killed a suspect after a high-speed chase.",
+    body: "The department described the use of force.",
+  };
+  const blocked = exclusionLabel(shooting);
+  if (!blocked) throw new Error("A shooting, pursuit, and suspect story should be excluded.");
+  if (!EXCLUSION_RULES.some((rule) => rule.label === blocked)) {
+    throw new Error(`Unexpected exclusion label ${blocked}.`);
+  }
+  const politics = {
+    title: "A political rally for a candidate",
+    dek: "The election night party filled a station parking lot.",
+    body: "Partisan signs lined the sidewalk.",
+  };
+  if (!exclusionLabel(politics)) throw new Error("A political story should be excluded.");
+  if (
+    exclusionLabel({
+      title: "Firefighters saved a neighbor",
+      dek: "The crew pulled her out and she is safe.",
+      body: "The rescue was finished before sunrise.",
+    })
+  ) {
+    throw new Error("A rescue should not match the exclusion list.");
+  }
+
+  const published = getPublishedStories();
+  const base = published.find((story) => story.slug === "dayton-officer-mote");
+  if (!base) throw new Error("Expected the Dayton officer story in the archive.");
+  const older = {
+    ...base,
+    slug: "oh-old",
+    date: "2026-01-01",
+    title: "Firefighters saved a family in Dayton",
+    dek: "The crew pulled everyone out of the house before the roof fell.",
+    body: "Firefighters saved the family and stayed until everyone was safe.",
+    tags: ["first-responders", "firefighters"],
+    state: "OH",
+    alsoStates: [],
+  };
+  const newerCamp = {
+    ...older,
+    slug: "oh-new",
+    date: "2026-10-20",
+    title: "A firefighter camp opened in Dayton",
+    dek: "The department hosted a free training camp for neighbors.",
+    body: "The camp was a kindness for people who wanted to learn the work.",
+    tags: ["first-responders", "firefighters"],
+  };
+  const violent = {
+    ...older,
+    slug: "oh-shooting",
+    title: "Officers shot a suspect after a pursuit",
+    dek: "Police shot and killed a suspect after a high-speed chase.",
+    body: "The use of force was reviewed the next day.",
+  };
+  const neutral = {
+    ...older,
+    slug: "oh-budget",
+    title: "The department budget was on a meeting agenda",
+    dek: "Council members discussed vehicles and radios for the year.",
+    body: "The meeting covered equipment costs and staffing charts for next year.",
+    tags: ["first-responders"],
+  };
+
+  const auto = buildFirstRespondersDayHub([older, newerCamp, neutral], emptyEditorConfig(), 2026);
+  const ohio = auto.slots.find((slot) => slot.state.code === "OH");
+  if (ohio?.story?.slug !== "oh-old") throw new Error("A rescue should beat a newer camp when both are in the same state.");
+  if (auto.stories.some((story) => story.slug === "oh-budget")) throw new Error("A budget story should not auto-fill the hub.");
+  if (auto.stories.some((story) => story.slug === "oh-shooting")) throw new Error("A shooting fixture leaked onto the hub.");
+  if (!auto.roles.find((role) => role.slug === "fire")?.stories.some((item) => item.story.slug === "oh-old")) {
+    throw new Error("The Dayton rescue should land in the firefighter group.");
+  }
+
+  const pinnedConfig = emptyEditorConfig();
+  pinnedConfig.states = { OH: "oh-new" };
+  const pinned = buildFirstRespondersDayHub([older, newerCamp], pinnedConfig, 2027);
+  const pinnedOhio = pinned.slots.find((slot) => slot.state.code === "OH");
+  if (!pinnedOhio?.pinned || pinnedOhio.story?.slug !== "oh-new") throw new Error("A state pin should replace the automatic pick.");
+  if (pinned.year !== 2027) throw new Error("The hub year should follow the year passed in.");
+
+  const rolePin = emptyEditorConfig();
+  rolePin.roles.ems = ["oh-old"];
+  const moved = buildFirstRespondersDayHub([older], rolePin, 2026);
+  if (moved.roles.find((role) => role.slug === "fire")?.stories.some((item) => item.story.slug === "oh-old")) {
+    throw new Error("A role pin should take the story out of the automatic group.");
+  }
+  const emsPin = moved.roles.find((role) => role.slug === "ems")?.stories.find((item) => item.story.slug === "oh-old");
+  if (!emsPin?.pinned) throw new Error("A role pin should show in that group and say it is pinned.");
+
+  const blockedPin = emptyEditorConfig();
+  blockedPin.states = { OH: "oh-shooting" };
+  const blockedHub = buildFirstRespondersDayHub([older, violent], blockedPin, 2026);
+  if (!blockedHub.pinErrors.some((error) => error.includes("OH") && error.includes("oh-shooting"))) {
+    throw new Error("A pin that fails the content filter should be an error.");
+  }
+  if (blockedHub.stories.some((story) => story.slug === "oh-shooting")) {
+    throw new Error("A rejected pin should not publish the shooting story.");
+  }
+
+  const excluded = emptyEditorConfig();
+  excluded.exclude = ["oh-old"];
+  const hidden = buildFirstRespondersDayHub([older, newerCamp], excluded, 2026);
+  if (hidden.stories.some((story) => story.slug === "oh-old")) throw new Error("An editor exclude should remove the story.");
+  if (hidden.pinErrors.length) throw new Error(`A real slug on the exclude list should not be an error: ${hidden.pinErrors.join("; ")}`);
+
+  const missingExclude = emptyEditorConfig();
+  missingExclude.exclude = ["not-a-real-story"];
+  const missing = buildFirstRespondersDayHub([older], missingExclude, 2026);
+  if (!missing.pinErrors.some((error) => error.includes("not-a-real-story"))) {
+    throw new Error("An exclude slug that is not published should fail.");
+  }
+
+  if (!readsAsPositive(older) || !storyQualifies(older, emptyEditorConfig())) {
+    throw new Error("The rescue fixture should qualify.");
+  }
+  if (readsAsPositive(neutral)) throw new Error("A budget agenda should not read as rescue, help, or kindness.");
+  if (storyQualifies(violent, emptyEditorConfig())) throw new Error("Keyword exclusion should block a story before ranking.");
+  if (!isFirstResponderCandidate(older)) throw new Error("A tagged story should be a candidate.");
+  if (isFirstResponderCandidate({ ...older, draft: true, tags: ["first-responders"] })) {
+    throw new Error("A draft should not be a candidate.");
+  }
+
+  const henefer = published.find((story) => story.slug === "henefer-coach-cpr");
+  const mission = published.find((story) => story.slug === "mission-viejo-garage-fire");
+  const pittsburgh = published.find((story) => story.slug === "pittsburgh-concord-fire");
+  const elko = published.find((story) => story.slug === "elko-midflight-baby");
+  const pinkham = published.find((story) => story.slug === "pinkham-glen-ellis-rescue");
+  if (!henefer || !mission || !pittsburgh || !elko || !pinkham) throw new Error("Expected first-responder fixtures in the archive.");
+  const liveConfig = emptyEditorConfig();
+  if (assignedRoles(henefer, liveConfig).includes("dispatch")) {
+    throw new Error("A dispatcher named only in the body should not file the story under dispatch.");
+  }
+  if (assignedRoles(mission, liveConfig).includes("fire")) {
+    throw new Error("Firefighters who only arrived after a neighbor's rescue should not take the firefighter group.");
+  }
+  if (!assignedRoles(pittsburgh, liveConfig).includes("fire")) throw new Error("Pittsburgh should group as firefighters.");
+  if (!assignedRoles(base, liveConfig).includes("police")) throw new Error("The Dayton officer story should group as police.");
+  if (!assignedRoles(elko, liveConfig).includes("ems")) throw new Error("The Elko flight crew should group as EMS.");
+  if (!assignedRoles(pinkham, liveConfig).includes("search-and-rescue")) {
+    throw new Error("The Glen Ellis story should group as search and rescue.");
+  }
+
+  for (const year of [2025, 2026, 2027]) {
+    if (!firstRespondersDayInSeason(`${year}-10-21`) || !firstRespondersDayInSeason(`${year}-10-28`) || !firstRespondersDayInSeason(`${year}-10-29`)) {
+      throw new Error(`The banner should show October 21 through 29 in ${year}.`);
+    }
+    if (firstRespondersDayInSeason(`${year}-10-20`) || firstRespondersDayInSeason(`${year}-10-30`) || firstRespondersDayInSeason(`${year}-11-01`)) {
+      throw new Error(`The banner should stay off outside October 21 through 29 in ${year}.`);
+    }
+  }
+  if (firstRespondersDayInSeason("October 28")) throw new Error("A banner date has to be YYYY-MM-DD.");
+
+  const emptyPins = parseFirstRespondersEditorConfig({
+    exclude: [],
+    states: {},
+    roles: { fire: [], police: [], ems: [], dispatch: [], "search-and-rescue": [] },
+  });
+  if (emptyPins.exclude.length || Object.keys(emptyPins.states).length) throw new Error("An empty config should mean no pins.");
+  for (const value of [{ exclude: ["Not A Slug"] }, { states: { Ohio: "dayton-officer-mote" } }, { extra: true }, ["exclude"]]) {
+    let threw = false;
+    try {
+      parseFirstRespondersEditorConfig({ ...emptyEditorConfig(), ...(value as object) });
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`Config should reject ${JSON.stringify(value)}`);
+  }
+
+  const config = loadFirstRespondersEditorConfig();
+  const live = getFirstRespondersDayHub();
+  const rebuilt = buildFirstRespondersDayHub(published, config, live.year);
+  if (live.pinErrors.length || rebuilt.pinErrors.length) {
+    throw new Error(`First Responders Day config: ${[...live.pinErrors, ...rebuilt.pinErrors].join("; ")}`);
+  }
+  if (live.slots.length !== 51 || live.covered.length + live.gaps.length !== 51) {
+    throw new Error("The hub should have one slot for every state and Washington, D.C.");
+  }
+  if (live.covered.length < 10) throw new Error("The hub should render real archive stories.");
+  for (const role of ["fire", "police", "ems", "search-and-rescue"] as const) {
+    if (!live.roles.find((item) => item.slug === role)?.stories.length) {
+      throw new Error(`The ${role} group should include at least one archive story.`);
+    }
+  }
+  if (!live.roles.some((role) => role.slug === "dispatch")) throw new Error("The dispatcher group should be on the page even when it is empty.");
+  for (const story of live.stories) {
+    if (exclusionLabel(story)) throw new Error(`${story.slug} is on the hub but matches the content filter.`);
+    if (config.exclude.includes(story.slug)) throw new Error(`${story.slug} is excluded and still on the hub.`);
+    if (!isFirstResponderCandidate(story)) throw new Error(`${story.slug} is on the hub without a first-responder tag.`);
+  }
+  if (!live.imageStory || !live.stories.some((story) => story.slug === live.imageStory?.slug)) {
+    throw new Error("The social image has to be a story that is actually on the hub.");
+  }
+  if (live.gaps.some((slot) => slot.story) || live.covered.some((slot) => !slot.story)) {
+    throw new Error("Open states and filled states got mixed up.");
+  }
+  for (const link of THANK_YOU_LINKS) {
+    if (link.external && !link.href.startsWith("https://")) throw new Error(`${link.label} should use https.`);
+  }
+  const hosts = THANK_YOU_LINKS.map((link) => link.href).join(" ");
+  if (!hosts.includes("cpr.heart.org") || !hosts.includes("redcrossblood.org") || !hosts.includes("911.gov")) {
+    throw new Error("Thanks links should point at the American Heart Association, the Red Cross, and 911.gov.");
+  }
+  if (!FIRST_RESPONDERS_RESOLUTION_URL.startsWith("https://www.congress.gov/")) {
+    throw new Error("The resolution citation should be the congress.gov page.");
+  }
+  if (CLASSROOM_QUESTIONS.length !== 3) throw new Error("The classroom corner needs 3 discussion questions.");
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.some((url) => url.endsWith(FIRST_RESPONDERS_DAY_PATH))) {
+    throw new Error("The sitemap should include the First Responders Day hub.");
+  }
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("FIRST_RESPONDERS_DAY_PATH")) throw new Error("IndexNow should ping the First Responders Day hub.");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+  if (!home.includes("FirstRespondersDayBanner")) throw new Error("The homepage should mount the First Responders Day banner.");
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("FIRST_RESPONDERS_DAY_PATH")) throw new Error("The footer should link to the First Responders Day hub.");
+  const topic = fs.readFileSync(path.join(process.cwd(), "components/hub-browse.tsx"), "utf8");
+  if (!topic.includes("FIRST_RESPONDERS_DAY_PATH")) throw new Error("The first-responders topic page should link to the hub.");
+  const page = fs.readFileSync(path.join(process.cwd(), "app/first-responders-day/page.tsx"), "utf8");
+  if (!page.includes("siteConfig.editor.name") || !page.includes("CLASSROOM_QUESTIONS") || !page.includes("THANK_YOU_LINKS")) {
+    throw new Error("The hub page should use the masthead byline, classroom questions, and thanks links.");
+  }
+  if (!page.includes("listingJsonLd") || !page.includes("EmailSignup") || !page.includes("ShareButtons")) {
+    throw new Error("The hub page should include schema, a newsletter signup, and share text.");
+  }
+  if (page.includes("Jane ") || page.includes("By John")) throw new Error("The hub byline should not use a personal name.");
+
+  const missingStates = live.gaps.map((slot) => slot.state.name);
+  console.log(
+    missingStates.length
+      ? `First Responders Day: ${live.covered.length} of ${live.slots.length} places covered. Still open: ${missingStates.join(", ")}`
+      : `First Responders Day: all ${live.slots.length} places covered.`,
+  );
+}
+
 function assertImageVariants() {
   const versioned = "/images/stories/pony-v2.webp";
   if (storyThumbPath(versioned) !== "/images/stories/pony-v2-sm.webp") {
@@ -2433,6 +2695,7 @@ assertPartnerKit();
 assertThanksBoard();
 assertExplainers();
 assertGivingTuesday(stories);
+assertFirstRespondersDay();
 const published = stories.filter((story) => !story.draft);
 const images = feedImageReport(published.map((story) => story.image));
 console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);

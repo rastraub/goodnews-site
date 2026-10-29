@@ -10,6 +10,7 @@ import { explainerPath, explainersForTag } from "@/lib/explainers";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { getHubByPath, getHubIndex, storiesForHub, type Hub } from "@/lib/hubs";
 import { pageCount, pagePath, pageSlice } from "@/lib/paging";
+import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import type { Story } from "@/lib/stories";
@@ -131,6 +132,12 @@ export function HubBrowse({ path, page }: { path: string; page: number }) {
           <p className="kicker">{hub.kicker}</p>
           <h1>{hub.heading}</h1>
           <p className="lede">{hub.description}</p>
+          {hub.path === "/topic/first-responders" ? (
+            <p className="lede" style={{ marginTop: 12 }}>
+              October 28 is Honoring the Nation&apos;s First Responders Day.{" "}
+              <Link href={FIRST_RESPONDERS_DAY_PATH}>Thank you, first responders</Link> gathers rescues, lifesaving help, and kindness from the archive.
+            </p>
+          ) : null}
           {topicExplainers.length ? (
             <p className="link-pills">
               {topicExplainers.map((explainer) => (

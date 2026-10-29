@@ -1,7 +1,8 @@
 /**
  * One story per state for a seasonal hub.
  * A hub passes its own qualify rule, quality tie-break, and editor pin map.
- * Veterans Day is the first caller. A later hub should use this instead of copying it.
+ * Veterans Day is the first caller. First Responders Day uses it too.
+ * A later hub should use this instead of copying it.
  */
 import { getStateByCode, STATES, type StateInfo } from "./states";
 
@@ -61,11 +62,17 @@ export function pickStateStories<T extends StateHubStory>(options: {
   pins?: Record<string, string>;
   qualifies: (story: T) => boolean;
   quality?: (story: T) => number;
+  /**
+   * Defaults to home state, then newest date, then featured, then Top 5, then quality.
+   * A hub that should prefer the strongest story over the newest one can pass its own compare.
+   */
+  compare?: (code: string, a: T, b: T) => number;
   states?: StateInfo[];
 }): StateHubPick<T> {
   const states = options.states ?? STATES;
   const pins = options.pins ?? {};
   const quality = options.quality ?? (() => 0);
+  const compare = options.compare ?? ((code: string, a: T, b: T) => compareStateStories(code, quality, a, b));
   const known = new Set(states.map((state) => state.code));
   const bySlug = new Map(options.stories.map((story) => [story.slug, story]));
   const pinErrors: string[] = [];
@@ -104,7 +111,7 @@ export function pickStateStories<T extends StateHubStory>(options: {
       state,
       candidates: eligible
         .filter((story) => story.state === state.code && !used.has(story.slug))
-        .sort((a, b) => compareStateStories(state.code, quality, a, b)),
+        .sort((a, b) => compare(state.code, a, b)),
     }))
     .filter((row) => row.candidates.length > 0)
     .sort((a, b) => a.candidates.length - b.candidates.length || a.state.name.localeCompare(b.state.name));
@@ -120,7 +127,7 @@ export function pickStateStories<T extends StateHubStory>(options: {
     if (chosen.has(state.code)) continue;
     const candidates = eligible
       .filter((story) => covers(story, state.code))
-      .sort((a, b) => compareStateStories(state.code, quality, a, b));
+      .sort((a, b) => compare(state.code, a, b));
     const next = candidates.find((candidate) => !used.has(candidate.slug)) ?? candidates[0];
     if (!next) continue;
     chosen.set(state.code, { story: next, pinned: false });
