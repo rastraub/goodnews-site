@@ -74,7 +74,7 @@ import {
 } from "../lib/quiz";
 import { stateName } from "../lib/states";
 import { explainerSchema } from "../lib/explainer-schema";
-import { explainerPaths, explainersForStory, getPublishedExplainers, storiesForExplainer } from "../lib/explainers";
+import { explainerMatchesStory, explainerPaths, explainersForStory, getPublishedExplainers, storiesForExplainer } from "../lib/explainers";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
@@ -855,9 +855,10 @@ function assertExplainers() {
   const fridge = storiesForExplainer(bySlug.get("how-a-community-fridge-works")!).map((story) => story.slug);
   if (!fridge.includes("new-ulm-library-fridge")) throw new Error("The fridge explainer should link the New Ulm story.");
 
-  const flights = storiesForExplainer(bySlug.get("how-honor-flights-work")!).map((story) => story.slug);
+  const flights = bySlug.get("how-honor-flights-work")!;
   for (const slug of ["anchorage-honor-flight", "des-moines-honor-flight", "fresno-honor-flight", "phoenix-honor-flight"]) {
-    if (!flights.includes(slug)) throw new Error(`Honor Flight explainer missed ${slug}.`);
+    const story = getStory(slug);
+    if (!story || !explainerMatchesStory(flights, story)) throw new Error(`Honor Flight explainer missed ${slug}.`);
   }
 
   const food = storiesForExplainer(bySlug.get("how-food-banks-rescue-food")!).map((story) => story.slug);
