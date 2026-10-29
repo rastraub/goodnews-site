@@ -1,0 +1,35 @@
+{
+  "start": "2026-10-05",
+  "stories": [
+    {
+      "slug": "ottawa-book-brigade",
+      "headline": "Unos 280 vecinos pasaron 7,400 libros por una acera de Ottawa",
+      "summary": "El 10 de octubre de 2026, unos 280 voluntarios formaron dos filas en Wellington Street West, en Hintonburg, y pasaron libros de mano en mano hasta la nueva tienda de The Spaniel's Tale. CBC News informó que las filas medían unos 80 o 90 metros y que, en dos horas y media, movieron más de 7,400 libros, que llegaron en orden alfabético. El copropietario Cole Davidson dijo que los clientes habían sugerido la idea, y la tienda nueva tiene más del doble de tamaño. Ese día no se movieron todos los libros: el resto pasó durante la semana, antes de la inauguración del 17 de octubre.",
+      "kidLine": "Los vecinos formaron una cadena y pasaron más de 7,400 libros hasta la librería nueva."
+    },
+    {
+      "slug": "baler-green-hatchlings",
+      "headline": "Más de 170 tortugas verdes recién nacidas llegaron al mar cerca de Baler",
+      "summary": "El Inquirer informó el 11 de octubre de 2026 que más de 170 crías de tortuga verde fueron soltadas en playas cerca de Baler, en la provincia de Aurora. Los huevos estaban en nidos separados dentro de la reserva forestal Aurora Watershed, y el personal llevó las crías a los sitios Diguisit y Dicasalarin, en el barangay Zabali. Participaron la oficina ambiental de Maria Aurora, la oficina ambiental del municipio de Baler y quienes administran los resorts de esas playas.",
+      "kidLine": "Más de 170 tortuguitas verdes caminaron hacia el mar en playas cerca de Baler."
+    },
+    {
+      "slug": "cochrane-darwin-rheas",
+      "headline": "Mujeres en la Patagonia devolvieron ñandúes de Darwin a la estepa",
+      "summary": "Mongabay informó el 10 de octubre de 2026 que un equipo de mujeres, con Rewilding Chile, cría ñandúes de Darwin en el Parque Nacional Patagonia y los devuelve al valle del Chacabuco. Censos anteriores estimaban unos 11 a 15 en la zona, y el reportaje dice que 13 fueron liberadas en abril de 2026 tras cerca de dos meses de acostumbrarse al valle. Al salir, pastaron y caminaron kilómetros; al moverse, también dispersan semillas. Es el regreso de un ave que faltaba, no una afirmación de que la estepa ya esté llena.",
+      "kidLine": "Un equipo de mujeres está devolviendo ñandúes de Darwin a la estepa del Parque Nacional Patagonia."
+    },
+    {
+      "slug": "onion-lake-garden-harvest",
+      "headline": "El huerto sin labranza de Onion Lake cosechó más de 1,300 kilogramos de comida",
+      "summary": "CBC News informó el 7 de octubre de 2026 que un huerto sin labranza en la nación cree de Onion Lake produjo más de 1,300 kilogramos de verduras, entre ellas papas, zanahorias, cebollas, tomates, calabacines y coliflor. Casi no hizo falta regar, y no usaron fertilizantes ni pesticidas. Estudiantes de la secundaria Sakāskohc sacaron papas una tarde y cada uno se llevó una bolsa; la comida también fue a dos bancos de alimentos y al Ekweskeet Healing Lodge. El número es la cosecha de este año, no una promesa sobre el año que viene.",
+      "kidLine": "El huerto de la comunidad cosechó más de 1,300 kilogramos de verduras, y los estudiantes se llevaron papas a casa."
+    },
+    {
+      "slug": "aldabra-giant-tortoises",
+      "headline": "Las tortugas gigantes de Aldabra suman unas 180,000",
+      "summary": "La Universidad de Exeter informó el 7 de octubre de 2026 que un nuevo conteo, hecho con la Seychelles Islands Foundation, estima unas 180,000 tortugas gigantes adultas y juveniles mayores en el atolón de Aldabra, la cifra más alta registrada. El mejor cálculo es de casi 183,000, y la población se vio estable entre 2018 y 2022. La diferencia frente a un cálculo antiguo de unas 100,000 se debe sobre todo a que los conteos anteriores no veían a los animales en la sombra. Gatos y ratas todavía se comen los huevos, así que el estudio es una base para seguir protegiéndolas, no una razón para bajar la guardia.",
+      "kidLine": "Un estudio contó unas 180,000 tortugas gigantes en un atolón remoto de Seychelles."
+    }
+  ]
+}

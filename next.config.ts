@@ -12,6 +12,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Two root layouts (English and Spanish) need one 404 document for URLs that match neither.
+    globalNotFound: true,
+  },
   // nodemailer talks to SMTP from the submit route. Leave it unbundled.
   serverExternalPackages: ["nodemailer"],
   images: {
@@ -52,6 +56,7 @@ const nextConfig: NextConfig = {
       cached("/category/:slug/rss.xml", FEED_CACHE_CONTROL),
       cached("/state/:slug/rss.xml", FEED_CACHE_CONTROL),
       cached("/week/rss.xml", FEED_CACHE_CONTROL),
+      cached("/es/rss.xml", FEED_CACHE_CONTROL),
       cached("/country/:slug/rss.xml", FEED_CACHE_CONTROL),
       cached("/brand/:path*", IMAGE_CACHE_CONTROL),
       cached("/sitemap.xml", FEED_CACHE_CONTROL),

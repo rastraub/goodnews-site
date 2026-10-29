@@ -24,6 +24,14 @@ import {
   type WeekSource,
 } from "../lib/weeks";
 import { storySchema } from "../lib/story-schema";
+import { editionLanguageAlternates, weekIndexLanguageAlternates } from "../lib/i18n";
+import {
+  SPANISH_TRANSLATION_NOTE,
+  formatSpanishWeekRange,
+  loadSpanishEditions,
+  renderSpanishRss,
+  suggestSpanishStories,
+} from "../lib/spanish-editions";
 import { getPublishedStories, loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
@@ -713,6 +721,73 @@ function assertImageVariants() {
   }
 }
 
+function assertSpanishEditions() {
+  const expectedNote = `Resúmenes traducidos del inglés por el equipo de ${siteConfig.name}. Las fuentes originales están en inglés.`;
+  if (SPANISH_TRANSLATION_NOTE !== expectedNote) {
+    throw new Error("The Spanish translation note should name the publication, not a person.");
+  }
+  if (formatSpanishWeekRange("2026-10-05", "2026-10-11") !== "del 5 al 11 de octubre de 2026") {
+    throw new Error("A Spanish week inside October should read del 5 al 11 de octubre de 2026.");
+  }
+  if (formatSpanishWeekRange("2026-10-26", "2026-11-01") !== "del 26 de octubre al 1 de noviembre de 2026") {
+    throw new Error("A Spanish week across months should name both months.");
+  }
+  const ranked = suggestSpanishStories([
+    sampleWeekStory({ slug: "marked", date: "2026-10-29", featured: true }),
+    sampleWeekStory({ slug: "kid", date: "2026-10-28", kidFriendly: true }),
+    sampleWeekStory({ slug: "ranked", date: "2026-10-29", top5: 1 }),
+  ]);
+  if (ranked.map((story) => story.slug).join(",") !== "kid,marked,ranked") {
+    throw new Error(`Kid-friendly stories should lead Spanish suggestions. Got ${ranked.map((story) => story.slug).join(",")}.`);
+  }
+  const languages = editionLanguageAlternates("2026-10-05");
+  if (languages.en !== "/week/2026-10-05" || languages.es !== "/es/buenas-noticias/2026-10-05" || languages["x-default"] !== "/week/2026-10-05") {
+    throw new Error("A Spanish edition should alternate with that Monday's English week.");
+  }
+  const indexLanguages = weekIndexLanguageAlternates();
+  if (indexLanguages.en !== "/week" || indexLanguages.es !== "/es/buenas-noticias" || indexLanguages["x-default"] !== "/week") {
+    throw new Error("The Spanish index should alternate with /week.");
+  }
+
+  const editions = loadSpanishEditions();
+  if (editions.length < 4) throw new Error(`Expected at least 4 Spanish editions. Got ${editions.length}.`);
+  for (const start of ["2026-10-05", "2026-10-12", "2026-10-19", "2026-10-26"]) {
+    if (!editions.some((edition) => edition.start === start)) throw new Error(`Missing seeded Spanish edition ${start}.`);
+  }
+  const current = weekStart(mountainDay());
+  for (const edition of editions) {
+    if (edition.stories.length !== 5) throw new Error(`${edition.path} should have 5 stories.`);
+    if (edition.inProgress !== (edition.start === current)) throw new Error(`${edition.path} has the wrong hasta ahora flag.`);
+    if (edition.englishPath !== `/week/${edition.start}`) throw new Error(`${edition.path} should point at the English week.`);
+    for (const story of edition.stories) {
+      if (!story.sourceName || !story.sourceUrl.startsWith("https://")) throw new Error(`${story.slug} is missing its original source.`);
+      if (!story.place.includes(",")) throw new Error(`${story.slug} should show a city and a state or country.`);
+    }
+  }
+  const ottawa = editions.find((edition) => edition.start === "2026-10-05")?.stories.find((story) => story.slug === "ottawa-book-brigade");
+  if (ottawa?.place !== "Ottawa, Canadá" || ottawa.sourceName !== "CBC News") {
+    throw new Error(`Ottawa should keep the city, the Spanish country, and the original source. Got ${ottawa?.place} / ${ottawa?.sourceName}.`);
+  }
+  const bison = editions.find((edition) => edition.start === "2026-10-26")?.stories.find((story) => story.slug === "pine-ridge-bison-release");
+  if (bison?.place !== "Porcupine, Dakota del Sur") throw new Error(`Pine Ridge should read Porcupine, Dakota del Sur. Got ${bison?.place}.`);
+  const open = editions.find((edition) => edition.start === "2026-10-26");
+  if (current === "2026-10-26" && !open?.title.startsWith("Las 5 buenas noticias, hasta ahora:")) {
+    throw new Error("The open Spanish week should say hasta ahora.");
+  }
+
+  const feed = renderSpanishRss(editions);
+  if (!feed.includes("<language>es</language>")) throw new Error("The Spanish feed language should be es.");
+  if (!feed.includes(SPANISH_TRANSLATION_NOTE)) throw new Error("The Spanish feed should include the translation note.");
+  if (feed.includes(siteConfig.editor.name)) throw new Error("The Spanish feed should not name an editor.");
+  const dates = [...feed.matchAll(/<pubDate>([^<]+)<\/pubDate>/g)].map((match) => match[1]);
+  if (new Set(dates).size !== dates.length) throw new Error("Spanish RSS pubDates must be unique.");
+  for (const edition of editions) {
+    if (!feed.includes(`/es/buenas-noticias/${edition.start}`)) throw new Error(`Spanish RSS is missing ${edition.path}.`);
+  }
+  if (renderWeekRss().includes("/es/buenas-noticias")) throw new Error("The English week feed should not list Spanish editions.");
+  console.log(`Spanish editions: ${editions.map((edition) => edition.start).join(", ")}.`);
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -721,6 +796,7 @@ assertWorldSpotlight();
 assertHubs();
 assertKidClassrooms();
 assertWeeks();
+assertSpanishEditions();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertEnrichmentMerge();
 assertLoadedCountries(stories);

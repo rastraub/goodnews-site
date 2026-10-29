@@ -45,6 +45,7 @@ export function feedCatalog(): { heading: string; feeds: FeedLink[] }[] {
         { title: "SmartNews", path: "/smartnews.xml", blurb: "SmartFormat feed for the SmartNews app." },
         { title: "World", path: "/world/rss.xml", blurb: "Stories from outside the United States." },
         { title: "For classrooms", path: "/kids/rss.xml", blurb: "Stories a teacher can read with a class." },
+        { title: "En español", path: "/es/rss.xml", blurb: "A weekly Top 5 in Spanish. Original sources stay in English." },
       ],
     },
     {

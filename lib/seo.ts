@@ -83,10 +83,14 @@ const feedTypes = {
  * Setting canonical alone would drop the layout feed tags.
  * `feedPath` points a section at its own RSS file.
  */
-export function pageAlternates(path: string, feedPath?: string): NonNullable<Metadata["alternates"]> {
+export function pageAlternates(
+  path: string,
+  feedPath?: string,
+  languages?: Record<string, string>,
+): NonNullable<Metadata["alternates"]> {
   return {
     canonical: path === "" ? "/" : path,
-    languages: hreflangAlternates(path),
+    languages: languages ?? hreflangAlternates(path),
     types: feedPath
       ? { "application/rss+xml": feedPath, "application/atom+xml": "/atom.xml" }
       : feedTypes,
@@ -104,6 +108,8 @@ export function listingMeta(options: {
   page: number;
   total: number;
   feedPath?: string;
+  /** When set, replaces the default hreflang map. Used to pair a week with its Spanish edition. */
+  languages?: Record<string, string>;
   image?: { url: string; alt: string; width?: number; height?: number; type?: "image/jpeg" | "image/webp" };
 }): Metadata {
   const path = pagePath(options.base, options.page);
@@ -115,7 +121,7 @@ export function listingMeta(options: {
   return {
     title,
     description: options.description,
-    alternates: pageAlternates(path, options.feedPath),
+    alternates: pageAlternates(path, options.feedPath, options.languages),
     ...(pagination.previous || pagination.next ? { pagination } : {}),
     ...(options.image
       ? {

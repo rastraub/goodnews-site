@@ -1,0 +1,35 @@
+{
+  "start": "2026-10-19",
+  "stories": [
+    {
+      "slug": "tortuguero-turtle-lights",
+      "headline": "Lámparas rojas en Tortuguero desviaron a menos crías de tortuga",
+      "summary": "The Tico Times informó el 25 de octubre de 2026 que las crías de tortuga buscan el mar yendo hacia el horizonte más brillante, y que una luz de casa o un letrero puede llevarlas tierra adentro. En Tortuguero, un estudio con crías de tortuga verde halló que el 15 por ciento se arrastró hacia la luz artificial blanca y el 5 por ciento lo hizo con lámparas rojas. En marzo de 2023, el instituto de electricidad instaló allí 71 lámparas rojas. El reportaje no dice que el pueblo se haya quedado a oscuras ni que todas las crías lleguen ahora al mar.",
+      "kidLine": "En Tortuguero, unas lámparas rojas confundieron a menos tortuguitas que las luces blancas."
+    },
+    {
+      "slug": "broulee-school-microforest",
+      "headline": "Estudiantes de cuarto grado en Broulee plantaron unas 1,000 plantas nativas",
+      "summary": "ABC News informó el 25 de octubre de 2026 que alumnos de cuarto grado del St Peter's Anglican College, en Broulee, pasaron una semana plantando unas 1,000 plantas nativas en un patio que estaba pelado. Quieren que ese espacio se vuelva un microbosque con sombra y plantas de una selva costera que está en peligro. Antes visitaron selvas de verdad, aprendieron qué necesita cada planta y usaron matemáticas para calcular el mantillo. Es la primera escuela de Nueva Gales del Sur que hace un microbosque con Microforest Collective como parte de las clases.",
+      "kidLine": "Niños de cuarto grado plantaron unas 1,000 plantas para empezar un bosque pequeño en su escuela."
+    },
+    {
+      "slug": "seattle-orca-j65",
+      "headline": "Tahlequah, una orca muy conocida, tiene una cría sana",
+      "summary": "KIRO 7 informó que el Center for Whale Research confirmó a J65, una cría macho de la orca J35, conocida como Tahlequah, en Puget Sound. Los investigadores lo vieron por primera vez junto a ella el 19 de octubre y, al día siguiente, un video de dron mostró que es macho. Lo vieron mamar, relacionarse con el grupo y nadar bien, sin problemas de salud a la vista. Las orcas residentes del sur están en peligro, y quienes las estudian van a seguir observándolo mientras crece.",
+      "kidLine": "Una cría de orca nada junto a su madre, Tahlequah, en Puget Sound."
+    },
+    {
+      "slug": "warsaw-snow-leopard-cubs",
+      "headline": "Tres crías de leopardo de las nieves salieron al exterior en el zoológico de Varsovia",
+      "summary": "Xinhua informó el 24 de octubre de 2026 que tres crías de leopardo de las nieves, nacidas en julio en el zoológico de Varsovia, pasaron sus primeras horas al aire libre el 23 de octubre. Esa fecha es el Día Internacional del Leopardo de las Nieves. El despacho no da los nombres ni el peso de las crías, ni describe cómo fue la salida más allá del debut. Verlas fuera es un primer paso en el zoológico, no un censo de leopardos salvajes.",
+      "kidLine": "Tres cachorros de leopardo de las nieves salieron por primera vez al exterior en el zoológico de Varsovia."
+    },
+    {
+      "slug": "kaukauna-community-fridge",
+      "headline": "Una idea de una estudiante convierte la clase de cocina en comida para un refrigerador comunitario",
+      "summary": "Kaukauna Community News contó que una estudiante de Kaukauna High School le pidió a la clase de cocina que preparara comida para el refrigerador comunitario del pueblo, y la maestra Katie Lehrer aceptó. En una sesión llamada FLEX hicieron 12 recipientes de ensalada de pasta. El refrigerador está en el estacionamiento de Electric City Chuters, abierto día y noche, y nadie tiene que inscribirse para llevar comida. La clase quiere repetirlo cada semana, y el reportaje no da el nombre de la estudiante que tuvo la idea.",
+      "kidLine": "Una estudiante pidió que la clase de cocina preparara comida para el refrigerador del pueblo."
+    }
+  ]
+}

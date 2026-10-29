@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "validate-stories": "tsx scripts/validate-stories.ts",
+    "missing-spanish": "tsx scripts/missing-spanish-editions.ts",
     "feed-images": "tsx scripts/generate-feed-images.ts"
   },
   "dependencies": {
