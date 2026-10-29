@@ -42,6 +42,7 @@ export function Footer() {
               <li><Link href="/web-stories">Web stories</Link></li>
               {quiz ? <li><Link href={quiz.path}>Good News Quiz</Link></li> : null}
               <li><Link href={ON_THIS_DAY_TODAY_PATH}>Good news on this day</Link></li>
+              <li><Link href="/heroes">Hometown Heroes</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href={VETERANS_DAY_PATH}>Veterans Day</Link></li>

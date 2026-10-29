@@ -20,6 +20,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
 
   const more = [
     ...(quizHref ? [{ href: quizHref, label: "Quiz" }] : []),
+    { href: "/heroes", label: "Hometown Heroes" },
     { href: "/kids", label: "Kids" },
     { href: "/topics", label: "Topics" },
     { href: "/explainers", label: "Explainers" },
@@ -113,11 +114,18 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
         <Link href="/subscribe">Subscribe</Link>
       </div>
       <div className="catbar">
-        {[...PRIMARY, ...more].map((link) => (
+        {[...PRIMARY, ...more.filter((link) => link.href !== "/heroes")].map((link) => (
           <Link key={link.href} href={link.href} className={active(link.href) ? "on" : undefined}>
             {link.label}
           </Link>
         ))}
+        {more
+          .filter((link) => link.href === "/heroes")
+          .map((link) => (
+            <Link key={link.href} href={link.href} className={active(link.href) ? "hub on" : "hub"}>
+              {link.label}
+            </Link>
+          ))}
       </div>
     </>
   );

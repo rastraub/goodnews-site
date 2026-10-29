@@ -193,8 +193,11 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 
 .latest{padding:0 0 88px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tabs button{font-size:14px;font-weight:600;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink2);cursor:pointer}
-.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tabs button,.tabs a{font-size:14px;font-weight:600;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink2);cursor:pointer}
+.tabs button.on,.tabs a.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.heroes-map{margin:8px 0 4px;border-radius:28px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+.heroes-map .map{min-height:0;padding:24px 20px 72px}
+.state-index a.on{border-color:var(--gold-d);background:#FFF8EC}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
 .card{background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;border:1px solid #F3ECE1;content-visibility:auto;contain-intrinsic-size:auto 460px}
 .card .ph{aspect-ratio:4/3;position:relative;overflow:hidden;display:block;background:#F6F1E8}
@@ -388,6 +391,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .t5{grid-template-columns:repeat(3,1fr)}
   .grid{grid-template-columns:repeat(2,1fr)}
   .otd-months{grid-template-columns:1fr 1fr}
+}
+@media (min-width:1261px){
+  .catbar{display:flex}
+  .catbar a:not(.hub){display:none}
 }
 @media (max-width:1260px){
   .links,.nav-right .iconbtn{display:none}
