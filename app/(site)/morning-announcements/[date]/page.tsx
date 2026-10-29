@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { CopyLink } from "@/components/copy-link";
 import { JsonLd } from "@/components/json-ld";
-import { PrintButton } from "@/app/kids/print-button";
+import { PrintButton } from "@/app/(site)/kids/print-button";
 import { openGraphImage } from "@/lib/feed-image";
 import {
   MORNING_ANNOUNCEMENTS_PATH,

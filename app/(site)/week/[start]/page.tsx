@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { ListenControls } from "@/components/listen-controls";
 import { StoryCard } from "@/components/story-card";
-import { kidListSegments, listenCardId } from "@/lib/listen-text";
-import { listingJsonLd, listingMeta } from "@/lib/seo";
-import { toCard } from "@/lib/present";
-import type { Story } from "@/lib/stories";
 import { packByStart } from "@/lib/classroom-pack";
+import { editionLanguageAlternates } from "@/lib/i18n";
+import { kidListSegments, listenCardId } from "@/lib/listen-text";
+import { toCard } from "@/lib/present";
 import { getQuiz } from "@/lib/quiz";
+import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { getSpanishEdition } from "@/lib/spanish-editions";
+import type { Story } from "@/lib/stories";
 import { storiesInReadingOrder, usPlaceSentence, weeksToPrerender, type WeekRoundup } from "@/lib/weeks";
 import { siteConfig } from "@/site.config";
 
@@ -26,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { start } = await params;
   const week = weeksToPrerender().find((item) => item.start === start);
   if (!week) return {};
+  const spanish = getSpanishEdition(start);
   return listingMeta({
     title: week.title,
     description: week.intro,
@@ -33,6 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     page: 1,
     total: 1,
     feedPath: "/week/rss.xml",
+    languages: spanish ? editionLanguageAlternates(start) : undefined,
     image: { url: week.image, alt: week.imageAlt },
   });
 }
@@ -112,6 +116,9 @@ export default async function WeekPage({ params }: Props) {
           {week.kids.length ? <Link href="/kids">Classroom section</Link> : null}
           <Link href="/on-this-day">Good news on this day</Link>
           <Link href="/week/rss.xml">Week RSS</Link>
+          <Link href={getSpanishEdition(week.start)?.path ?? "/es/buenas-noticias"} hrefLang="es" lang="es">
+            En español
+          </Link>
         </p>
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>

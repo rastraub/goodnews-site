@@ -6,7 +6,7 @@ import { ShareButtons } from "@/components/share-buttons";
 import { StoryImage } from "@/components/story-image";
 import { UsMap } from "@/components/us-map";
 import { VerifiedBadge } from "@/components/verified-badge";
-import { PrintButton } from "@/app/kids/print-button";
+import { PrintButton } from "@/app/(site)/kids/print-button";
 import { getCategory } from "@/lib/categories";
 import { openGraphImage } from "@/lib/feed-image";
 import {

@@ -407,6 +407,46 @@ npm run next-kindness-challenge -- --write
 If a Monday inside the published window has no curated entry, the page still builds. `pickFallbackStory()` in `lib/kindness.ts` chooses a published `kidFriendly` story tagged `kindness`, skipping stories already used by curated weeks when another one is free. If no classroom story has that tag, it uses any `kidFriendly` story. The action on that page comes from a fixed set of safe prompts. It does not invent details from the story. The window runs from launch week through eight Mondays after the current week.
 
 Check the page before you commit. The challenge has to stay positive, and a teacher should be able to hand it to children about ages 6 to 12.
+## Spanish weekly Top 5
+
+8. Spanish edition. Do not translate a story inside the morning job, and do not call a translation API. Once a week, follow the next section. `npm run missing-spanish` lists weeks that do not have a Spanish file yet.
+
+## Spanish weekly edition
+
+`/es/buenas-noticias/{monday}` is five stories from that Monday-to-Sunday week, in Spanish, for families and classrooms. The date is the same Monday the English page uses at `/week/{monday}`. `/es/buenas-noticias` lists the editions. `/es` points there. The feed is `/es/rss.xml`.
+
+The words live in a JSON file, one edition per week:
+
+`data/es/buenas-noticias/2026-10-05.json`
+
+```json
+{
+  "start": "2026-10-05",
+  "stories": [
+    {
+      "slug": "ottawa-book-brigade",
+      "headline": "Un titular en español",
+      "summary": "Dos a cuatro oraciones. Los nombres, lugares y números salen de la nota en inglés.",
+      "kidLine": "Una línea para leer en clase, solo si la historia ya tiene kidFriendly."
+    }
+  ]
+}
+```
+
+The file needs exactly five stories. `headline` is the Spanish title. `summary` is two to four sentences. `kidLine` is one or two sentences, and only when that story already has `kidFriendly: true`. Leave it off otherwise. Do not put the source name in the file. The page reads `sourceName` and `sourceUrl` from the English story so the credit cannot drift. The city and state (or country) are read from the story too.
+
+The page adds this note on its own, with the publication name from `site.config.ts`. Do not put a person's name in the file, the headline, or the summary as translator or editor:
+
+> Resúmenes traducidos del inglés por el equipo de {name}. Las fuentes originales están en inglés.
+
+### What the weekly run does
+
+1. Run `npm run missing-spanish`. It prints each published week that has no Spanish file, and up to eight suggestions. A non-zero exit means a week is waiting. The build does not fail for that gap, so a morning story batch can still ship.
+2. Pick five stories from that week. Order the suggestions the way the script does: kid-friendly first, then a story still marked `featured` (the story of the day), then `top5` from 1 to 5, then `worldPick`, then the most-cheered, then the newest. Homepage marks usually live on the current day only, so an older week often has kid-friendly as the durable signal. Drop anything violent, political, or upsetting, even when the ending is happy and even when `kidFriendly` is set. Do not force a quota of countries. If the top of the list is five versions of the same news, swap in the next suitable story.
+3. Read the English story and its source. Write the headline and summary in neutral Latin American Spanish that a parent can read with a child. Keep names, places, and numbers as they are. Do not add a fact, a quote, or a happier ending. Do not call a paid translation API. The file is the translation.
+4. The open week can be published before Sunday. The page says "hasta ahora" until that Monday rolls over, using the same Mountain Time week as `/week`. If a stronger suitable story is published later in the week, edit the same JSON file. The feed includes an edition as soon as the file exists, including the open week, because the file does not grow by itself.
+5. Run `npm run validate-stories` and `npm run build`. Validation checks the Monday, the five slugs, the sentence counts, the kid line, and the feed. Commit the JSON file with the week's stories. The next deploy adds the page, the sitemap entry, and the IndexNow URL.
+
 
 ## Health & Tech
 

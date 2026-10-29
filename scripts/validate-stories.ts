@@ -19,7 +19,7 @@ import {
   readsAsPositive,
   storyQualifies,
 } from "../lib/first-responders-day";
-import { GET, POST } from "../app/api/good-neighbor/route";
+import { GET, POST } from "../app/(site)/api/good-neighbor/route";
 import {
   badgeLabel,
   blockReason,
@@ -151,6 +151,14 @@ import {
   veteransDayInSeason,
   VETERANS_DAY_PATH,
 } from "../lib/veterans-day";
+import { editionLanguageAlternates, weekIndexLanguageAlternates } from "../lib/i18n";
+import {
+  SPANISH_TRANSLATION_NOTE,
+  formatSpanishWeekRange,
+  loadSpanishEditions,
+  renderSpanishRss,
+  suggestSpanishStories,
+} from "../lib/spanish-editions";
 import { worldSpotlight } from "../lib/world-pick";
 import sitemap from "../app/sitemap";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
@@ -1566,7 +1574,7 @@ function assertVeteransDayHub() {
   if (!urls.some((url) => url.endsWith(VETERANS_DAY_PATH))) throw new Error("The sitemap should include the Veterans Day hub.");
   const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
   if (!indexNow.includes("VETERANS_DAY_PATH")) throw new Error("IndexNow should ping the Veterans Day hub.");
-  const home = fs.readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
   if (!home.includes("VeteransDayBanner")) throw new Error("The homepage should mount the Veterans Day banner.");
   const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
   if (!footer.includes("VETERANS_DAY_PATH")) throw new Error("The footer should link to the Veterans Day hub.");
@@ -1800,13 +1808,13 @@ function assertFirstRespondersDay() {
   }
   const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
   if (!indexNow.includes("FIRST_RESPONDERS_DAY_PATH")) throw new Error("IndexNow should ping the First Responders Day hub.");
-  const home = fs.readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
   if (!home.includes("FirstRespondersDayBanner")) throw new Error("The homepage should mount the First Responders Day banner.");
   const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
   if (!footer.includes("FIRST_RESPONDERS_DAY_PATH")) throw new Error("The footer should link to the First Responders Day hub.");
   const topic = fs.readFileSync(path.join(process.cwd(), "components/hub-browse.tsx"), "utf8");
   if (!topic.includes("FIRST_RESPONDERS_DAY_PATH")) throw new Error("The first-responders topic page should link to the hub.");
-  const page = fs.readFileSync(path.join(process.cwd(), "app/first-responders-day/page.tsx"), "utf8");
+  const page = fs.readFileSync(path.join(process.cwd(), "app/(site)/first-responders-day/page.tsx"), "utf8");
   if (!page.includes("siteConfig.editor.name") || !page.includes("CLASSROOM_QUESTIONS") || !page.includes("THANK_YOU_LINKS")) {
     throw new Error("The hub page should use the masthead byline, classroom questions, and thanks links.");
   }
@@ -1834,6 +1842,73 @@ function assertImageVariants() {
   if (storyThumbPath("/images/stories/pony.webp") !== "/images/stories/pony-sm.webp") {
     throw new Error("Unversioned thumbnail path changed.");
   }
+}
+
+function assertSpanishEditions() {
+  const expectedNote = `Resúmenes traducidos del inglés por el equipo de ${siteConfig.name}. Las fuentes originales están en inglés.`;
+  if (SPANISH_TRANSLATION_NOTE !== expectedNote) {
+    throw new Error("The Spanish translation note should name the publication, not a person.");
+  }
+  if (formatSpanishWeekRange("2026-10-05", "2026-10-11") !== "del 5 al 11 de octubre de 2026") {
+    throw new Error("A Spanish week inside October should read del 5 al 11 de octubre de 2026.");
+  }
+  if (formatSpanishWeekRange("2026-10-26", "2026-11-01") !== "del 26 de octubre al 1 de noviembre de 2026") {
+    throw new Error("A Spanish week across months should name both months.");
+  }
+  const ranked = suggestSpanishStories([
+    sampleWeekStory({ slug: "marked", date: "2026-10-29", featured: true }),
+    sampleWeekStory({ slug: "kid", date: "2026-10-28", kidFriendly: true }),
+    sampleWeekStory({ slug: "ranked", date: "2026-10-29", top5: 1 }),
+  ]);
+  if (ranked.map((story) => story.slug).join(",") !== "kid,marked,ranked") {
+    throw new Error(`Kid-friendly stories should lead Spanish suggestions. Got ${ranked.map((story) => story.slug).join(",")}.`);
+  }
+  const languages = editionLanguageAlternates("2026-10-05");
+  if (languages.en !== "/week/2026-10-05" || languages.es !== "/es/buenas-noticias/2026-10-05" || languages["x-default"] !== "/week/2026-10-05") {
+    throw new Error("A Spanish edition should alternate with that Monday's English week.");
+  }
+  const indexLanguages = weekIndexLanguageAlternates();
+  if (indexLanguages.en !== "/week" || indexLanguages.es !== "/es/buenas-noticias" || indexLanguages["x-default"] !== "/week") {
+    throw new Error("The Spanish index should alternate with /week.");
+  }
+
+  const editions = loadSpanishEditions();
+  if (editions.length < 4) throw new Error(`Expected at least 4 Spanish editions. Got ${editions.length}.`);
+  for (const start of ["2026-10-05", "2026-10-12", "2026-10-19", "2026-10-26"]) {
+    if (!editions.some((edition) => edition.start === start)) throw new Error(`Missing seeded Spanish edition ${start}.`);
+  }
+  const current = weekStart(mountainDay());
+  for (const edition of editions) {
+    if (edition.stories.length !== 5) throw new Error(`${edition.path} should have 5 stories.`);
+    if (edition.inProgress !== (edition.start === current)) throw new Error(`${edition.path} has the wrong hasta ahora flag.`);
+    if (edition.englishPath !== `/week/${edition.start}`) throw new Error(`${edition.path} should point at the English week.`);
+    for (const story of edition.stories) {
+      if (!story.sourceName || !story.sourceUrl.startsWith("https://")) throw new Error(`${story.slug} is missing its original source.`);
+      if (!story.place.includes(",")) throw new Error(`${story.slug} should show a city and a state or country.`);
+    }
+  }
+  const ottawa = editions.find((edition) => edition.start === "2026-10-05")?.stories.find((story) => story.slug === "ottawa-book-brigade");
+  if (ottawa?.place !== "Ottawa, Canadá" || ottawa.sourceName !== "CBC News") {
+    throw new Error(`Ottawa should keep the city, the Spanish country, and the original source. Got ${ottawa?.place} / ${ottawa?.sourceName}.`);
+  }
+  const bison = editions.find((edition) => edition.start === "2026-10-26")?.stories.find((story) => story.slug === "pine-ridge-bison-release");
+  if (bison?.place !== "Porcupine, Dakota del Sur") throw new Error(`Pine Ridge should read Porcupine, Dakota del Sur. Got ${bison?.place}.`);
+  const open = editions.find((edition) => edition.start === "2026-10-26");
+  if (current === "2026-10-26" && !open?.title.startsWith("Las 5 buenas noticias, hasta ahora:")) {
+    throw new Error("The open Spanish week should say hasta ahora.");
+  }
+
+  const feed = renderSpanishRss(editions);
+  if (!feed.includes("<language>es</language>")) throw new Error("The Spanish feed language should be es.");
+  if (!feed.includes(SPANISH_TRANSLATION_NOTE)) throw new Error("The Spanish feed should include the translation note.");
+  if (feed.includes(siteConfig.editor.name)) throw new Error("The Spanish feed should not name an editor.");
+  const dates = [...feed.matchAll(/<pubDate>([^<]+)<\/pubDate>/g)].map((match) => match[1]);
+  if (new Set(dates).size !== dates.length) throw new Error("Spanish RSS pubDates must be unique.");
+  for (const edition of editions) {
+    if (!feed.includes(`/es/buenas-noticias/${edition.start}`)) throw new Error(`Spanish RSS is missing ${edition.path}.`);
+  }
+  if (renderWeekRss().includes("/es/buenas-noticias")) throw new Error("The English week feed should not list Spanish editions.");
+  console.log(`Spanish editions: ${editions.map((edition) => edition.start).join(", ")}.`);
 }
 
 function assertKindnessChallenges() {
@@ -3159,6 +3234,7 @@ async function main() {
   assertGivingTuesday(stories);
   assertFirstRespondersDay();
   assertKindnessChallenges();
+  assertSpanishEditions();
   await assertGoodNeighbor();
   const published = stories.filter((story) => !story.draft);
   const images = feedImageReport(published.map((story) => story.image));

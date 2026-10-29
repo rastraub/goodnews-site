@@ -20,6 +20,7 @@ import { quizzesToPrerender } from "@/lib/quiz";
 import { getKindnessChallenges } from "@/lib/kindness";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
+import { loadSpanishEditions } from "@/lib/spanish-editions";
 import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
 
@@ -100,6 +101,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const neighborMonths = ballotMonths();
   const neighborCurrent = editionMonth();
   const neighborLatest = getBallot(neighborCurrent)?.nominees[0]?.date ?? siteLatest;
+  const spanishEditions = loadSpanishEditions();
+  const newestSpanish = spanishEditions[spanishEditions.length - 1];
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -186,6 +189,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
         url: absoluteUrl(edition.path),
         lastModified: edition.latest,
         changeFrequency: (edition.inProgress ? "daily" : "monthly") as "daily" | "monthly",
+        priority: edition.inProgress ? 0.7 : 0.6,
+      })),
+    {
+      url: absoluteUrl("/es"),
+      lastModified: newestSpanish?.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
+    {
+      url: absoluteUrl("/es/buenas-noticias"),
+      lastModified: newestSpanish?.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    ...spanishEditions
+      .slice()
+      .reverse()
+      .map((edition) => ({
+        url: absoluteUrl(edition.path),
+        lastModified: edition.latest,
+        changeFrequency: (edition.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: edition.inProgress ? 0.7 : 0.6,
       })),
     {

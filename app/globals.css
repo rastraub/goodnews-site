@@ -98,6 +98,16 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 .week-promo .more{margin-top:8px}
 .kindness-promo{margin-top:16px}
 .kind-now{border-color:#E0B15A}
+.translation-note{margin-top:14px;max-width:640px;color:var(--ink2);font-size:15px;line-height:1.55}
+.es-stories{display:grid;gap:18px}
+.es-story{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;align-items:start;background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
+.es-story h2{font-family:var(--font-serif);font-weight:600;font-size:28px;letter-spacing:-.02em;line-height:1.2;margin:6px 0 10px}
+.es-story p{color:var(--ink2);font-size:16.5px;line-height:1.6}
+.es-place{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.es-kid{margin-top:12px;padding:10px 12px;background:var(--sky);border-radius:12px;color:var(--ink)!important;font-size:15.5px!important}
+.es-kid strong{font-weight:650}
+.es-meta{margin-top:12px;font-size:14.5px!important}
+.es-meta a{color:var(--blue-d);font-weight:600}
 .week-index{display:grid;gap:16px}
 .week-row{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:12px;box-shadow:var(--shadow);color:inherit}
 .week-row h2{font-family:var(--font-serif);font-weight:600;font-size:28px;letter-spacing:-.02em;line-height:1.15;margin:4px 0 8px}
@@ -438,8 +448,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .world-spot{padding:4px 0 28px}
   .world-spot-card{grid-template-columns:1fr;padding:12px}
   .world-spot h2{font-size:24px}
-  .week-promo-card,.week-row{grid-template-columns:1fr}
-  .week-row h2,.week-promo h2{font-size:24px}
+  .week-promo-card,.week-row,.es-story{grid-template-columns:1fr}
+  .week-row h2,.week-promo h2,.es-story h2{font-size:24px}
   .t5{grid-template-columns:1fr;gap:12px}
   .t5 a{flex-direction:row;align-items:center;gap:14px;padding:10px;border-radius:16px}
   .t5 .thumb{width:92px;height:92px;flex:none;aspect-ratio:auto;border-radius:12px}

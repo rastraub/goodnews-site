@@ -89,7 +89,7 @@ export function Footer() {
         <div className="fbottom">
           <span>© {year} {siteConfig.name} · {siteConfig.domain}</span>
           <span>
-            <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link> · <Link href="/contact">Contact</Link>
+            <Link href="/es">En español</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link> · <Link href="/contact">Contact</Link>
           </span>
         </div>
       </div>

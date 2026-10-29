@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { EmailSignup } from "@/components/email-signup";
 import { JsonLd } from "@/components/json-ld";
 import { StoryImage } from "@/components/story-image";
-import { PrintButton } from "@/app/kids/print-button";
+import { PrintButton } from "@/app/(site)/kids/print-button";
 import { getCategory } from "@/lib/categories";
 import {
   CLASSROOM_INDEX_PATH,

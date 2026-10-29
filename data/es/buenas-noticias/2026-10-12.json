@@ -1,0 +1,35 @@
+{
+  "start": "2026-10-12",
+  "stories": [
+    {
+      "slug": "el-coire-olive-ridley",
+      "headline": "Salieron las primeras crías de tortuga golfina de la temporada en Michoacán",
+      "summary": "MiMorelia informó el 12 de octubre de 2026 que las primeras crías de tortuga golfina de la temporada salieron de la arena en el campamento Motín del Oro, en la comunidad indígena de El Coire, en la costa de Michoacán. La noticia la compartió Santuarios y Campamentos Tortugueros de Occidente y Pacífico Centro, parte de la CONANP. La temporada empezó con calor, arena seca y huracanes. El reportaje no dice cuántas crías ni cuántos nidos hubo, y una brigada de la comunidad ha estado vigilando los nidos.",
+      "kidLine": "En la costa de Michoacán, las primeras tortuguitas golfinas de la temporada salieron de la arena."
+    },
+    {
+      "slug": "yanayacu-amazon-turtles",
+      "headline": "Más de 14,000 tortugas amazónicas volvieron a los ríos",
+      "summary": "Peru21 informó el 17 de octubre de 2026 que el Sernanp y CIMA-Cordillera Azul devolvieron 14,645 tortugas de agua dulce en el Parque Nacional Cordillera Azul y sus alrededores: 14,146 taricayas, 454 charapas y 45 teparos. Solo el 16 de octubre, 6,640 taricayas y charapas entraron a la quebrada Carnaval y a los ríos Cushabatay y Ucayali. Otras sueltas habían empezado el 9 de octubre. La nota trata de animales que volvieron al agua, no de un censo de cuántas viven ahora; Peru21 también señaló que estas tortugas todavía se capturan por los huevos y la carne.",
+      "kidLine": "En la Amazonía de Perú, devolvieron 14,645 tortugas de río al agua."
+    },
+    {
+      "slug": "ealing-beaver-kits",
+      "headline": "Niños de Londres pueden ponerle nombre a dos crías de castor",
+      "summary": "BBC News informó el 13 de octubre de 2026 que este año nacieron dos crías de castor en Paradise Fields, en Greenford, al oeste de Londres. Una familia de castores euroasiáticos fue soltada allí en 2023, la primera vez que vivían en el Londres urbano en más de 400 años. Quienes tengan entre 4 y 18 años y vivan en Londres pueden proponer nombres hasta el 7 de diciembre de 2026. El Ealing Beaver Project y la oficina de la alcaldía elegirán los nombres.",
+      "kidLine": "Nacieron dos crías de castor en Londres, y los niños de la ciudad pueden proponerles nombres."
+    },
+    {
+      "slug": "wicklow-hobbit-ring",
+      "headline": "Tres amigos encontraron un anillo de boda perdido y lo llevaron en avión a Irlanda",
+      "summary": "CBC Radio contó el 17 de octubre de 2026 que un anillo de boda de oro de 18 quilates se cayó a un arroyo de montaña en Italia y que tres hombres lo buscaron durante nueve días. Filippo Palagi, Nicola Malloggi y Edoardo Poggi remaron y luego buscaron en los rápidos, hasta que Malloggi cerró la mano sobre el anillo. Después volaron a Irlanda vestidos como Frodo, Merry y Sam, y se lo devolvieron en persona a Patrick Mohr. Pasaron un día juntos en Glendalough y Glenmalure, en las montañas de Wicklow.",
+      "kidLine": "Tres amigos encontraron un anillo de boda en un río de Italia y se lo devolvieron en Irlanda."
+    },
+    {
+      "slug": "seoul-red-panda-twins",
+      "headline": "El parque de Seúl presentó a sus primeros gemelos de panda rojo",
+      "summary": "Haps Magazine informó que el 14 de octubre de 2026 el Seoul Grand Park mostró al público a Maru y Marong, gemelos de panda rojo nacidos el 19 de junio. Su madre es Lian y su padre, Ravi; es la primera vez que el parque los cría de forma natural. Cada uno pesa más de un kilogramo, los nombres salieron de una votación, y el parque dijo que es más fácil verlos temprano o después de las 4 de la tarde. Presentarlos a los visitantes no es una suelta a la naturaleza.",
+      "kidLine": "En Seúl, los gemelos de panda rojo Maru y Marong salieron para que el público los viera."
+    }
+  ]
+}

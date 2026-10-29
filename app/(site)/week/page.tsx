@@ -3,6 +3,7 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { StoryImage } from "@/components/story-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { weekIndexLanguageAlternates } from "@/lib/i18n";
 import { getQuiz, latestQuiz } from "@/lib/quiz";
 import { SITE_LAUNCH, formatLongDate, launchWeekStart, weeksToPrerender } from "@/lib/weeks";
 
@@ -28,6 +29,7 @@ export function generateMetadata(): Metadata {
     page: 1,
     total: 1,
     feedPath: "/week/rss.xml",
+    languages: weekIndexLanguageAlternates(),
     image: newest ? { url: newest.image, alt: newest.imageAlt } : undefined,
   });
 }
@@ -73,6 +75,9 @@ export default function WeekIndexPage() {
           <Link href="/stories">All stories</Link>
           <Link href="/kids">For classrooms</Link>
           <Link href="/classroom">Good News Friday</Link>
+          <Link href="/es/buenas-noticias" hrefLang="es" lang="es">
+            En español
+          </Link>
         </p>
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>

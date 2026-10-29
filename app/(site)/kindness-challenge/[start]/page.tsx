@@ -6,7 +6,7 @@ import { EmailSignup } from "@/components/email-signup";
 import { JsonLd } from "@/components/json-ld";
 import { ShareButtons } from "@/components/share-buttons";
 import { StoryImage } from "@/components/story-image";
-import { PrintButton } from "@/app/kids/print-button";
+import { PrintButton } from "@/app/(site)/kids/print-button";
 import { openGraphImage } from "@/lib/feed-image";
 import { formatStoryDate } from "@/lib/format";
 import {
