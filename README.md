@@ -107,7 +107,8 @@ A database for tips is still a later step. See below.
 
 Sitemaps and feeds:
 
-- `https://www.tazzora.com/sitemap.xml`
+- `https://www.tazzora.com/sitemap.xml` (includes `/explainers` and each explainer)
+- `https://www.tazzora.com/explainers` (evergreen guides; not a news feed)
 - `https://www.tazzora.com/news-sitemap.xml` (stories from the last 48 hours)
 - `https://www.tazzora.com/good-news-index` (monthly editions; each month also has `/good-news-index/YYYY-MM/index.csv`)
 - `https://www.tazzora.com/rss.xml`

@@ -2,6 +2,7 @@ import { getCategory } from "../lib/categories";
 import { getCountry } from "../lib/countries";
 import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
 import { kidPlaceForStory } from "../lib/kids";
+import { explainerPaths } from "../lib/explainers";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { getOutletForStory } from "../lib/outlets";
 import { isWithinHours } from "../lib/seo";
@@ -24,6 +25,7 @@ async function main() {
   }
 
   const urls = new Set(STATIC_PATHS.map((path) => (path === "/" ? siteConfig.url : `${siteConfig.url}${path}`)));
+  for (const path of explainerPaths()) urls.add(`${siteConfig.url}${path}`);
   for (const week of weeksToPrerender()) urls.add(`${siteConfig.url}${week.path}`);
   for (const edition of indexesToPrerender()) urls.add(`${siteConfig.url}${edition.path}`);
   for (const pack of packsToPrerender()) urls.add(`${siteConfig.url}${pack.path}`);

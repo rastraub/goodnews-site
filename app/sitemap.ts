@@ -3,6 +3,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { kidPlaces } from "@/lib/kids";
 import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
+import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
 import { getOutlets } from "@/lib/outlets";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
@@ -217,6 +218,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: (index === 0 ? "daily" : "weekly") as "daily" | "weekly",
       priority: index === 0 ? 0.6 : 0.5,
       images: [absoluteUrl(edition.posterPath)],
+    })),
+    ...explainerSitemapEntries(),
+  ];
+}
+
+function explainerSitemapEntries(): MetadataRoute.Sitemap {
+  const explainers = getPublishedExplainers();
+  const latest = explainers.reduce<string | undefined>((newest, explainer) => {
+    const modified = explainerModifiedDate(explainer);
+    return !newest || modified > newest ? modified : newest;
+  }, undefined);
+  return [
+    {
+      url: absoluteUrl(EXPLAINER_INDEX_PATH),
+      ...(latest ? { lastModified: latest } : {}),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    ...explainers.map((explainer) => ({
+      url: absoluteUrl(explainerPath(explainer.slug)),
+      lastModified: explainerModifiedDate(explainer),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     })),
   ];
 }

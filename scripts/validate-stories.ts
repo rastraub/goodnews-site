@@ -61,7 +61,7 @@ import { STATES } from "../lib/states";
 import { buildOutlets, formatOutletCsv, getOutletForStory, getOutlets, outletNameKey, type OutletCredit } from "../lib/outlets";
 import { storySchema } from "../lib/story-schema";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
-import { getPublishedStories, loadAllStories } from "../lib/stories";
+import { getPublishedStories, getStory, loadAllStories } from "../lib/stories";
 import { quizShareText, quizShareUrl } from "../lib/quiz-copy";
 import {
   MAX_QUIZ_QUESTIONS,
@@ -73,6 +73,8 @@ import {
   type QuizSource,
 } from "../lib/quiz";
 import { stateName } from "../lib/states";
+import { explainerSchema } from "../lib/explainer-schema";
+import { explainerPaths, explainersForStory, getPublishedExplainers, storiesForExplainer } from "../lib/explainers";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
@@ -828,6 +830,74 @@ function assertFeeds() {
     const html = storyHtml(sample);
     if (!html.includes("<strong>How to help:</strong>")) throw new Error("Feed bodies need a How to help paragraph.");
     if (html.includes("More good news")) throw new Error("Feed bodies must not add a related-stories list.");
+  }
+}
+
+function assertExplainers() {
+  const bad = explainerSchema.safeParse({ title: "too short" });
+  if (bad.success) throw new Error("Explainer schema accepted an incomplete file.");
+
+  const explainers = getPublishedExplainers();
+  if (explainers.length < 10) throw new Error(`Expected at least 10 explainers, found ${explainers.length}.`);
+  for (const explainer of explainers) {
+    if (!storiesForExplainer(explainer).length) {
+      throw new Error(`${explainer.slug} should link at least one archive story.`);
+    }
+    if (explainer.schema === "HowTo" && (explainer.steps?.length ?? 0) < 3) {
+      throw new Error(`${explainer.slug} is a HowTo without steps.`);
+    }
+    if (explainer.schema === "Article" && explainer.steps?.length) {
+      throw new Error(`${explainer.slug} is an Article with HowTo steps.`);
+    }
+  }
+
+  const bySlug = new Map(explainers.map((explainer) => [explainer.slug, explainer]));
+  const fridge = storiesForExplainer(bySlug.get("how-a-community-fridge-works")!).map((story) => story.slug);
+  if (!fridge.includes("new-ulm-library-fridge")) throw new Error("The fridge explainer should link the New Ulm story.");
+
+  const flights = storiesForExplainer(bySlug.get("how-honor-flights-work")!).map((story) => story.slug);
+  for (const slug of ["anchorage-honor-flight", "des-moines-honor-flight", "fresno-honor-flight", "phoenix-honor-flight"]) {
+    if (!flights.includes(slug)) throw new Error(`Honor Flight explainer missed ${slug}.`);
+  }
+
+  const food = storiesForExplainer(bySlug.get("how-food-banks-rescue-food")!).map((story) => story.slug);
+  if (food.includes("traverse-city-pet-pantry") || food.includes("sioux-falls-dog-food")) {
+    throw new Error("Pet food stories should stay off the food-bank explainer.");
+  }
+
+  const fortMyers = getStory("fort-myers-diner-second-chance");
+  if (!fortMyers) throw new Error("Missing the Fort Myers story used to check foster matching.");
+  if (explainersForStory(fortMyers).some((explainer) => explainer.slug === "how-animal-shelter-foster-programs-work")) {
+    throw new Error("A story about a person who grew up in foster care should not link the animal foster explainer.");
+  }
+
+  const newUlm = getStory("new-ulm-library-fridge");
+  if (!newUlm) throw new Error("Missing the New Ulm fridge story.");
+  const newUlmLinks = explainersForStory(newUlm);
+  if (newUlmLinks[0]?.slug !== "how-a-community-fridge-works") {
+    throw new Error("New Ulm should lead with the community fridge explainer.");
+  }
+  if (!newUlmLinks.some((explainer) => explainer.slug === "how-food-banks-rescue-food")) {
+    throw new Error("New Ulm should also link the food bank explainer.");
+  }
+
+  const library = getStory("effingham-little-library");
+  if (!library || !explainersForStory(library).some((explainer) => explainer.slug === "how-to-start-a-little-free-library")) {
+    throw new Error("Little Free Library stories should link the explainer.");
+  }
+
+  const paths = explainerPaths();
+  if (!paths.includes("/explainers") || paths.length !== explainers.length + 1) {
+    throw new Error("Explainer paths should include the index and every page.");
+  }
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.some((url) => url.endsWith("/explainers"))) throw new Error("Sitemap is missing the explainer index.");
+  if (!urls.some((url) => url.endsWith("/explainers/how-honor-flights-work"))) {
+    throw new Error("Sitemap is missing an explainer page.");
+  }
+  if (!siteConfig.editor.name.endsWith("Editorial Team")) {
+    throw new Error("Explainer bylines should stay the editorial team named in site config.");
   }
 }
 
@@ -1700,6 +1770,7 @@ assertOutlets();
 assertFeeds();
 assertPartnerKit();
 assertThanksBoard();
+assertExplainers();
 const published = stories.filter((story) => !story.draft);
 const images = feedImageReport(published.map((story) => story.image));
 console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);

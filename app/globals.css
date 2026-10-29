@@ -271,7 +271,19 @@ footer a:hover{color:#fff}
 .source-stories a:hover{color:var(--blue-d)}
 .source-when{display:block;color:var(--muted);font-size:13px;font-weight:600;margin-top:1px}
 .prose p{font-size:18.5px;line-height:1.7;color:var(--ink);margin:0 0 18px}
+.prose h2{font-family:var(--font-serif);font-size:32px;margin:28px 0 10px;font-weight:600}
 .prose a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.prose ul{margin:0 0 18px 1.2em;display:grid;gap:8px}
+.prose li{font-size:18.5px;line-height:1.7}
+.explainer-list{display:grid;gap:14px}
+.explainer-list a{display:block;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
+.explainer-list h2{font-family:var(--font-serif);font-size:26px;font-weight:600;margin:0 0 6px;letter-spacing:-.02em}
+.explainer-list p{color:var(--ink2);margin:0;line-height:1.55}
+.explainer-list .count{display:block;margin-top:8px;color:var(--gold-d);font-size:13px;font-weight:700}
+.explainer-callout{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-top:22px}
+.explainer-callout h2{font-family:var(--font-serif);font-size:26px;margin:0 0 8px;font-weight:600}
+.explainer-callout ul{margin:0;padding-left:1.1em;display:grid;gap:8px}
+.explainer-callout a{color:var(--blue-d);font-weight:700}
 .side-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px 20px 22px;box-shadow:var(--shadow)}
 .side-card h2{font-family:var(--font-serif);font-size:24px;font-weight:600;margin-bottom:12px}
 .help-list{display:grid;gap:10px}
@@ -567,7 +579,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 .classroom-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin-top:28px}
 .classroom-box h2{font-family:var(--font-serif);font-size:28px;margin:0 0 10px;font-weight:600}
-.classroom-box ol{margin:8px 0 12px 18px;display:grid;gap:8px}
+.classroom-box ol,.classroom-box ul{margin:8px 0 12px 18px;display:grid;gap:8px}
+.classroom-box li{line-height:1.6}
 .print-sheet{max-width:720px}
 .print-sheet h2{font-family:var(--font-serif);font-size:32px;margin:22px 0 8px;font-weight:600}
 .print-figure{position:relative;margin:18px 0}
