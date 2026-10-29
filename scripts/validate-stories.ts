@@ -23,6 +23,25 @@ import {
   weekStart,
   type WeekSource,
 } from "../lib/weeks";
+import {
+  FIRST_INDEX_MONTH,
+  MAX_PRERENDERED_INDEXES,
+  buildIndexes,
+  formatPerMillion,
+  getPublishedIndexes,
+  helpUrlKey,
+  isSupportKind,
+  monthEnd,
+  monthKey,
+  renderIndexCsv,
+  stateIndexLink,
+  storiesPerMillion,
+  type IndexStory,
+} from "../lib/good-news-index";
+import { renderIndexMap } from "../components/index-map";
+import { POPULATION_US_TOTAL, populationOf, populationTotal } from "../lib/population";
+import { absoluteUrl } from "../lib/seo";
+import { STATES } from "../lib/states";
 import { storySchema } from "../lib/story-schema";
 import { getPublishedStories, loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
@@ -31,7 +50,6 @@ import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject }
 import sitemap from "../app/sitemap";
 import { BADGE_VARIANTS, badgeSvg } from "../lib/badges";
 import { badgeEmbedHtml, embedDocumentForSlug, embedScriptSource, iframeSnippet, renderEmbedDocument, storyShareLines } from "../lib/partner-kit";
-import { absoluteUrl } from "../lib/seo";
 import { siteConfig, socialLinks } from "../site.config";
 
 const REQUIRED_SOURCES = [
@@ -776,6 +794,262 @@ function assertImageVariants() {
   }
 }
 
+function sampleIndexStory(partial: Partial<IndexStory> & Pick<IndexStory, "slug" | "date">): IndexStory {
+  return {
+    title: `A verified good news story ${partial.slug}`,
+    country: "US",
+    state: "CO",
+    alsoStates: [],
+    category: "community",
+    tags: ["parks"],
+    howToHelp: [{ label: "Learn more", url: "https://example.org/learn", kind: "learn" }],
+    image: `/images/stories/${partial.slug}.webp`,
+    imageAlt: "A photo from the month",
+    ...partial,
+  };
+}
+
+function assertGoodNewsIndex() {
+  if (FIRST_INDEX_MONTH !== "2026-10") throw new Error("The first Good News Index edition is October 2026.");
+  if (monthEnd("2026-10") !== "2026-10-31") throw new Error("October should close on the 31st.");
+  if (monthEnd("2026-02") !== "2026-02-28") throw new Error("February 2026 should close on the 28th.");
+  if (MAX_PRERENDERED_INDEXES < 600) {
+    throw new Error(`MAX_PRERENDERED_INDEXES is ${MAX_PRERENDERED_INDEXES}. Keep it at or above 600 so decades of monthly pages stay static.`);
+  }
+  if (populationTotal() !== POPULATION_US_TOTAL) {
+    throw new Error(`Population table sums to ${populationTotal()}, not ${POPULATION_US_TOTAL}.`);
+  }
+  if (populationOf("CO") !== 5_957_493) throw new Error("Colorado's July 1, 2024 population should be 5,957,493.");
+  for (const state of STATES) {
+    if (!populationOf(state.code)) throw new Error(`No Census population for ${state.code}.`);
+  }
+  if (helpUrlKey("https://www.Example.org/give/") !== "example.org/give") {
+    throw new Error("A help URL key should drop www, the query string, and a trailing slash.");
+  }
+  if (helpUrlKey("https://www.Example.org/give/") !== helpUrlKey("https://example.org/give?utm=1")) {
+    throw new Error("www and a query string should not make a second help link.");
+  }
+
+  const september = buildIndexes(
+    [
+      sampleIndexStory({ slug: "sept", date: "2026-09-20" }),
+      sampleIndexStory({ slug: "oct", date: "2026-10-02" }),
+    ],
+    "2026-10-21",
+  );
+  if (september.length !== 1 || september[0].month !== "2026-10" || september[0].storyCount !== 1) {
+    throw new Error("Stories dated before October 2026 should stay out of the index.");
+  }
+  if (!september[0].inProgress || !september[0].updatedLabel.startsWith("Month to date.")) {
+    throw new Error("October should be month to date on October 21.");
+  }
+
+  const futureMonth = buildIndexes([sampleIndexStory({ slug: "nov", date: "2026-11-02" })], "2026-10-21");
+  if (futureMonth.length) throw new Error("A month that has not started should wait.");
+
+  const windowed = buildIndexes(
+    [
+      sampleIndexStory({ slug: "late", date: "2026-10-25" }),
+      sampleIndexStory({ slug: "today", date: "2026-10-21" }),
+      sampleIndexStory({ slug: "early", date: "2026-10-01" }),
+    ],
+    "2026-10-21",
+  );
+  const windowSlugs = windowed[0]?.stories.map((story) => story.slug).sort().join(",");
+  if (windowSlugs !== "early,today") throw new Error(`A story dated after the build day should wait. Got ${windowSlugs}.`);
+
+  const shared = buildIndexes(
+    [
+      sampleIndexStory({
+        slug: "shared",
+        date: "2026-10-10",
+        state: "OH",
+        alsoStates: ["WY"],
+        kidFriendly: true,
+      }),
+    ],
+    "2026-10-21",
+  )[0];
+  const ohio = shared.states.find((state) => state.code === "OH");
+  const wyoming = shared.states.find((state) => state.code === "WY");
+  const alabama = shared.states.find((state) => state.code === "AL");
+  if (shared.usCount !== 1 || ohio?.stories !== 1 || wyoming?.stories !== 1) {
+    throw new Error("alsoStates should count the story in each listed state and once in the national total.");
+  }
+  if (ohio?.rank !== 1 || wyoming?.rank !== 1 || ohio?.rankLabel !== "tied for 1st" || wyoming?.rankLabel !== "tied for 1st") {
+    throw new Error(`Tied states should share 1st. Got ${ohio?.rankLabel} and ${wyoming?.rankLabel}.`);
+  }
+  if (alabama?.rank !== undefined || alabama?.rankLabel !== "—") {
+    throw new Error("A state with no story should be listed and left unranked.");
+  }
+  if (shared.states.length !== 51) throw new Error("Every edition should list the 50 states and the District of Columbia.");
+  if (shared.kidUsCount !== 1 || ohio?.kidStories !== 1 || wyoming?.kidStories !== 1) {
+    throw new Error("A classroom story should count once nationally and in each state it appears in.");
+  }
+  if (ohio && ohio.perMillion !== storiesPerMillion(ohio.stories, ohio.population)) {
+    throw new Error("The per-person rate should be stories divided by population, times one million.");
+  }
+
+  const helped = buildIndexes(
+    [
+      sampleIndexStory({
+        slug: "give-a",
+        date: "2026-10-08",
+        state: "CO",
+        howToHelp: [
+          { label: "Give", url: "https://www.Example.org/give/", kind: "donate" },
+          { label: "Read", url: "https://example.org/about", kind: "learn" },
+        ],
+      }),
+      sampleIndexStory({
+        slug: "give-b",
+        date: "2026-10-09",
+        state: "CO",
+        howToHelp: [
+          { label: "Give again", url: "https://example.org/give?utm=1", kind: "donate" },
+          { label: "Thanks", url: "https://example.org/thanks", kind: "thank" },
+        ],
+      }),
+    ],
+    "2026-10-21",
+  )[0];
+  const helpedColorado = helped.states.find((state) => state.code === "CO");
+  if (helpedColorado?.helpLinks !== 2 || helped.helpLinkCount !== 2) {
+    throw new Error(`Donate and thank links should collapse www and query strings, and learn-more links should stay out. Got ${helpedColorado?.helpLinks} / ${helped.helpLinkCount}.`);
+  }
+
+  const closed = buildIndexes([sampleIndexStory({ slug: "oct-only", date: "2026-10-15" })], "2026-11-02")[0];
+  if (closed.inProgress || closed.title.includes("month to date") || !closed.title.includes("October 2026")) {
+    throw new Error(`A finished month should drop the month-to-date label. Got ${closed.title}.`);
+  }
+  if (!closed.updatedLabel.startsWith("Closed edition.")) throw new Error("A finished month should say it is a closed edition.");
+
+  const csv = renderIndexCsv(shared);
+  if (!csv.startsWith("\uFEFF")) throw new Error("The CSV should start with a UTF-8 BOM.");
+  if (!csv.includes("not a measure of how good a state is")) throw new Error("The CSV should carry the methodology caveat.");
+  if (!csv.includes("NST-EST2024-POP")) throw new Error("The CSV should cite the Census population table.");
+  if (!csv.includes("state,OH,Ohio,1,")) throw new Error("The CSV should include the Ohio state row.");
+  if (!shared.citation.includes(siteConfig.editor.name) || !shared.citation.includes(absoluteUrl(shared.path))) {
+    throw new Error(`The citation should name the editorial team and the edition URL. Got ${shared.citation}`);
+  }
+
+  const today = mountainDay();
+  const published = getPublishedStories().filter((story) => story.date <= today);
+  const indexes = buildIndexes(published, today);
+  if (indexes.length > MAX_PRERENDERED_INDEXES) {
+    throw new Error(`${indexes.length} index editions exceed the prerender cap of ${MAX_PRERENDERED_INDEXES}. Raise MAX_PRERENDERED_INDEXES.`);
+  }
+  if (indexes.some((edition) => edition.month < FIRST_INDEX_MONTH)) {
+    throw new Error("An edition before October 2026 should not be built.");
+  }
+  if (getPublishedIndexes().length !== indexes.length) {
+    throw new Error("Published index pages should match the editions built from the archive.");
+  }
+  const october = indexes.find((edition) => edition.month === "2026-10");
+  if (!october) throw new Error("October 2026 should be an edition.");
+  const octoberStories = published.filter((story) => story.date.startsWith("2026-10"));
+  if (october.storyCount !== octoberStories.length) {
+    throw new Error(`October story count ${october.storyCount} does not match the archive (${octoberStories.length}).`);
+  }
+  const inState = (code: string) =>
+    octoberStories.filter((story) => story.country === "US" && (story.state === code || story.alsoStates.includes(code)));
+  const coloradoStories = inState("CO");
+  const colorado = october.states.find((state) => state.code === "CO");
+  const maryland = october.states.find((state) => state.code === "MD");
+  const district = october.states.find((state) => state.code === "DC");
+  const wyomingRow = october.states.find((state) => state.code === "WY");
+  if (!colorado || colorado.stories !== coloradoStories.length) {
+    throw new Error(`Colorado's row (${colorado?.stories}) does not match stories filed there (${coloradoStories.length}).`);
+  }
+  const us = octoberStories.filter((story) => story.country === "US").length;
+  const world = octoberStories.filter((story) => story.country !== "US").length;
+  const kids = octoberStories.filter((story) => story.kidFriendly);
+  if (october.usCount !== us || october.worldCount !== world || october.kidCount !== kids.length) {
+    throw new Error(`October totals drifted: page ${october.usCount}/${october.worldCount}/${october.kidCount}, archive ${us}/${world}/${kids.length}.`);
+  }
+  if (october.kidUsCount !== kids.filter((story) => story.country === "US").length) {
+    throw new Error("Classroom stories in the United States should count each story once.");
+  }
+  if (october.kidUsCount + october.kidWorldCount !== october.kidCount) {
+    throw new Error("Classroom counts should add up to the classroom total.");
+  }
+  if (october.states.length !== STATES.length) throw new Error("October should list every state and the District of Columbia.");
+  const categorySum = october.categories.reduce((sum, category) => sum + category.count, 0);
+  if (categorySum !== october.storyCount) throw new Error("Category counts should add up to the story count.");
+  const community = octoberStories.filter((story) => story.category === "community").length;
+  if (october.categories.find((category) => category.slug === "community")?.count !== community) {
+    throw new Error("The community category count does not match the archive.");
+  }
+  const countrySum = october.countries.reduce((sum, country) => sum + country.count, 0);
+  if (countrySum !== october.worldCount) throw new Error("Country counts should add up to the world total.");
+  const nationalHelp = new Set<string>();
+  const coloradoHelp = new Set<string>();
+  for (const story of octoberStories) {
+    for (const link of story.howToHelp) {
+      if (!isSupportKind(link.kind)) continue;
+      nationalHelp.add(helpUrlKey(link.url));
+    }
+  }
+  for (const story of coloradoStories) {
+    for (const link of story.howToHelp) {
+      if (!isSupportKind(link.kind)) continue;
+      coloradoHelp.add(helpUrlKey(link.url));
+    }
+  }
+  if (nationalHelp.size !== october.helpLinkCount || coloradoHelp.size !== colorado.helpLinks) {
+    throw new Error(`Help-link counts drifted: national ${october.helpLinkCount} vs ${nationalHelp.size}, Colorado ${colorado.helpLinks} vs ${coloradoHelp.size}.`);
+  }
+  const expectedRate = storiesPerMillion(colorado.stories, colorado.population);
+  if (colorado.perMillion !== expectedRate || colorado.perMillionLabel !== formatPerMillion(expectedRate, colorado.stories)) {
+    throw new Error("Colorado's per-million display should follow the unrounded Census rate.");
+  }
+  if (october.inProgress !== (monthKey(today) === "2026-10")) {
+    throw new Error("October is month to date only while the build day is still in October.");
+  }
+  const map = renderIndexMap(october.states);
+  if (map.includes('aria-label="Colorado"') || !map.includes("Colorado,")) {
+    throw new Error("The map label should include Colorado's count.");
+  }
+  if (!map.includes("dccircle dc band-")) throw new Error("The District of Columbia circle should take a band color.");
+  for (const state of october.states) {
+    if (!map.includes(`class="${state.code.toLowerCase()} band-`)) {
+      throw new Error(`The map is missing a band for ${state.name}.`);
+    }
+  }
+  const realCsv = renderIndexCsv(october);
+  if (!realCsv.includes(`state,CO,Colorado,${colorado.stories},`)) {
+    throw new Error("The October CSV should include Colorado's story count.");
+  }
+  const link = stateIndexLink({ name: "Colorado", slug: "colorado" }, today);
+  if (monthKey(today) === october.month && link?.label !== "See how Colorado ranks this month") {
+    throw new Error(`The open month should use the this-month state link. Got ${link?.label}.`);
+  }
+  if (link?.href !== `${october.path}#colorado`) throw new Error(`State pages should link to the state row. Got ${link?.href}.`);
+  for (const code of ["MD", "DC", "WY"]) {
+    const row = october.states.find((state) => state.code === code);
+    const count = inState(code).length;
+    if (row?.stories !== count) {
+      throw new Error(`${code} has ${row?.stories} on the page and ${count} in the archive.`);
+    }
+  }
+  const topCountry = october.countries[0];
+  if (topCountry) {
+    const archiveCount = octoberStories.filter((story) => story.country === topCountry.code).length;
+    if (archiveCount !== topCountry.count) {
+      throw new Error(`${topCountry.label} has ${topCountry.count} on the page and ${archiveCount} in the archive.`);
+    }
+  }
+
+  const leaders = october.states
+    .filter((state) => state.stories > 0)
+    .slice(0, 5)
+    .map((state) => `${state.code} ${state.stories} (${state.rankLabel})`)
+    .join(", ");
+  console.log(
+    `Good News Index ${october.month} through ${october.latest}: ${october.storyCount} stories, US ${october.usCount}, world ${october.worldCount}, classroom ${october.kidCount} (US ${october.kidUsCount}, world ${october.kidWorldCount}), help links ${october.helpLinkCount}, places with a story ${october.statesWithStories}. Leaders: ${leaders}. CO ${colorado.stories} ${colorado.rankLabel}, ${colorado.perMillionLabel} per million = ${colorado.stories} / ${colorado.population} * 1000000. MD ${maryland?.stories} (${maryland?.rankLabel}), DC ${district?.stories} (${district?.rankLabel}), WY ${wyomingRow?.stories} (${wyomingRow?.rankLabel}, ${wyomingRow?.perMillionLabel} per million). ${topCountry ? `Top country ${topCountry.label} ${topCountry.count}.` : "No world stories."} Editions ${indexes.length}.`,
+  );
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -784,6 +1058,7 @@ assertWorldSpotlight();
 assertHubs();
 assertKidClassrooms();
 assertWeeks();
+assertGoodNewsIndex();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertEnrichmentMerge();
 assertLoadedCountries(stories);
