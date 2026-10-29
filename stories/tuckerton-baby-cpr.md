@@ -24,8 +24,7 @@ howToHelp:
   - label: "Red Cross CPR classes"
     url: "https://www.redcross.org/take-a-class/cpr"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true
