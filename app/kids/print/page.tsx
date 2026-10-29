@@ -7,6 +7,8 @@ import { placeLabel } from "@/lib/present";
 import { pageAlternates } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
+import { ListenControls } from "@/components/listen-controls";
+import { kidListenSegments } from "@/lib/listen-text";
 import { PrintButton } from "../print-button";
 
 export function generateMetadata(): Metadata {
@@ -43,7 +45,8 @@ export default function KidsPrintPage() {
             <p className="teacher-note">
               Print this sheet and read it with your class. It is a verified news story, shortened for children. The questions are for you to lead.
             </p>
-            <h2>{story.title}</h2>
+            <ListenControls className="listen-bar no-print" label="Listen to this story" segments={kidListenSegments(story)} />
+            <h2 id="speak-title">{story.title}</h2>
             <p className="teacher-note">
               {placeLabel(story)} · {formatStoryDate(story.date)}
             </p>
@@ -51,7 +54,9 @@ export default function KidsPrintPage() {
               <StoryImage src={story.image} alt={story.imageAlt} sizes="(max-width: 700px) 100vw, 720px" priority treatment={story.imageTreatment} />
               <figcaption className="caption">{story.imageCaption}</figcaption>
             </figure>
-            <p className="read-aloud">{story.kidSummary}</p>
+            <p className="read-aloud" id="speak-kid">
+              {story.kidSummary}
+            </p>
             <h2>Discussion questions</h2>
             <ol className="questions">
               {story.kidQuestions.map((question) => (

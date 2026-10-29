@@ -146,6 +146,10 @@ kidQuestions:
 - `/kids/state/colorado` and `/kids/country/japan` exist only when that place has at least one classroom story. A state and a country can share a name, so the path says which is which. An empty place is not a page.
 - The teacher email is a separate signup on `/kids` for adults and educators. The list tag is `teachers`. Do not collect a child's name, age, school, or email. Classroom pages do not run ads.
 
+### Listening
+
+Story pages can read the headline, the dek, and the body aloud in the browser. The control uses the device's built-in speech. There is no audio file to add, and nothing is sent to a speech service. When a story has `kidSummary`, the page also offers a Kid version that reads the headline and that summary instead of the dek and the full body. Classroom pages (`/kids`, a state or country classroom page, the printable story of the day, and each week's classroom section) can read the listed kid summaries in order. If the browser cannot speak, the buttons are left off the page. A reader's speed and voice stay in their own browser.
+
 ### Mix for a daily batch
 
 About one in four stories in a daily batch should come from outside the United States when the batch is large enough and the reporting is strong enough. Spread those stories across more than one region. Do not force a weak story to hit the mix, and do not fill the international share from a single country. Stories from the United States stay the majority while the world edition is growing.

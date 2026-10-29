@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
+import { ListenControls } from "@/components/listen-controls";
 import { StoryGrid } from "@/components/story-grid";
 import { getCountryBySlug } from "@/lib/countries";
 import { kidStoriesInCountry, kidStoriesInState } from "@/lib/kids";
+import { kidListSegments } from "@/lib/listen-text";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
@@ -51,6 +53,8 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
   if (!place || !place.stories.length || page > pageCount(place.stories.length)) notFound();
   const path = page <= 1 ? place.path : `${place.path}/page/${page}`;
   const title = `Good news for kids in ${place.name}`;
+  const listed = pageSlice(place.stories, page);
+  const pages = pageCount(place.stories.length);
 
   return (
     <div className="page-block">
@@ -84,9 +88,14 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
           <Link href="/kids/print">Print the story of the day</Link>
           <Link href="/kids">All classroom stories</Link>
         </p>
+        <ListenControls
+          label="Read all aloud"
+          groupLabel={pages > 1 ? `Read the classroom summaries on this page, ${listed.length} stories` : "Read all classroom summaries aloud"}
+          segments={kidListSegments(listed)}
+        />
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>
-        <StoryGrid stories={place.stories} page={page} base={place.path} />
+        <StoryGrid stories={place.stories} page={page} base={place.path} listen />
       </div>
     </div>
   );

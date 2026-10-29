@@ -41,6 +41,10 @@ export function IconSprite() {
           <path d="M10 2.5l6 2.3v4.6c0 4-2.6 6.8-6 8.1-3.4-1.3-6-4.1-6-8.1V4.8z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
           <path d="M7.3 10l2 2 3.6-3.8" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </symbol>
+        <symbol id="i-speaker" viewBox="0 0 24 24">
+          <path d="M4.2 9.5h3.1L12 5.6v12.8l-4.7-3.9H4.2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <path d="M15.2 9.5a3 3 0 0 1 0 5M17.7 7.2a6 6 0 0 1 0 9.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </symbol>
         <symbol id="i-ext" viewBox="0 0 20 20">
           <path d="M8 4H4.5A1.5 1.5 0 0 0 3 5.5v10A1.5 1.5 0 0 0 4.5 17h10a1.5 1.5 0 0 0 1.5-1.5V12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           <path d="M11 3h6v6M17 3l-8 8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />

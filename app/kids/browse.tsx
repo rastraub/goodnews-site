@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { EmailSignup } from "@/components/email-signup";
 import { JsonLd } from "@/components/json-ld";
+import { ListenControls } from "@/components/listen-controls";
 import { StoryGrid } from "@/components/story-grid";
 import { getKidStories, kidPlaces } from "@/lib/kids";
+import { kidListSegments } from "@/lib/listen-text";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
@@ -33,6 +35,8 @@ export function KidsBrowse({ page }: { page: number }) {
   if (page > pageCount(stories.length)) notFound();
   const places = kidPlaces(stories);
   const path = page <= 1 ? "/kids" : `/kids/page/${page}`;
+  const listed = pageSlice(stories, page);
+  const pages = pageCount(stories.length);
 
   return (
     <div className="page-block">
@@ -66,6 +70,13 @@ export function KidsBrowse({ page }: { page: number }) {
           <Link href="/classroom">Good News Friday packs</Link>
           <a href="#teachers">Teacher email</a>
         </p>
+        {listed.length ? (
+          <ListenControls
+            label="Read all aloud"
+            groupLabel={pages > 1 ? `Read the classroom summaries on this page, ${listed.length} stories` : "Read all classroom summaries aloud"}
+            segments={kidListSegments(listed)}
+          />
+        ) : null}
         {places.length ? (
           <div className="chips">
             {places.map((place) => (
@@ -79,7 +90,7 @@ export function KidsBrowse({ page }: { page: number }) {
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>
         {stories.length ? (
-          <StoryGrid stories={stories} page={page} base="/kids" />
+          <StoryGrid stories={stories} page={page} base="/kids" listen />
         ) : (
           <div className="empty">
             <h2>No classroom story yet.</h2>

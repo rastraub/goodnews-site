@@ -4,10 +4,10 @@ import { StoryImage } from "./story-image";
 import { VerifiedBadge } from "./verified-badge";
 import type { StoryCardModel } from "@/lib/present";
 
-export function StoryCard({ story }: { story: StoryCardModel }) {
+export function StoryCard({ story, listenId }: { story: StoryCardModel; listenId?: string }) {
   const href = `/story/${story.slug}`;
   return (
-    <article className="card">
+    <article className="card" id={listenId}>
       <Link href={href} className="ph">
         <StoryImage
           src={story.image}

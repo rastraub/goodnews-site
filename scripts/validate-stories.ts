@@ -21,6 +21,7 @@ import {
   type PackCandidate,
 } from "../lib/classroom-pack";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
+import { assertListenText } from "../lib/listen-text";
 import { classroomJsonLd } from "../lib/seo";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
@@ -1470,6 +1471,7 @@ function assertOutlets() {
 
 const stories = loadAllStories();
 assertImageVariants();
+assertListenText();
 assertSchemaRejectsGarbage();
 assertCountryRules();
 assertWorldSpotlight();

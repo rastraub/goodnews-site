@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CheerButton } from "@/components/cheer-button";
+import { ListenControls } from "@/components/listen-controls";
 import { JsonLd } from "@/components/json-ld";
 import { ShareButtons } from "@/components/share-buttons";
 import { StoryCard } from "@/components/story-card";
@@ -13,6 +14,7 @@ import { packByStart } from "@/lib/classroom-pack";
 import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
+import { kidListenSegments, storyListenSegments } from "@/lib/listen-text";
 import { placeLabel, toCard } from "@/lib/present";
 import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
@@ -103,8 +105,15 @@ export default async function StoryPage({ params }: Props) {
             <span className="dot" />
             <span className="place">{placeLabel(story)}</span>
           </div>
-          <EmphaticTitle title={story.title} emphasis={story.emphasis} />
-          <p className="dek">{story.dek}</p>
+          <EmphaticTitle id="speak-title" title={story.title} emphasis={story.emphasis} />
+          <ListenControls
+            label="Listen to this story"
+            segments={storyListenSegments(story)}
+            kidSegments={story.kidFriendly && story.kidSummary && story.kidQuestions?.length ? kidListenSegments(story) : undefined}
+          />
+          <p className="dek" id="speak-dek">
+            {story.dek}
+          </p>
           <div className="meta">
             <span className="byline">
               By <Link href="/about#masthead">{siteConfig.editor.name}</Link>
@@ -163,7 +172,7 @@ export default async function StoryPage({ params }: Props) {
           {story.kidFriendly && story.kidSummary && story.kidQuestions?.length ? (
             <section className="classroom-box" id="classroom">
               <h2>For the classroom</h2>
-              <p>{story.kidSummary}</p>
+              <p id="speak-kid">{story.kidSummary}</p>
               <ol>
                 {story.kidQuestions.map((question) => (
                   <li key={question}>{question}</li>
