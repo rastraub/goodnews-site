@@ -66,7 +66,7 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `emphasis` | no | A phrase inside `title` that renders in italic. |
 | `dek` | yes | The deck under the headline. |
 | `date` | yes | `YYYY-MM-DD`. Quote it so YAML does not surprise you. |
-| `city` | yes | Town or city. |
+| `city` | yes | Town or city the story is about. Use the same spelling each time (`Denver`, not `denver`). `St. Louis` and `Saint Louis` in the same state are one page. The same name in two states stays two pages. Use `place` when the label is a park, a county, or a region rather than the town. |
 | `country` | no | ISO 3166-1 alpha-2 code, uppercase, such as `JP` or `US`. Omit it on a United States story. The default is `US`. |
 | `state` | US only | Two-letter USPS code, including `DC`. Required when `country` is `US` or omitted. Leave it off for every other country. |
 | `alsoStates` | no | Other US states this story should appear in. Do not repeat `state`. Leave it off outside the United States. |
@@ -117,14 +117,17 @@ country: "JP"
 
 ### Pages that appear on their own
 
-These URLs are created only when at least three published stories belong there. A thinner combination is not a page, so it is not in the sitemap and it does not rank.
+State topic pages and tag pages are created only when at least three published stories belong there. A thinner combination is not a page, so it is not in the sitemap and it does not rank. City pages are the exception: every city in the archive gets a page.
 
-- `/state/colorado/animals` is that state's stories in one category.
-- `/state/colorado/city/denver` is one US city. The city name is slugified, and the state keeps Springfields apart.
-- `/country/japan/city/osaka` is a city outside the United States.
+- `/state/colorado/animals` is that state's stories in one category. It needs three stories.
+- `/state/colorado/city/denver` is one US city. The page exists as soon as one story names that city. It is indexable, listed in the sitemap, and included in the IndexNow ping once the city has two stories. A city with one story still renders and is linked from the state page, but the page is noindex and left out of the sitemap.
+- City names are normalized. Case, punctuation, and the abbreviations `St.`, `Ft.`, and `Mt.` share one URL. `St. Louis` and `Saint Louis` in Missouri are `/state/missouri/city/saint-louis`. `Fort Worth` and `Ft. Worth` are `/state/texas/city/fort-worth`. Springfield in Illinois and Springfield in Missouri stay different pages because the state is part of the URL. The intro on the page is counted from the stories: how many, the date range, and the top categories. It does not add facts about the city that are not in the archive.
+- `/country/japan/city/osaka` follows the same city rule outside the United States. Those pages are linked from the country page.
 - `/topic/animal-rescue` is a tag shared by at least three stories. The index of those pages is `/topics`.
 
-A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Pick tags from `lib/tags.ts`. Do not invent a tag to force a page. If a real topic is missing from that list, add the slug, a human title such as "Good news about animal rescue", and a one-sentence intro there first. Validation rejects anything else. Topic hubs are in the sitemap and in the IndexNow ping, the same way city and state hubs are.
+A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Pick tags from `lib/tags.ts`. Do not invent a tag to force a page. If a real topic is missing from that list, add the slug, a human title such as "Good news about animal rescue", and a one-sentence intro there first. Validation rejects anything else. Indexable city hubs, state topic hubs, and topic hubs are in the sitemap and in the IndexNow ping. One-story city pages are not.
+
+`npm run city-report` lists every city by story count, marked index or noindex. `npm run validate-stories` prints the same report.
 
 ### Stories for classrooms
 
@@ -188,7 +191,7 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
    - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
    - **For classrooms.** When a story is appropriate to read aloud with children about ages 6 to 12, set `kidFriendly: true` in that story's front matter, write `kidSummary` in about 60 to 110 plain words, and add two or three `kidQuestions`. Stay accurate to the source. Do not invent facts or quotes. Skip the flag for death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, and anything a teacher would hesitate to read to a class. Do not force one into the batch. Do not backfill classroom text into `data/story-enrichment.json`. The kids pages, `/kids/print`, and the Good News Friday pack use these fields. Add `kidWord` and `kidDefinition` only when both come from the story. Do not invent a vocabulary word to fill the pack. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The Friday pack rebuilds from the week's classroom stories at `/classroom/week/{Monday}`. Do not hand-write a pack. The teacher email is a separate adult list. Do not add a child to any list, and do not add ads or anything else that identifies a child.
-6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML, and it rebuilds the Good News Index from those story files, including the open month. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request. The same build publishes that day's web story. There is no extra file to add. Explainers are a separate folder. Do not paste an explainer into a story. If the story is about a topic that already has one, the story page links it. See Good News Explainers below.
+6. Run `npm run validate-stories` and `npm run build`. Both have to pass. Validation prints the city coverage report (the same list as `npm run city-report`): which cities have a page, and which of those pages are indexable. The build prebuilds story, listing, and hub HTML, including one-story city pages, and it rebuilds the Good News Index from those story files, including the open month. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request. The same build publishes that day's web story. There is no extra file to add. Explainers are a separate folder. Do not paste an explainer into a story. If the story is about a topic that already has one, the story page links it. See Good News Explainers below.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 8. While the Thanksgiving hub is open, run `npm run thanks-gaps` and aim a real kindness or gratitude story at a state that is still missing. Do not force a weak story just to close a gap. See 50 States of Thanks below.
 

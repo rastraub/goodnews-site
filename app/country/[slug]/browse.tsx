@@ -42,6 +42,7 @@ function CountryBody({ country, page }: { country: CountryInfo; page: number }) 
   const description = countryDescription(country.name);
   const path = page <= 1 ? `/country/${country.slug}` : `/country/${country.slug}/page/${page}`;
   const counts = new Map(countryCounts().map((item) => [item.code, item.count]));
+  const cityHubs = getHubIndex().byCountrySlug.get(country.slug) ?? [];
   const siblings = countriesInRegion(country.region)
     .filter((item) => item.code !== country.code && (counts.get(item.code) ?? 0) > 0)
     .slice(0, 12);
@@ -82,12 +83,22 @@ function CountryBody({ country, page }: { country: CountryInfo; page: number }) 
           {country.code !== "US" && kidStoriesInCountry(country.code).length ? (
             <Link href={`/kids/country/${country.slug}`}>Classroom stories</Link>
           ) : null}
-          {(getHubIndex().byCountrySlug.get(country.slug) ?? []).map((hub) => (
-            <Link key={hub.path} href={hub.path}>
-              {hub.crumbs[hub.crumbs.length - 1]?.name ?? hub.linkLabel}
-            </Link>
-          ))}
         </p>
+        {cityHubs.length ? (
+          <>
+            <h2 className="side-title">Cities</h2>
+            <p className="link-pills">
+              {cityHubs.map((hub) => {
+                const name = hub.crumbs[hub.crumbs.length - 1]?.name ?? hub.linkLabel;
+                return (
+                  <Link key={hub.path} href={hub.path}>
+                    {name} · {hub.count}
+                  </Link>
+                );
+              })}
+            </p>
+          </>
+        ) : null}
       </div>
       <div className="wrap state-layout" style={{ paddingTop: 24 }}>
         <div>

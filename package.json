@@ -13,7 +13,8 @@
     "feed-images": "tsx scripts/generate-feed-images.ts",
     "credited-outlets-report": "tsx scripts/credited-outlets-report.ts",
     "web-story-posters": "tsx scripts/generate-web-story-posters.ts",
-    "validate-web-stories": "tsx scripts/validate-web-stories.ts"
+    "validate-web-stories": "tsx scripts/validate-web-stories.ts",
+    "city-report": "tsx scripts/city-report.ts"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

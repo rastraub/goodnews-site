@@ -5,7 +5,8 @@ import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
 import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
 import { feedImageReport } from "../lib/feed-image";
 import { largeJpegPath, storyThumbPath } from "../lib/images";
-import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
+import { citySlug } from "../lib/cities";
+import { formatCityReport } from "../lib/city-report";
 import {
   CLASSROOM_INDEX_DESCRIPTION,
   CLASSROOM_INDEX_PATH,
@@ -20,6 +21,8 @@ import {
   whereInTheWorld,
   type PackCandidate,
 } from "../lib/classroom-pack";
+import { buildHubs, getHubIndex, indexableHubs, MAX_PRERENDERED_HUBS, MIN_CITY_INDEX_STORIES, MIN_HUB_STORIES, slugify, type HubStory } from "../lib/hubs";
+import { getStateByCode } from "../lib/states";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { assertListenText } from "../lib/listen-text";
 import { classroomJsonLd } from "../lib/seo";
@@ -178,12 +181,48 @@ function hubStory(partial: Partial<HubStory> & Pick<HubStory, "slug">): HubStory
 }
 
 function assertHubs() {
+  const alone = buildHubs([hubStory({ slug: "one" })]);
+  const oneDenver = alone.cities.find((hub) => hub.path === "/state/colorado/city/denver");
+  if (!oneDenver || oneDenver.count !== 1 || oneDenver.indexable) {
+    throw new Error("A single city story should render a noindex city page.");
+  }
+  if (alone.stateCategories.length || alone.topics.length) {
+    throw new Error("One story should not publish a state topic or tag hub.");
+  }
   const thin = buildHubs([
     hubStory({ slug: "one" }),
     hubStory({ slug: "two", date: "2026-10-02" }),
   ]);
-  if (thin.cities.length || thin.stateCategories.length || thin.topics.length) {
-    throw new Error("Two stories should not publish a hub page.");
+  const twoDenver = thin.cities.find((hub) => hub.path === "/state/colorado/city/denver");
+  if (!twoDenver || twoDenver.count !== 2 || !twoDenver.indexable) {
+    throw new Error("Two stories in one city should be an indexable city hub.");
+  }
+  if (thin.stateCategories.length || thin.topics.length) {
+    throw new Error("Two stories should not publish a state topic or tag hub.");
+  }
+  const mixed = buildHubs([
+    hubStory({ slug: "a", city: "DENVER" }),
+    hubStory({ slug: "b", city: "denver", date: "2026-10-02" }),
+    hubStory({ slug: "c", city: "St. Louis", state: "MO", date: "2026-10-03" }),
+    hubStory({ slug: "d", city: "Saint Louis", state: "MO", date: "2026-10-04" }),
+    hubStory({ slug: "e", city: "Ft. Worth", state: "TX", date: "2026-10-05" }),
+    hubStory({ slug: "f", city: "Fort Worth", state: "TX", date: "2026-10-06" }),
+    hubStory({ slug: "g", city: "Springfield", state: "IL", date: "2026-10-07" }),
+    hubStory({ slug: "h", city: "Springfield", state: "MO", date: "2026-10-08" }),
+  ]);
+  const cased = mixed.cities.find((hub) => hub.path === "/state/colorado/city/denver");
+  if (!cased || cased.count !== 2 || !cased.heading.startsWith("Good news from Denver,")) {
+    throw new Error(`Denver case variants should share one page titled Denver. Got ${cased?.heading}`);
+  }
+  const louis = mixed.cities.find((hub) => hub.path === "/state/missouri/city/saint-louis");
+  if (!louis || louis.count !== 2 || !louis.indexable) {
+    throw new Error("St. Louis and Saint Louis should share one indexable hub.");
+  }
+  const worth = mixed.cities.find((hub) => hub.path === "/state/texas/city/fort-worth");
+  if (!worth || worth.count !== 2) throw new Error("Fort Worth and Ft. Worth should share one hub.");
+  const springs = mixed.cities.filter((hub) => hub.path.endsWith("/springfield"));
+  if (springs.length !== 2 || springs.some((hub) => hub.indexable || hub.count !== 1)) {
+    throw new Error("Springfield in different states should stay separate noindex pages.");
   }
   const ready = buildHubs([
     hubStory({ slug: "one", tags: ["school-lunch"] }),
@@ -193,11 +232,19 @@ function assertHubs() {
   ]);
   const animals = ready.stateCategories.find((hub) => hub.path === "/state/colorado/animals");
   const denver = ready.cities.find((hub) => hub.path === "/state/colorado/city/denver");
+  const boulder = ready.cities.find((hub) => hub.path === "/state/colorado/city/boulder");
   const topic = ready.topics.find((hub) => hub.path === "/topic/school-lunch");
-  if (!animals || animals.count < MIN_HUB_STORIES) throw new Error("Colorado animals should be a hub once three stories exist.");
-  if (!denver || denver.count !== 3) throw new Error("Denver should be a city hub, and Boulder should not.");
-  if (ready.cities.some((hub) => hub.path.includes("boulder"))) throw new Error("A single Boulder story should not be a city page.");
-  if (!topic) throw new Error("A shared tag should become a topic page at three stories.");
+  if (!animals || animals.count < MIN_HUB_STORIES || !animals.indexable) {
+    throw new Error("Colorado animals should be a hub once three stories exist.");
+  }
+  if (!denver || denver.count !== 3 || !denver.indexable) throw new Error("Denver should be an indexable city hub.");
+  if (!denver.description.includes("3 verified stories") || !denver.description.includes("October 1, 2026") || !denver.description.includes("October 4, 2026") || !denver.description.includes("Animals")) {
+    throw new Error(`Denver intro should count stories, dates, and categories. Got: ${denver.description}`);
+  }
+  if (!boulder || boulder.count !== 1 || boulder.indexable) {
+    throw new Error("A single Boulder story should be a noindex city page.");
+  }
+  if (!topic || !topic.indexable) throw new Error("A shared tag should become a topic page at three stories.");
   const badTag = storySchema.safeParse(minimalStory({ state: "OH", tags: ["School Lunch"] }));
   if (badTag.success) throw new Error("Tags have to be kebab-case.");
   const unknownTag = storySchema.safeParse(minimalStory({ state: "OH", tags: ["not-a-real-topic"] }));
@@ -207,10 +254,70 @@ function assertHubs() {
   const known = storySchema.safeParse(minimalStory({ state: "OH", tags: ["dogs", "animal-rescue"] }));
   if (!known.success) throw new Error("Tags from the vocabulary should pass.");
   const index = getHubIndex();
-  for (const hub of [...index.stateCategories, ...index.cities, ...index.topics]) {
-    if (hub.count < MIN_HUB_STORIES) throw new Error(`${hub.path} is thinner than ${MIN_HUB_STORIES} stories.`);
+  for (const hub of [...index.stateCategories, ...index.topics]) {
+    if (hub.count < MIN_HUB_STORIES || !hub.indexable) {
+      throw new Error(`${hub.path} should stay indexable only at ${MIN_HUB_STORIES} stories.`);
+    }
   }
-  console.log(`Hubs: ${index.stateCategories.length} state topics, ${index.cities.length} cities, ${index.topics.length} topics.`);
+  let indexableCities = 0;
+  let quietCities = 0;
+  for (const hub of index.cities) {
+    if (hub.count < 1) throw new Error(`${hub.path} has no stories.`);
+    if (hub.indexable !== hub.count >= MIN_CITY_INDEX_STORIES) {
+      throw new Error(`${hub.path} indexable flag does not match its story count.`);
+    }
+    if (!hub.description.includes(String(hub.count))) {
+      throw new Error(`${hub.path} intro should include the story count.`);
+    }
+    if (hub.indexable) indexableCities += 1;
+    else quietCities += 1;
+  }
+  for (const hub of indexableHubs(index)) {
+    if (hub.kind === "city" && hub.count < MIN_CITY_INDEX_STORIES) {
+      throw new Error(`${hub.path} would be in the sitemap with too few stories.`);
+    }
+    if (hub.kind !== "city" && hub.count < MIN_HUB_STORIES) {
+      throw new Error(`${hub.path} would be in the sitemap with too few stories.`);
+    }
+  }
+  const listedCities = new Set(indexableHubs(index).filter((hub) => hub.kind === "city").map((hub) => hub.path));
+  for (const hub of index.cities) {
+    if (!hub.indexable && listedCities.has(hub.path)) {
+      throw new Error(`${hub.path} is noindex and should stay out of the sitemap.`);
+    }
+  }
+  assertCitySlugsStayPut(getPublishedStories());
+  console.log(`Hubs: ${index.stateCategories.length} state topics, ${index.cities.length} cities (${indexableCities} indexable, ${quietCities} noindex), ${index.topics.length} topics.`);
+  console.log(formatCityReport(index.cities));
+}
+
+/** Pages already indexable under the old slug stay put. Abbreviation merges are the only allowed slug change. */
+function assertCitySlugsStayPut(stories: { city: string; country: string; state?: string }[]) {
+  const legacyCounts = new Map<string, number>();
+  for (const story of stories) {
+    if (story.country !== "US" || !story.state) continue;
+    const state = getStateByCode(story.state);
+    const legacy = slugify(story.city);
+    if (!state || !legacy) continue;
+    const path = `/state/${state.slug}/city/${legacy}`;
+    legacyCounts.set(path, (legacyCounts.get(path) ?? 0) + 1);
+  }
+  const index = getHubIndex();
+  for (const story of stories) {
+    const legacy = slugify(story.city);
+    const next = citySlug(story.city);
+    if (!legacy || legacy === next) continue;
+    const abbreviation = /(?:^|-)(st|ft|mt)(?:-|$)/.test(legacy);
+    if (!abbreviation) {
+      throw new Error(`${story.city} slug changed from ${legacy} to ${next} without an abbreviation.`);
+    }
+  }
+  for (const [path, count] of legacyCounts) {
+    if (count < MIN_HUB_STORIES) continue;
+    if (!index.byPath.has(path)) {
+      throw new Error(`${path} has ${count} stories under its original slug and should keep that URL.`);
+    }
+  }
 }
 
 function assertKidClassrooms() {

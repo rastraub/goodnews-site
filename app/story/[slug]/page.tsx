@@ -11,7 +11,7 @@ import { EmphaticTitle, StoryBody } from "@/components/story-body";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
 import { packByStart } from "@/lib/classroom-pack";
-import { getHubByPath, hubPathsForStory } from "@/lib/hubs";
+import { cityHubForStory, getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { kidListenSegments, storyListenSegments } from "@/lib/listen-text";
@@ -21,7 +21,7 @@ import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHand
 import { getCountry } from "@/lib/countries";
 import { explainerPath, explainersForStory } from "@/lib/explainers";
 import { getOutletForStory } from "@/lib/outlets";
-import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
+import { getStory, relatedStories, storiesToPrerender, type Story } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { weekStart } from "@/lib/weeks";
 import { siteConfig } from "@/site.config";
@@ -105,7 +105,7 @@ export default async function StoryPage({ params }: Props) {
           <div className="kicker">
             {category?.label}
             <span className="dot" />
-            <span className="place">{placeLabel(story)}</span>
+            <span className="place"><PlaceName story={story} /></span>
           </div>
           <EmphaticTitle id="speak-title" title={story.title} emphasis={story.emphasis} />
           <ListenControls
@@ -259,5 +259,28 @@ export default async function StoryPage({ params }: Props) {
         </section>
       ) : null}
     </article>
+  );
+}
+
+function PlaceName({ story }: { story: Story }) {
+  const hub = cityHubForStory(story);
+  const label = placeLabel(story);
+  if (!hub) return label;
+  const at = label.toLowerCase().indexOf(story.city.toLowerCase());
+  if (at < 0) {
+    return (
+      <>
+        <Link href={hub.path}>{story.city}</Link>
+        {" · "}
+        {label}
+      </>
+    );
+  }
+  return (
+    <>
+      {label.slice(0, at)}
+      <Link href={hub.path}>{label.slice(at, at + story.city.length)}</Link>
+      {label.slice(at + story.city.length)}
+    </>
   );
 }
