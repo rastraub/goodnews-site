@@ -475,3 +475,6 @@ October 25 through December 31 must keep two to four milestones each. Other days
 ```
 
 `updated` at the top of the file is the day the milestone list was last checked. `npm run validate-stories` rejects a bad year, a missing citation, a third sentence, a homepage link, a host that is not on the list, and a gap in the October 25 through December 31 window.
+## Good Neighbor of the Month
+
+The ballot is built from the month's archive. To force a story on, or to drop one the automatic pick included, edit `data/good-neighbor.json`. `pin` and `exclude` are slug lists for that `YYYY-MM`. A pinned story is dated in that month and already published. At most 12 pins. `winner` is optional and is used after the 25th. The README has the file shape and the storage flag for shared vote totals. Until that flag is set, readers cheer a favorite in the browser and nothing about them is stored.

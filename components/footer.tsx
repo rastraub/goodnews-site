@@ -72,6 +72,7 @@ export function Footer() {
           <div>
             <p className="flabel">Join in</p>
             <ul>
+              <li><Link href="/good-neighbor">Good Neighbor vote</Link></li>
               <li><Link href="/subscribe">Daily Top 5 email</Link></li>
               <li><Link href="/kids#teachers">Teacher email</Link></li>
               <li><Link href="/giving-tuesday">Giving Tuesday</Link></li>

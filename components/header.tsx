@@ -24,6 +24,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
     { href: "/topics", label: "Topics" },
     { href: "/explainers", label: "Explainers" },
     { href: "/on-this-day", label: "On this day" },
+    { href: "/good-neighbor", label: "Good Neighbor" },
   ];
 
   function active(href: string) {
@@ -32,6 +33,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
     if (href === "/world") return pathname === "/world" || pathname.startsWith("/country/");
     if (href === "/topics") return pathname === "/topics" || pathname.startsWith("/topic/");
     if (href === "/quiz" || href.startsWith("/quiz/")) return pathname === "/quiz" || pathname.startsWith("/quiz/");
+    if (href === "/good-neighbor") return pathname === "/good-neighbor" || pathname.startsWith("/good-neighbor/");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

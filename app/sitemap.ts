@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/categories";
+import { ballotMonths, getBallot } from "@/lib/good-neighbor-data";
+import { editionMonth } from "@/lib/good-neighbor";
 import { kidPlaces } from "@/lib/kids";
 import { GIVING_TUESDAY_PATH, getGivingGuide } from "@/lib/giving-tuesday";
 import { getHubIndex, indexableHubs } from "@/lib/hubs";
@@ -90,6 +92,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }, undefined);
   const veterans = getVeteransDayHub();
   const responders = getFirstRespondersDayHub();
+  const neighborMonths = ballotMonths();
+  const neighborCurrent = editionMonth();
+  const neighborLatest = getBallot(neighborCurrent)?.nominees[0]?.date ?? siteLatest;
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -122,6 +127,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.8,
     },
+    {
+      url: absoluteUrl("/good-neighbor"),
+      lastModified: neighborLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    },
+    {
+      url: absoluteUrl("/good-neighbor/winners"),
+      lastModified: neighborLatest,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    },
+    ...neighborMonths
+      .filter((month) => month !== neighborCurrent)
+      .map((month) => ({
+        url: absoluteUrl(`/good-neighbor/${month}`),
+        lastModified: getBallot(month)?.nominees[0]?.date ?? neighborLatest,
+        changeFrequency: "monthly" as const,
+        priority: 0.5,
+      })),
     {
       url: absoluteUrl("/week"),
       lastModified: newestWeek?.latest ?? siteLatest,
