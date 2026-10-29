@@ -34,6 +34,7 @@ export function Footer() {
               <li><Link href="/week">This week</Link></li>
               <li><Link href="/good-news-index">Good News Index</Link></li>
               <li><Link href={THANKS_PATH}>50 States of Thanks</Link></li>
+              <li><Link href="/web-stories">Web stories</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href="/topics">Topics</Link></li>

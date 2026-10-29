@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run validate-stories && next build",
+    "build": "npm run validate-stories && npm run web-story-posters && npm run validate-web-stories && next build",
     "postbuild": "tsx scripts/indexnow.ts",
     "start": "next start",
     "lint": "eslint .",
@@ -11,7 +11,9 @@
     "validate-stories": "tsx scripts/validate-stories.ts",
     "thanks-gaps": "tsx scripts/thanks-gaps.ts",
     "feed-images": "tsx scripts/generate-feed-images.ts",
-    "credited-outlets-report": "tsx scripts/credited-outlets-report.ts"
+    "credited-outlets-report": "tsx scripts/credited-outlets-report.ts",
+    "web-story-posters": "tsx scripts/generate-web-story-posters.ts",
+    "validate-web-stories": "tsx scripts/validate-web-stories.ts"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
@@ -25,6 +27,7 @@
     "@types/node": "^22.15.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "amphtml-validator": "^1.0.38",
     "eslint": "^9.36.0",
     "eslint-config-next": "^16.4.0",
     "sharp": "^0.34.4",

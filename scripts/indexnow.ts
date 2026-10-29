@@ -11,9 +11,10 @@ import { CLASSROOM_INDEX_PATH, packsToPrerender } from "../lib/classroom-pack";
 import { indexesToPrerender } from "../lib/good-news-index";
 import { THANKS_PATH } from "../lib/thanks";
 import { weeksToPrerender } from "../lib/weeks";
+import { listWebStories } from "../lib/web-stories";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -26,6 +27,9 @@ async function main() {
   for (const edition of indexesToPrerender()) urls.add(`${siteConfig.url}${edition.path}`);
   for (const pack of packsToPrerender()) urls.add(`${siteConfig.url}${pack.path}`);
   const recent = getPublishedStories().filter((story) => isWithinHours(story.date, 48));
+  for (const edition of listWebStories()) {
+    if (isWithinHours(edition.date, 48)) urls.add(`${siteConfig.url}${edition.path}`);
+  }
   for (const story of recent) {
     urls.add(`${siteConfig.url}/story/${story.slug}`);
     const outlet = getOutletForStory(story);

@@ -183,7 +183,7 @@ A morning batch is new story files. Verify each one, then rotate the homepage so
    - **Top 5.** Assign ranks `1` through `5` to the five strongest newest stories. Remove `top5` from any story that is leaving that five. If the morning batch has fewer than five stories, fill the remaining ranks from the strongest recent stories already on the site, still using each rank once.
    - **Around the World.** Set `worldPick: true` on one story from outside the United States, and remove `worldPick` from yesterday's pick. Only one story may have it. A US story cannot have it. The morning email is sent outside this repo. After the Top 5, add a bonus link titled "Around the World": the headline, the place, and the story URL. `worldSpotlight()` in `lib/world-pick.ts` returns that story. If the flag is missing and an international story exists, the same helper rotates a recent one by calendar date, and the homepage and state pages use that rotation. Use the flag when you have a story worth the email. Do not invent one to fill the slot.
    - **For classrooms.** When a story is appropriate to read aloud with children about ages 6 to 12, set `kidFriendly: true` in that story's front matter, write `kidSummary` in about 60 to 110 plain words, and add two or three `kidQuestions`. Stay accurate to the source. Do not invent facts or quotes. Skip the flag for death, serious illness or cancer, violence, crime, accidents with injuries, abuse, war, addiction, and anything a teacher would hesitate to read to a class. Do not force one into the batch. Do not backfill classroom text into `data/story-enrichment.json`. The kids pages, `/kids/print`, and the Good News Friday pack use these fields. Add `kidWord` and `kidDefinition` only when both come from the story. Do not invent a vocabulary word to fill the pack. `storyOfTheDay()` in `lib/kids.ts` picks the printable story. The Friday pack rebuilds from the week's classroom stories at `/classroom/week/{Monday}`. Do not hand-write a pack. The teacher email is a separate adult list. Do not add a child to any list, and do not add ads or anything else that identifies a child.
-6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML, and it rebuilds the Good News Index from those story files, including the open month. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request.
+6. Run `npm run validate-stories` and `npm run build`. Both have to pass. The build prebuilds story, listing, and hub HTML, and it rebuilds the Good News Index from those story files, including the open month. If the archive outgrows that cap, validation fails on purpose: do not leave the extra pages to render on each request. The same build publishes that day's web story. There is no extra file to add.
 7. Commit the new stories, the images, and the rank edits, then push to `main`. The next deploy publishes them.
 8. While the Thanksgiving hub is open, run `npm run thanks-gaps` and aim a real kindness or gratitude story at a state that is still missing. Do not force a weak story just to close a gap. See 50 States of Thanks below.
 
@@ -234,6 +234,19 @@ npm run credited-outlets-report -- outlets.csv
 ```
 
 With no path, the CSV goes to standard output. A path writes that file. Prefer a path when you want a clean file, because `npm run` also prints the command it is running. Drafts are skipped. Columns are `outlet`, `domain`, `homepage`, `states`, `story_count`, `latest_date`, `story_urls`, and `nonprofits`. `states` lists US state names and, for a story outside the United States, the country name. `story_urls` are the summaries on this site. `nonprofits` are the `howToHelp` labels and links on those stories. The row order matches `/sources`: most stories first.
+
+## Web story
+
+Every date that has a published story gets an AMP web story at `/web-stories/YYYY-MM-DD`. The index is `/web-stories`. The morning job does not create a file for it, and it does not crop a poster by hand.
+
+The build reads the stories filed on that date and keeps up to five:
+
+- When any of those stories has a `top5` rank, the order matches the daily Top 5: ranked stories first, then the rest of that date.
+- When none of them has a rank, the featured story comes first and the newest stories follow. Stories that share a date already sort by title after the featured flag, which is the same order the rest of the site uses.
+
+The cover says "Today's good news" and the date. Each story page uses that story's photo, the short title, a one-line dek, the place, and the photo credit and license. "Read the story" opens the full article. The last page links to `/subscribe`.
+
+`npm run build` crops a 3:4 poster from the lead photo with sharp, writes it under `public/images/web-stories/`, and runs the AMP validator. Those posters are build output. A new story file on `main` is enough.
 
 ## Health & Tech
 
