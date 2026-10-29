@@ -183,6 +183,13 @@ export default async function WeekPage({ params }: Props) {
                   </svg>
                 </Link>
               ) : null}
+              {" · "}
+              <Link className="more" href="/morning-announcements">
+                Morning announcements
+                <svg className="ico" aria-hidden="true">
+                  <use href="#i-arrow" />
+                </svg>
+              </Link>
             </p>
             <ListenControls label="Read all aloud" groupLabel="Read this week's classroom summaries aloud" segments={kidListSegments(week.kids)} />
             {quiz?.kidQuestions.length ? (

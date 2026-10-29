@@ -57,6 +57,25 @@ import { getStateByCode } from "../lib/states";
 import { assertKindnessHelpers, getKindnessChallenges } from "../lib/kindness";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { assertListenText } from "../lib/listen-text";
+import {
+  MAX_ANNOUNCEMENT_DAYS,
+  MAX_SCRIPT_WORDS,
+  MIN_SCRIPT_WORDS,
+  announcementJsonLd,
+  announcementSpan,
+  buildAnnouncementScript,
+  datesInSpan,
+  featuredSchoolDate,
+  isSuitableAnnouncementStory,
+  isUnsuitableText,
+  isWeekend,
+  listAnnouncementDays,
+  pickAnnouncementStories,
+  previousSchoolDay,
+  resolveAnnouncementDay,
+  sentencesOf,
+  type AnnouncementCandidate,
+} from "../lib/morning-announcements";
 import { classroomJsonLd } from "../lib/seo";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
@@ -472,6 +491,213 @@ function assertKidClassrooms() {
     }
   }
   console.log(`Kid-friendly stories: ${getKidStories().length}. Places: ${places.length}.`);
+}
+
+function announcementFixture(overrides: Partial<AnnouncementCandidate> = {}): AnnouncementCandidate {
+  const summary =
+    "Neighbors in Dayton planted shade trees in a city park. Students came by after school to water the new trees. The class can visit the park and see what grew.";
+  return {
+    slug: "alpha-story",
+    title: "Neighbors planted shade trees in a Dayton park",
+    dek: "Neighbors spent a morning planting trees in a city park and invited students to water them.",
+    date: "2026-10-21",
+    city: "Dayton",
+    country: "US",
+    state: "OH",
+    category: "community",
+    sourceName: "Dayton Daily News",
+    sourceUrl: "https://example.com/alpha",
+    kidFriendly: true,
+    kidSummary: summary,
+    ...overrides,
+  };
+}
+
+function longClassroomSummary(label: string): string {
+  return [1, 2, 3, 4, 5, 6]
+    .map(
+      (n) =>
+        `${label} sentence ${n} tells a plain fact about neighbors animals or students helping in a careful way.`,
+    )
+    .join(" ");
+}
+
+function assertMorningAnnouncements() {
+  if (isUnsuitableText("His phone died before help arrived.")) {
+    throw new Error("A dead phone should not block a morning announcement.");
+  }
+  if (!isUnsuitableText("A hiker died before help arrived.")) {
+    throw new Error("A death should not be read over a school PA.");
+  }
+  if (!isUnsuitableText("Students learned how to stop the bleeding.")) {
+    throw new Error("Injury details should stay out of the morning script.");
+  }
+  if (!isUnsuitableText("The governor signed a bill after the election.")) {
+    throw new Error("Politics should stay out of the morning script.");
+  }
+  if (isUnsuitableText("Children tossed seed bombs into the garden.")) {
+    throw new Error("A seed bomb is a garden activity, not a weapon.");
+  }
+  const split = sentencesOf("Students met at St. Louis. They planted a tree. The list. The next sentence stays apart.");
+  if (split.length !== 4 || !split[0].includes("St. Louis") || split[2] !== "The list.") {
+    throw new Error(`Sentence splits should keep St. Louis together. Got: ${split.join(" | ")}`);
+  }
+
+  const injury = announcementFixture({
+    slug: "injury-story",
+    dek: "Friends built a controller after a spinal cord injury.",
+    kidSummary: "A student with a back injury got a new game controller from a college class.",
+  });
+  if (isSuitableAnnouncementStory(injury)) throw new Error("An injury story should not be suitable.");
+  const plain = announcementFixture();
+  if (!isSuitableAnnouncementStory(plain)) throw new Error("A kid-friendly park story should be suitable.");
+  const adult = announcementFixture({ kidFriendly: false });
+  if (isSuitableAnnouncementStory(adult)) throw new Error("A story that is not kid-friendly should be skipped.");
+  const draft = announcementFixture({ draft: true });
+  if (isSuitableAnnouncementStory(draft)) throw new Error("A draft should not be announced.");
+
+  const wednesday = "2026-10-21";
+  const animals = [1, 2, 3].map((n) =>
+    announcementFixture({
+      slug: `animal-${n}`,
+      category: "animals",
+      featured: n === 1,
+      kidSummary: longClassroomSummary(`Animal ${n}`),
+      sourceName: `Animal News ${n}`,
+    }),
+  );
+  const science = announcementFixture({
+    slug: "science-one",
+    category: "science",
+    city: "Boulder",
+    state: "CO",
+    kidSummary: longClassroomSummary("Science"),
+    sourceName: "Science Desk",
+  });
+  const picked = pickAnnouncementStories([adult, injury, draft, ...animals, science]);
+  if (picked.length !== 3) throw new Error("A morning script should use three stories.");
+  if (!picked.some((story) => story.slug === "science-one")) {
+    throw new Error("The script should spread stories across categories.");
+  }
+  if (picked.some((story) => story.slug === "injury-story" || story.slug === adult.slug || story.draft)) {
+    throw new Error("Unsuitable stories should not be picked.");
+  }
+  const again = pickAnnouncementStories([science, ...animals].reverse());
+  if (again.map((story) => story.slug).join() !== picked.map((story) => story.slug).join()) {
+    throw new Error("The same date should keep the same three stories.");
+  }
+
+  const readyStories = picked.filter(isSuitableAnnouncementStory);
+  const script = buildAnnouncementScript(wednesday, readyStories);
+  if (script.wordCount < MIN_SCRIPT_WORDS || script.wordCount > MAX_SCRIPT_WORDS) {
+    throw new Error(`Sample script is ${script.wordCount} words. Keep it between ${MIN_SCRIPT_WORDS} and ${MAX_SCRIPT_WORDS}.`);
+  }
+  if (!script.plainText.includes("Kindness thought for the day")) {
+    throw new Error("The script needs a kindness thought.");
+  }
+  if (!script.plainText.endsWith(`That's today's good news from ${siteConfig.name}.`)) {
+    throw new Error("The sign-off should close the script.");
+  }
+  if (script.plainText.includes(siteConfig.owner.name) || script.plainText.includes(siteConfig.editor.name)) {
+    throw new Error("The spoken script should not name the publisher or the editorial team.");
+  }
+  if (script.readSeconds < 60 || script.readSeconds > 90) {
+    throw new Error(`Sample script reads as ${script.readSeconds} seconds. Aim for about a minute.`);
+  }
+  for (const story of script.stories) {
+    if (!script.plainText.includes(story.line) || !story.line.includes(story.sourceName)) {
+      throw new Error("Each story line should credit the original outlet.");
+    }
+  }
+  const linked = announcementJsonLd(script);
+  const resource = (linked["@graph"] as { [key: string]: unknown }[])[0];
+  const publisher = resource.publisher as { name?: string };
+  if (resource["@type"] !== "LearningResource" || publisher.name !== siteConfig.owner.name) {
+    throw new Error("The script schema should be a LearningResource published by the owner organization.");
+  }
+
+  if (featuredSchoolDate("2026-10-21") !== "2026-10-21") throw new Error("A Wednesday should stay a school day.");
+  if (previousSchoolDay("2026-10-24") !== "2026-10-23" || previousSchoolDay("2026-10-25") !== "2026-10-23") {
+    throw new Error("A weekend should fall back to the previous Friday.");
+  }
+  if (featuredSchoolDate("2026-10-24") !== "2026-10-23") throw new Error("Saturday's featured script should be Friday.");
+  if (mountainDay(new Date("2026-10-29T05:30:00.000Z")) !== "2026-10-28") {
+    throw new Error("Today's announcement date should follow Mountain Time.");
+  }
+  const weekend = resolveAnnouncementDay("2026-10-24", [announcementFixture({ date: "2026-10-23" })]);
+  if (!weekend || weekend.kind !== "weekend" || !weekend.redirectTo.endsWith("/2026-10-23")) {
+    throw new Error("A Saturday URL should redirect to Friday.");
+  }
+  const thin = resolveAnnouncementDay(wednesday, [announcementFixture()]);
+  if (!thin || thin.kind !== "thin" || thin.suitableCount !== 1) {
+    throw new Error("Fewer than three suitable stories should not be a full script.");
+  }
+
+  const published = getPublishedStories();
+  const today = mountainDay();
+  const span = announcementSpan(published, today);
+  if (!span) throw new Error("The archive should have an announcement span.");
+  const spanned = datesInSpan(span);
+  if (spanned.length > MAX_ANNOUNCEMENT_DAYS) {
+    throw new Error(`${spanned.length} announcement days exceed the prerender cap of ${MAX_ANNOUNCEMENT_DAYS}.`);
+  }
+  const days = listAnnouncementDays(published, today);
+  if (days.length !== spanned.length) throw new Error("Every day in the span should resolve.");
+  let ready = 0;
+  const used = new Set<string>();
+  for (const day of days) {
+    if (day.kind === "weekend") {
+      if (!isWeekend(day.date) || isWeekend(day.redirectTo.slice(-10))) {
+        throw new Error(`${day.date} should redirect to a school day.`);
+      }
+      continue;
+    }
+    if (isWeekend(day.date)) throw new Error(`${day.date} is a weekend and should not be a script.`);
+    if (day.kind === "thin") {
+      if (day.suitableCount >= 3) throw new Error(`${day.date} has enough stories to be a script.`);
+      continue;
+    }
+    ready += 1;
+    if (!day.script.indexable) throw new Error(`${day.date} script should be indexable.`);
+    if (day.script.stories.length !== 3) throw new Error(`${day.date} should announce three stories.`);
+    if (day.script.wordCount < MIN_SCRIPT_WORDS || day.script.wordCount > MAX_SCRIPT_WORDS) {
+      throw new Error(`${day.date} script is ${day.script.wordCount} words.`);
+    }
+    if (day.script.readSeconds < 60 || day.script.readSeconds > 90) {
+      throw new Error(`${day.date} reads as ${day.script.readSeconds} seconds.`);
+    }
+    if (!day.script.plainText.includes("Kindness thought for the day")) throw new Error(`${day.date} is missing a kindness thought.`);
+    if (!day.script.plainText.endsWith(`That's today's good news from ${siteConfig.name}.`)) {
+      throw new Error(`${day.date} is missing the sign-off.`);
+    }
+    if (day.script.plainText.includes(siteConfig.owner.name) || day.script.plainText.includes(siteConfig.editor.name)) {
+      throw new Error(`${day.date} script names the publisher.`);
+    }
+    for (const story of day.script.stories) {
+      if (used.has(`${day.date}:${story.slug}`)) throw new Error(`${story.slug} was repeated on ${day.date}.`);
+      used.add(`${day.date}:${story.slug}`);
+      const source = published.find((item) => item.slug === story.slug);
+      if (!source || !isSuitableAnnouncementStory(source)) {
+        throw new Error(`${story.slug} on ${day.date} is not a suitable classroom story.`);
+      }
+      if (source.date !== day.date) throw new Error(`${story.slug} is not from ${day.date}.`);
+    }
+  }
+  if (ready < 10) throw new Error(`Only ${ready} school days have a full script. The archive should backfill more.`);
+  const blocked = [
+    "iowa-city-switch-controller",
+    "wheat-ridge-lutheran-careers",
+    "sheeps-bridge-hiker-rescue",
+    "cincinnati-gelato-kitten",
+    "ofunato-shrine-boat",
+    "asheville-swannanoa",
+  ];
+  for (const slug of blocked) {
+    if ([...used].some((key) => key.endsWith(`:${slug}`))) {
+      throw new Error(`${slug} should not be read in a morning announcement.`);
+    }
+  }
+  console.log(`Morning announcements: ${ready} school-day scripts, ${days.length - ready} other days.`);
 }
 
 function assertPrerenderCoversArchive(storyCount: number) {
@@ -2912,6 +3138,7 @@ async function main() {
   assertWorldSpotlight();
   assertHubs();
   assertKidClassrooms();
+  assertMorningAnnouncements();
   assertWeeks();
   assertGoodNewsIndex();
   assertClassroomPacks();

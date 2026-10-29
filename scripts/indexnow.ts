@@ -5,6 +5,7 @@ import { getCountry } from "../lib/countries";
 import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
 import { kidPlaceForStory } from "../lib/kids";
 import { explainerPaths } from "../lib/explainers";
+import { loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "../lib/morning-announcements";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { getOutletForStory } from "../lib/outlets";
 import { isWithinHours } from "../lib/seo";
@@ -22,7 +23,7 @@ import { weeksToPrerender } from "../lib/weeks";
 import { listWebStories } from "../lib/web-stories";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, FIRST_RESPONDERS_DAY_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", MORNING_ANNOUNCEMENTS_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, FIRST_RESPONDERS_DAY_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -57,6 +58,11 @@ async function main() {
     if (story.kidFriendly) {
       urls.add(`${siteConfig.url}/kids`);
       urls.add(`${siteConfig.url}/kids/print`);
+      urls.add(`${siteConfig.url}${MORNING_ANNOUNCEMENTS_PATH}`);
+      const announcement = loadAnnouncementDays().find((day) => day.date === story.date);
+      if (announcement?.kind === "script" && announcement.script.indexable) {
+        urls.add(`${siteConfig.url}${announcement.path}`);
+      }
       const classroom = kidPlaceForStory(story);
       if (classroom) urls.add(`${siteConfig.url}${classroom}`);
       if (story.country === "US") {

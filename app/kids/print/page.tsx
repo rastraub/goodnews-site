@@ -80,6 +80,7 @@ export default function KidsPrintPage() {
               {quiz ? (
                 <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
               ) : null}
+              <Link href="/morning-announcements">Morning announcements</Link>
               <Link href={`/story/${story.slug}`}>Read the full story</Link>
               {placePath ? <Link href={placePath}>More classroom stories from this place</Link> : null}
               <Link href="/kids">All classroom stories</Link>

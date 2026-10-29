@@ -5,6 +5,7 @@ import { editionMonth } from "@/lib/good-neighbor";
 import { kidPlaces } from "@/lib/kids";
 import { GIVING_TUESDAY_PATH, getGivingGuide } from "@/lib/giving-tuesday";
 import { getHubIndex, indexableHubs } from "@/lib/hubs";
+import { indexableAnnouncementDays, loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "@/lib/morning-announcements";
 import { absoluteUrl } from "@/lib/seo";
 import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
 import { FIRST_RESPONDERS_DAY_PATH, getFirstRespondersDayHub } from "@/lib/first-responders-day";
@@ -19,7 +20,7 @@ import { quizzesToPrerender } from "@/lib/quiz";
 import { getKindnessChallenges } from "@/lib/kindness";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
-import { weeksToPrerender } from "@/lib/weeks";
+import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
@@ -29,6 +30,7 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
   { path: "/kindness-challenge", changeFrequency: "weekly", priority: 0.7 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
+  { path: MORNING_ANNOUNCEMENTS_PATH, changeFrequency: "daily", priority: 0.6 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
   { path: "/sources", changeFrequency: "daily", priority: 0.6 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
@@ -248,6 +250,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: place.latest,
       changeFrequency: "daily" as const,
       priority: 0.5,
+    })),
+    ...indexableAnnouncementDays(loadAnnouncementDays()).map((day) => ({
+      url: absoluteUrl(day.path),
+      lastModified: day.date,
+      changeFrequency: (day.date === mountainDay() ? "daily" : "weekly") as "daily" | "weekly",
+      priority: day.date === mountainDay() ? 0.6 : 0.5,
     })),
     ...indexableHubs(hubs).map((hub) => ({
       url: absoluteUrl(hub.path),

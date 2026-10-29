@@ -92,6 +92,7 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
           {quiz ? (
             <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
           ) : null}
+          <Link href="/morning-announcements">Morning announcements</Link>
           <Link href="/kids">All classroom stories</Link>
         </p>
         <ListenControls
