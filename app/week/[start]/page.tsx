@@ -6,6 +6,7 @@ import { StoryCard } from "@/components/story-card";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { toCard } from "@/lib/present";
 import type { Story } from "@/lib/stories";
+import { packByStart } from "@/lib/classroom-pack";
 import { storiesInReadingOrder, usPlaceSentence, weeksToPrerender, type WeekRoundup } from "@/lib/weeks";
 import { siteConfig } from "@/site.config";
 
@@ -68,6 +69,7 @@ export default async function WeekPage({ params }: Props) {
   const previous = index > 0 ? weeks[index - 1] : undefined;
   const next = index < weeks.length - 1 ? weeks[index + 1] : undefined;
   const storyWord = week.kids.length === 1 ? "story" : "stories";
+  const pack = packByStart(week.start);
 
   return (
     <div className="page-block">
@@ -167,6 +169,14 @@ export default async function WeekPage({ params }: Props) {
                   <use href="#i-arrow" />
                 </svg>
               </Link>
+              {pack ? (
+                <Link className="more" href={pack.path} style={{ marginLeft: 16 }}>
+                  Print the Good News Friday pack
+                  <svg className="ico" aria-hidden="true">
+                    <use href="#i-arrow" />
+                  </svg>
+                </Link>
+              ) : null}
             </p>
             <div style={{ marginTop: 18 }}>
               <Cards stories={week.kids} />

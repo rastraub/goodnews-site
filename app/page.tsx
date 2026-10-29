@@ -13,6 +13,7 @@ import { VerifiedBadge } from "@/components/verified-badge";
 import { CATEGORIES } from "@/lib/categories";
 import { getStateByCode, stateName } from "@/lib/states";
 import { placeLabel, toCard, type StoryCardModel } from "@/lib/present";
+import { packsToPrerender } from "@/lib/classroom-pack";
 import { getHero, getPublishedStories, getTop5, stateCounts } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
 
@@ -45,6 +46,9 @@ export default function HomePage() {
   const stories = getPublishedStories();
   const hero = getHero(stories);
   const top5 = getTop5(stories);
+  const friday = packsToPrerender().at(-1);
+  const fridayHref = friday?.inProgress ? friday.path : "/classroom";
+  const fridayLabel = friday?.inProgress ? "Print this week's Good News Friday" : "Good News Friday for class";
   const cards = stories.map(toCard);
   const counts = stateCounts(stories);
   const chips = counts.slice(0, 4).map((item) => ({
@@ -55,7 +59,13 @@ export default function HomePage() {
 
   return (
     <>
-      {hero ? <Hero story={hero} /> : null}
+      {hero ? (
+        <Hero story={hero} fridayHref={fridayHref} fridayLabel={fridayLabel} />
+      ) : (
+        <div className="wrap" style={{ paddingTop: 28 }}>
+          <FridayLink href={fridayHref} label={fridayLabel} />
+        </div>
+      )}
       <section className="top5">
         <div className="wrap">
           <div className="shead">
@@ -130,7 +140,23 @@ export default function HomePage() {
   );
 }
 
-function Hero({ story }: { story: NonNullable<ReturnType<typeof getHero>> }) {
+function FridayLink({ href, label }: { href: string; label: string }) {
+  return (
+    <p className="home-pack-link">
+      <Link href={href}>{label}</Link>
+    </p>
+  );
+}
+
+function Hero({
+  story,
+  fridayHref,
+  fridayLabel,
+}: {
+  story: NonNullable<ReturnType<typeof getHero>>;
+  fridayHref: string;
+  fridayLabel: string;
+}) {
   const card = toCard(story);
   return (
     <section className="hero">
@@ -168,6 +194,7 @@ function Hero({ story }: { story: NonNullable<ReturnType<typeof getHero>> }) {
               How to help
             </Link>
           </div>
+          <FridayLink href={fridayHref} label={fridayLabel} />
         </div>
       </div>
     </section>

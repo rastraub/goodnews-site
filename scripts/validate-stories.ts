@@ -6,7 +6,22 @@ import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "..
 import { feedImageReport } from "../lib/feed-image";
 import { largeJpegPath, storyThumbPath } from "../lib/images";
 import { buildHubs, getHubIndex, MAX_PRERENDERED_HUBS, MIN_HUB_STORIES, type HubStory } from "../lib/hubs";
+import {
+  CLASSROOM_INDEX_DESCRIPTION,
+  CLASSROOM_INDEX_PATH,
+  CLASSROOM_INDEX_TITLE,
+  PACK_SIZE,
+  buildClassroomPacks,
+  getClassroomPacks,
+  isClassroomReady,
+  packQuestions,
+  packVocabulary,
+  selectPackStories,
+  whereInTheWorld,
+  type PackCandidate,
+} from "../lib/classroom-pack";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
+import { classroomJsonLd } from "../lib/seo";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
   MAX_PRERENDERED_WEEKS,
@@ -224,6 +239,27 @@ function assertKidClassrooms() {
   if (orphan.success) throw new Error("A kid summary without kidFriendly should fail.");
   const questionsOnly = storySchema.safeParse(minimalStory({ state: "OH", kidQuestions: questions }));
   if (questionsOnly.success) throw new Error("Discussion questions without kidFriendly should fail.");
+  const wordOnly = storySchema.safeParse(
+    minimalStory({ state: "OH", kidFriendly: true, kidSummary: summary, kidQuestions: questions, kidWord: "nest" }),
+  );
+  if (wordOnly.success) throw new Error("A vocabulary word needs a definition.");
+  const defined = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      kidFriendly: true,
+      kidSummary: summary,
+      kidQuestions: questions,
+      kidWord: "nest",
+      kidDefinition: "A home a bird builds.",
+    }),
+  );
+  if (!defined.success || defined.data.kidWord !== "nest" || defined.data.kidDefinition !== "A home a bird builds.") {
+    throw new Error("A word and a definition should pass.");
+  }
+  const orphanWord = storySchema.safeParse(
+    minimalStory({ state: "OH", kidWord: "nest", kidDefinition: "A home a bird builds." }),
+  );
+  if (orphanWord.success) throw new Error("A vocabulary word without kidFriendly should fail.");
 
   const day = "2026-10-20";
   const alpha = { slug: "alpha-story", date: "2026-10-18", kidFriendly: true };
@@ -1050,6 +1086,217 @@ function assertGoodNewsIndex() {
   );
 }
 
+function samplePackStory(partial: Partial<PackCandidate> & Pick<PackCandidate, "slug" | "date">): PackCandidate {
+  return {
+    title: `Classroom story ${partial.slug}`,
+    city: "Denver",
+    country: "US",
+    state: "CO",
+    category: "animals",
+    kidFriendly: true,
+    kidSummary: "A short classroom summary a teacher can read aloud to the class without adding anything.",
+    kidQuestions: ["What did the people in this story do?", "How could a class try something kind this week?"],
+    image: `/images/stories/${partial.slug}.webp`,
+    imageAlt: "A photo from the classroom pack",
+    ...partial,
+  };
+}
+
+function assertClassroomPacks() {
+  if (CLASSROOM_INDEX_PATH !== "/classroom") throw new Error("The classroom index should live at /classroom.");
+  if (!CLASSROOM_INDEX_TITLE.toLowerCase().includes("good news for kids this week")) {
+    throw new Error("The classroom index title should target good news for kids this week.");
+  }
+  if (!CLASSROOM_INDEX_DESCRIPTION.toLowerCase().includes("current events for kids, printable")) {
+    throw new Error("The classroom index description should target current events for kids printable.");
+  }
+  const questions = [
+    "What did the people in this story do?",
+    "How could a class try something kind this week?",
+    "Who would you tell about it?",
+  ];
+  if (packQuestions({ kidQuestions: questions }).length !== 2) throw new Error("A pack should print one or two discussion questions.");
+  if (packVocabulary({}) || packVocabulary({ kidWord: "nest" })) throw new Error("A missing vocabulary word should be omitted.");
+  const vocab = packVocabulary({ kidWord: " nest ", kidDefinition: " A home a bird builds. " });
+  if (!vocab || vocab.word !== "nest" || vocab.definition !== "A home a bird builds.") {
+    throw new Error("A vocabulary line should appear only when the story already has a word and a definition.");
+  }
+  if (whereInTheWorld(samplePackStory({ slug: "denver", date: "2026-10-07" })) !== "Denver, Colorado, United States") {
+    throw new Error("A US classroom story should name the city, state, and country.");
+  }
+  if (whereInTheWorld(samplePackStory({ slug: "osaka", date: "2026-10-07", country: "JP", state: undefined, city: "Osaka" })) !== "Osaka, Japan") {
+    throw new Error("A world classroom story should name the city and country once.");
+  }
+
+  const bare = samplePackStory({ slug: "bare", date: "2026-10-07", kidFriendly: false, kidSummary: undefined, kidQuestions: undefined });
+  const onlyReady = samplePackStory({ slug: "ready-one", date: "2026-10-07" });
+  const padded = selectPackStories([bare, bare, bare, bare, onlyReady]);
+  if (padded.length !== 1 || padded[0].slug !== "ready-one") {
+    throw new Error("A short week should not be filled with stories that have no read-aloud.");
+  }
+
+  const animals = ["CO", "OH", "ME", "TX", "CA"].map((state, index) =>
+    samplePackStory({ slug: `animal-${state.toLowerCase()}`, date: addDays("2026-10-22", -index), state, category: "animals" }),
+  );
+  const community = samplePackStory({
+    slug: "community-one",
+    date: "2026-10-18",
+    state: "CO",
+    category: "community",
+    city: "Boulder",
+  });
+  const mixed = selectPackStories([...animals, community]);
+  if (!mixed.some((story) => story.slug === "community-one")) {
+    throw new Error("The pack should mix categories instead of five stories from one section.");
+  }
+  const france = samplePackStory({
+    slug: "lyon",
+    date: "2026-10-21",
+    country: "FR",
+    state: undefined,
+    city: "Lyon",
+    category: "science",
+  });
+  const japan = samplePackStory({
+    slug: "osaka",
+    date: "2026-10-16",
+    country: "JP",
+    state: undefined,
+    city: "Osaka",
+    category: "animals",
+  });
+  const worldly = selectPackStories([...animals, community, japan, france]);
+  if (worldly[0]?.slug !== "lyon") throw new Error("The newest classroom-ready world story should lead the pack.");
+  if (worldly.length !== PACK_SIZE) throw new Error("A full week should stop at five stories.");
+  const plainWorld = samplePackStory({
+    slug: "paris",
+    date: "2026-10-21",
+    country: "FR",
+    state: undefined,
+    city: "Paris",
+    kidFriendly: false,
+    kidSummary: undefined,
+    kidQuestions: undefined,
+  });
+  if (selectPackStories([...animals, plainWorld]).some((story) => story.country !== "US")) {
+    throw new Error("A world story without classroom text should stay out of the pack.");
+  }
+  const forward = selectPackStories([france, japan, ...animals]).map((story) => story.slug).join(",");
+  const backward = selectPackStories([...animals].reverse().concat([japan, france])).map((story) => story.slug).join(",");
+  if (forward !== backward) throw new Error("Pack selection should stay the same if the input order changes.");
+
+  const early = buildClassroomPacks(
+    [samplePackStory({ slug: "early", date: "2026-09-30" })],
+    "2026-10-20",
+  );
+  if (early.length) throw new Error("A week before launch should not be a classroom pack.");
+  const future = buildClassroomPacks(
+    [samplePackStory({ slug: "future", date: "2026-10-26" })],
+    "2026-10-20",
+  );
+  if (future.length) throw new Error("A week that has not started should not be a classroom pack.");
+  const finished = buildClassroomPacks(
+    [
+      samplePackStory({ slug: "mon", date: "2026-10-05", category: "heroes", state: "UT" }),
+      samplePackStory({ slug: "wed", date: "2026-10-07", category: "community", state: "NM" }),
+    ],
+    "2026-10-20",
+  );
+  if (finished.length !== 1 || finished[0].path !== "/classroom/week/2026-10-05" || finished[0].inProgress) {
+    throw new Error("Classroom packs should use the Monday of the week, the same key as the roundup.");
+  }
+  if (finished[0].friday !== "2026-10-09" || !finished[0].teacherNote.includes("shorter than five")) {
+    throw new Error("A two-story week should name Friday and say the pack is shorter than five.");
+  }
+  if (!finished[0].teacherNote.includes("10 to 15 minutes") || !finished[0].teacherNote.includes("grades 1 to 6")) {
+    throw new Error("The teacher note should cover a 10 to 15 minute class for grades 1 to 6.");
+  }
+  if (!finished[0].challenge.includes("heroes") || !finished[0].challenge.includes("community") || finished[0].challenge.includes("Classroom story")) {
+    throw new Error("The kindness challenge should use the week's sections and places, not a story title.");
+  }
+  if (!finished[0].description.toLowerCase().includes("good news for kids this week") || !finished[0].description.toLowerCase().includes("current events for kids, printable")) {
+    throw new Error("A pack description should use the classroom search phrases.");
+  }
+  const open = buildClassroomPacks(
+    Array.from({ length: 6 }, (_, index) =>
+      samplePackStory({
+        slug: `open-${index}`,
+        date: addDays("2026-10-19", index % 4),
+        category: index % 2 === 0 ? "animals" : "science",
+        state: index % 2 === 0 ? "CO" : "WA",
+      }),
+    ),
+    "2026-10-22",
+  );
+  if (open.length !== 1 || !open[0].inProgress || open[0].stories.length !== PACK_SIZE || open[0].title.includes("shorter")) {
+    throw new Error("The open week should stay marked so far and still cap at five stories.");
+  }
+  if (open[0].teacherNote.includes("shorter than five")) throw new Error("Five or more classroom stories should not be described as a short pack.");
+
+  const markup = JSON.stringify(
+    classroomJsonLd({
+      name: finished[0].title,
+      description: finished[0].description,
+      path: finished[0].path,
+      crumbs: [{ name: "Good News Friday", path: CLASSROOM_INDEX_PATH }],
+      resources: finished[0].stories.map((story) => ({ name: story.title, path: `/story/${story.slug}` })),
+      learningResourceType: "lesson plan",
+      timeRequired: "PT15M",
+    }),
+  );
+  if (!markup.includes("LearningResource") || !markup.includes("CollectionPage") || !markup.includes("educationalLevel") || !markup.includes("Ages 6–11 (grades 1–6)")) {
+    throw new Error("A pack should be a LearningResource collection with an age level.");
+  }
+
+  const today = mountainDay();
+  const current = weekStart(today);
+  const launch = launchWeekStart();
+  const packs = getClassroomPacks();
+  const published = getPublishedStories();
+  const readyWeeks = new Set<string>();
+  let vocabCount = 0;
+  for (const story of published) {
+    if (story.kidFriendly && !isClassroomReady(story)) {
+      throw new Error(`${story.slug} is kid-friendly but cannot be read aloud.`);
+    }
+    if (packVocabulary(story)) vocabCount += 1;
+    if (!isClassroomReady(story)) continue;
+    const start = weekStart(story.date);
+    if (start < launch || start > current) continue;
+    readyWeeks.add(start);
+  }
+  const packed = new Set(packs.map((pack) => pack.start));
+  for (const start of readyWeeks) {
+    if (!packed.has(start)) throw new Error(`${start} has a classroom story and should be a Good News Friday pack.`);
+  }
+  for (const pack of packs) {
+    if (!readyWeeks.has(pack.start)) throw new Error(`${pack.path} has no classroom story.`);
+    if (pack.stories.length < 1 || pack.stories.length > PACK_SIZE) throw new Error(`${pack.path} should have 1 to 5 stories.`);
+    if (pack.start !== weekStart(pack.start) || pack.path !== `/classroom/week/${pack.start}`) {
+      throw new Error(`${pack.path} should be keyed to Monday.`);
+    }
+    if (pack.inProgress !== (pack.start === current)) throw new Error(`${pack.path} has the wrong so-far flag.`);
+    const weekStories = published.filter((story) => isClassroomReady(story) && weekStart(story.date) === pack.start);
+    const selected = selectPackStories(weekStories).map((story) => story.slug).join(",");
+    if (selected !== pack.stories.map((story) => story.slug).join(",")) {
+      throw new Error(`${pack.path} selection does not match the pack rules.`);
+    }
+    if (weekStories.some((story) => story.country !== "US") && !pack.stories.some((story) => story.country !== "US")) {
+      throw new Error(`${pack.path} left out a world story.`);
+    }
+    for (const story of pack.stories) {
+      if (!story.kidSummary || packQuestions(story).length < 1) throw new Error(`${story.slug} is in a pack without a read-aloud.`);
+    }
+  }
+  if (readyWeeks.has(launch) && packs[0]?.start !== launch) {
+    throw new Error("Launch week has classroom stories and should be the first pack.");
+  }
+  const short = packs.filter((pack) => pack.stories.length < PACK_SIZE).map((pack) => `${pack.start} (${pack.stories.length})`);
+  console.log(
+    `Classroom packs: ${packs.length} since ${launch}. Vocabulary fields: ${vocabCount}. Shorter than five: ${short.join(", ") || "none"}.`,
+  );
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -1059,6 +1306,7 @@ assertHubs();
 assertKidClassrooms();
 assertWeeks();
 assertGoodNewsIndex();
+assertClassroomPacks();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertEnrichmentMerge();
 assertLoadedCountries(stories);

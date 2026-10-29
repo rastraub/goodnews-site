@@ -75,6 +75,8 @@ export const storySchema = z
       .min(2, "Add 2 or 3 discussion questions")
       .max(3, "Add 2 or 3 discussion questions")
       .optional(),
+    kidWord: z.string().trim().min(2).max(40).optional(),
+    kidDefinition: z.string().trim().min(12).max(200).optional(),
     cheers: z.number().int().nonnegative().optional().default(0),
     draft: z.boolean().optional().default(false),
     editorApproved: z.boolean(),
@@ -97,12 +99,28 @@ export const storySchema = z
           message: "A classroom story needs 2 or 3 discussion questions",
         });
       }
-    } else if (data.kidSummary || data.kidQuestions?.length) {
+    } else if (data.kidSummary || data.kidQuestions?.length || data.kidWord || data.kidDefinition) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["kidFriendly"],
-        message: "Set kidFriendly: true when you add a kid summary or discussion questions",
+        message: "Set kidFriendly: true when you add a kid summary, discussion questions, or a vocabulary word",
       });
+    }
+    if (data.kidWord || data.kidDefinition) {
+      if (!data.kidWord) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["kidWord"],
+          message: "A vocabulary word needs the word itself",
+        });
+      }
+      if (!data.kidDefinition) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["kidDefinition"],
+          message: "A vocabulary word needs a short definition a teacher can read",
+        });
+      }
     }
     const seenTags = new Set<string>();
     for (const tag of data.tags) {

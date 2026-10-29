@@ -5,6 +5,7 @@ import { getHubIndex } from "@/lib/hubs";
 import { absoluteUrl } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
+import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
 import { indexesToPrerender } from "@/lib/good-news-index";
 import { weeksToPrerender } from "@/lib/weeks";
 
@@ -61,6 +62,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const newestWeek = weeks[weeks.length - 1];
   const indexes = indexesToPrerender();
   const newestIndex = indexes[indexes.length - 1];
+  const packs = packsToPrerender();
+  const newestPack = packs[packs.length - 1];
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -104,6 +107,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: edition.latest,
         changeFrequency: (edition.inProgress ? "daily" : "monthly") as "daily" | "monthly",
         priority: edition.inProgress ? 0.7 : 0.6,
+      })),
+    {
+      url: absoluteUrl(CLASSROOM_INDEX_PATH),
+      lastModified: newestPack?.latest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
+    ...packs
+      .slice()
+      .reverse()
+      .map((pack) => ({
+        url: absoluteUrl(pack.path),
+        lastModified: pack.latest,
+        changeFrequency: (pack.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: pack.inProgress ? 0.6 : 0.5,
       })),
     ...CATEGORIES.map((category) => ({
       url: absoluteUrl(`/category/${category.slug}`),
