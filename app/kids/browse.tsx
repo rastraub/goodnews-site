@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { EmailSignup } from "@/components/email-signup";
+import { KindnessLinks } from "@/components/kindness-links";
 import { JsonLd } from "@/components/json-ld";
 import { ListenControls } from "@/components/listen-controls";
 import { StoryGrid } from "@/components/story-grid";
@@ -83,6 +84,7 @@ export function KidsBrowse({ page }: { page: number }) {
             segments={kidListSegments(listed)}
           />
         ) : null}
+        <KindnessLinks />
         {places.length ? (
           <div className="chips">
             {places.map((place) => (

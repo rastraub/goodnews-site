@@ -16,12 +16,13 @@ import { allOnThisDayPaths, ON_THIS_DAY_INDEX_PATH } from "../lib/on-this-day";
 import { quizzesToPrerender } from "../lib/quiz";
 import { THANKS_PATH } from "../lib/thanks";
 import { FIRST_RESPONDERS_DAY_PATH } from "../lib/first-responders-day";
+import { getKindnessChallenges } from "../lib/kindness";
 import { VETERANS_DAY_PATH } from "../lib/veterans-day";
 import { weeksToPrerender } from "../lib/weeks";
 import { listWebStories } from "../lib/web-stories";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, FIRST_RESPONDERS_DAY_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, FIRST_RESPONDERS_DAY_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -37,6 +38,7 @@ async function main() {
   for (const quiz of quizzesToPrerender()) urls.add(`${siteConfig.url}${quiz.path}`);
   for (const path of allOnThisDayPaths()) urls.add(`${siteConfig.url}${path}`);
   for (const month of ballotMonths()) urls.add(`${siteConfig.url}${goodNeighborPath(month)}`);
+  for (const challenge of getKindnessChallenges()) urls.add(`${siteConfig.url}${challenge.path}`);
   const recent = getPublishedStories().filter((story) => isWithinHours(story.date, 48));
   for (const edition of listWebStories()) {
     if (isWithinHours(edition.date, 48)) urls.add(`${siteConfig.url}${edition.path}`);

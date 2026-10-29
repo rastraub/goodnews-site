@@ -16,6 +16,7 @@ import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
 import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
 import { quizzesToPrerender } from "@/lib/quiz";
+import { getKindnessChallenges } from "@/lib/kindness";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { weeksToPrerender } from "@/lib/weeks";
@@ -26,6 +27,7 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/local", changeFrequency: "daily", priority: 0.8 },
   { path: "/heroes", changeFrequency: "daily", priority: 0.7 },
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
+  { path: "/kindness-challenge", changeFrequency: "weekly", priority: 0.7 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
   { path: "/sources", changeFrequency: "daily", priority: 0.6 },
@@ -213,6 +215,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: quiz.latest,
         changeFrequency: (quiz.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: quiz.inProgress ? 0.7 : 0.6,
+      })),
+    ...getKindnessChallenges()
+      .slice()
+      .reverse()
+      .map((challenge) => ({
+        url: absoluteUrl(challenge.path),
+        lastModified: challenge.story.date > challenge.week ? challenge.story.date : challenge.week,
+        changeFrequency: "weekly" as const,
+        priority: challenge.status === "this-week" ? 0.7 : 0.6,
       })),
     ...CATEGORIES.map((category) => ({
       url: absoluteUrl(`/category/${category.slug}`),

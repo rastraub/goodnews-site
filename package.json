@@ -17,7 +17,8 @@
     "city-report": "tsx scripts/city-report.ts",
     "giving-tuesday-coverage": "tsx scripts/giving-tuesday-coverage.ts",
     "veterans-gaps": "tsx scripts/veterans-day-gaps.ts",
-    "first-responders-gaps": "tsx scripts/first-responders-day-gaps.ts"
+    "first-responders-gaps": "tsx scripts/first-responders-day-gaps.ts",
+    "next-kindness-challenge": "tsx scripts/next-kindness-challenge.ts"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

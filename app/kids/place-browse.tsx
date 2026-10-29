@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { KindnessLinks } from "@/components/kindness-links";
 import { JsonLd } from "@/components/json-ld";
 import { ListenControls } from "@/components/listen-controls";
 import { StoryGrid } from "@/components/story-grid";
@@ -98,6 +99,7 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
           groupLabel={pages > 1 ? `Read the classroom summaries on this page, ${listed.length} stories` : "Read all classroom summaries aloud"}
           segments={kidListSegments(listed)}
         />
+        <KindnessLinks />
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>
         <StoryGrid stories={place.stories} page={page} base={place.path} listen />

@@ -45,6 +45,7 @@ export function Footer() {
               <li><Link href="/heroes">Hometown Heroes</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
+              <li><Link href="/kindness-challenge">Kindness Challenge</Link></li>
               <li><Link href={VETERANS_DAY_PATH}>Veterans Day</Link></li>
               <li><Link href={FIRST_RESPONDERS_DAY_PATH}>First Responders Day</Link></li>
               <li><Link href="/topics">Topics</Link></li>

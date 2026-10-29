@@ -9,6 +9,7 @@ import { TopFiveCard } from "@/components/story-card";
 import { FirstRespondersDayBanner } from "@/components/first-responders-day-banner";
 import { GoodNeighborPromo } from "@/components/good-neighbor-promo";
 import { IndexPromo } from "@/components/index-promo";
+import { KindnessPromo } from "@/components/kindness-promo";
 import { OnThisDayPromo } from "@/components/on-this-day-promo";
 import { ThanksBanner } from "@/components/thanks-banner";
 import { VeteransDayBanner } from "@/components/veterans-day-banner";
@@ -106,6 +107,7 @@ export default function HomePage() {
           <IndexPromo />
           <OnThisDayPromo />
           <GoodNeighborPromo />
+          <KindnessPromo />
         </div>
       </section>
       <WorldSpotlight />

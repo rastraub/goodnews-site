@@ -8,6 +8,7 @@ import { placeLabel } from "@/lib/present";
 import { pageAlternates } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
+import { KindnessLinks } from "@/components/kindness-links";
 import { ListenControls } from "@/components/listen-controls";
 import { kidListenSegments } from "@/lib/listen-text";
 import { PrintButton } from "../print-button";
@@ -71,6 +72,9 @@ export default function KidsPrintPage() {
               {" · "}
               <a href={`${siteConfig.url}/story/${story.slug}`}>Full story</a>
             </p>
+            <div className="no-print">
+              <KindnessLinks />
+            </div>
             <div className="print-actions no-print">
               <PrintButton />
               {quiz ? (

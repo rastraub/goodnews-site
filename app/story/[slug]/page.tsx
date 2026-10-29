@@ -24,6 +24,7 @@ import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
 import { explainerPath, explainersForStory } from "@/lib/explainers";
+import { challengesForStory } from "@/lib/kindness";
 import { getOutletForStory } from "@/lib/outlets";
 import { getStory, relatedStories, storiesToPrerender, type Story } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
@@ -88,6 +89,7 @@ export default async function StoryPage({ params }: Props) {
   const outlet = getOutletForStory(story);
   const neighborBadge = recordedWinnerFor(story.slug);
   const neighborVote = !neighborBadge && votesEnabled() ? closedNomination(story.slug) : undefined;
+  const inspired = challengesForStory(story.slug);
   const hubLinks = hubPathsForStory(story).flatMap((path) => {
     const hub = getHubByPath(path);
     return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
@@ -191,6 +193,21 @@ export default async function StoryPage({ params }: Props) {
             </div>
           </div>
           <StoryBody markdown={story.body} />
+          {inspired.length ? (
+            <section className="classroom-box" id="kindness-challenge">
+              <h2>Kindness Challenge</h2>
+              <p>
+                This story inspired {inspired.length === 1 ? "a weekly kindness challenge" : "weekly kindness challenges"} for classrooms and families.
+              </p>
+              <p className="link-pills">
+                {inspired.map((challenge) => (
+                  <Link key={challenge.week} href={challenge.path}>
+                    {challenge.status === "this-week" ? "This week's challenge" : challenge.rangeLabel}
+                  </Link>
+                ))}
+              </p>
+            </section>
+          ) : null}
           {story.kidFriendly && story.kidSummary && story.kidQuestions?.length ? (
             <section className="classroom-box" id="classroom">
               <h2>For the classroom</h2>
