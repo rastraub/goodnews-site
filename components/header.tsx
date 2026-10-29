@@ -23,6 +23,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
     { href: "/kids", label: "Kids" },
     { href: "/topics", label: "Topics" },
     { href: "/explainers", label: "Explainers" },
+    { href: "/on-this-day", label: "On this day" },
   ];
 
   function active(href: string) {

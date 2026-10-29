@@ -110,6 +110,7 @@ export default async function WeekPage({ params }: Props) {
           {next ? <Link href={next.path}>Next week</Link> : null}
           {quiz ? <Link href={quiz.path}>Good News Quiz</Link> : null}
           {week.kids.length ? <Link href="/kids">Classroom section</Link> : null}
+          <Link href="/on-this-day">Good news on this day</Link>
           <Link href="/week/rss.xml">Week RSS</Link>
         </p>
       </div>

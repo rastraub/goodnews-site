@@ -6,6 +6,7 @@ import { CheerButton } from "@/components/cheer-button";
 import { EmphaticTitle } from "@/components/story-body";
 import { TopFiveCard } from "@/components/story-card";
 import { IndexPromo } from "@/components/index-promo";
+import { OnThisDayPromo } from "@/components/on-this-day-promo";
 import { ThanksBanner } from "@/components/thanks-banner";
 import { WeekPromo } from "@/components/week-promo";
 import { WorldSpotlight } from "@/components/world-spotlight";
@@ -96,6 +97,7 @@ export default function HomePage() {
           </div>
           <WeekPromo />
           <IndexPromo />
+          <OnThisDayPromo />
         </div>
       </section>
       <WorldSpotlight />

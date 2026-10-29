@@ -7,8 +7,10 @@ import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishe
 import { getOutlets } from "@/lib/outlets";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
+import { parseMonthDaySlug } from "@/lib/calendar-day";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
 import { indexesToPrerender } from "@/lib/good-news-index";
+import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
 import { quizzesToPrerender } from "@/lib/quiz";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { weeksToPrerender } from "@/lib/weeks";
@@ -220,6 +222,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [absoluteUrl(edition.posterPath)],
     })),
     ...explainerSitemapEntries(),
+    {
+      url: absoluteUrl(ON_THIS_DAY_INDEX_PATH),
+      lastModified: siteLatest && siteLatest > onThisDayUpdated() ? siteLatest : onThisDayUpdated(),
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    },
+    ...allOnThisDayPaths().map((path) => {
+      const day = parseMonthDaySlug(path.slice("/on-this-day/".length));
+      const seeded = day ? Boolean(getOnThisDay(day.month, day.day)) : false;
+      return {
+        url: absoluteUrl(path),
+        lastModified: day ? onThisDayLastModified(day.month, day.day) : onThisDayUpdated(),
+        changeFrequency: "weekly" as const,
+        priority: seeded ? 0.6 : 0.4,
+      };
+    }),
   ];
 }
 

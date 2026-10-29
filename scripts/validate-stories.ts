@@ -62,6 +62,9 @@ import { POPULATION_US_TOTAL, populationOf, populationTotal } from "../lib/popul
 import { absoluteUrl } from "../lib/seo";
 import { STATES } from "../lib/states";
 import { buildOutlets, formatOutletCsv, getOutletForStory, getOutlets, outletNameKey, type OutletCredit } from "../lib/outlets";
+import { monthDayFromIso, onThisDayPath, parseMonthDaySlug } from "../lib/calendar-day";
+import { loadOnThisDay, storiesForMonthDay } from "../lib/on-this-day";
+import { onThisDayFileSchema } from "../lib/on-this-day-schema";
 import { storySchema } from "../lib/story-schema";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
 import { getPublishedStories, getStory, loadAllStories } from "../lib/stories";
@@ -1855,6 +1858,40 @@ function assertQuizzes() {
   }
 }
 
+function assertOnThisDay() {
+  const rejected = onThisDayFileSchema.safeParse({
+    updated: "2026-10-25",
+    days: [
+      {
+        month: 10,
+        day: 25,
+        prompts: ["What is one kind thing to try?", "What would your class headline be?"],
+        entries: [
+          {
+            year: 1903,
+            text: "One sentence is not enough when the schema also requires a second milestone.",
+            kidLine: "A read-aloud line still needs a second milestone on the day.",
+            sources: [{ name: "Example", url: "https://www.nasa.gov/history/" }],
+          },
+        ],
+      },
+    ],
+  });
+  if (rejected.success) throw new Error("A day with one milestone should fail.");
+  if (parseMonthDaySlug("february-30")) throw new Error("February 30 should not be a page.");
+  if (!parseMonthDaySlug("february-29")) throw new Error("February 29 should be a page.");
+  if (onThisDayPath(10, 25) !== "/on-this-day/october-25") throw new Error("October 25 path changed.");
+  const october = monthDayFromIso("2026-10-25");
+  if (!october || october.month !== 10 || october.day !== 25) throw new Error("Archive dates should match month and day.");
+  const file = loadOnThisDay();
+  if (file.days.length < 68) throw new Error("October 25 through December 31 should each have milestones.");
+  const matched = storiesForMonthDay(10, 25);
+  if (matched.some((story) => !story.date.endsWith("-10-25"))) {
+    throw new Error("October 25 archive list included another date.");
+  }
+  console.log(`On this day: ${file.days.length} seeded days, ${file.days.reduce((sum, day) => sum + day.entries.length, 0)} milestones.`);
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertListenText();
@@ -1867,6 +1904,7 @@ assertWeeks();
 assertGoodNewsIndex();
 assertClassroomPacks();
 assertQuizzes();
+assertOnThisDay();
 assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
 assertEnrichmentMerge();
 assertLoadedCountries(stories);

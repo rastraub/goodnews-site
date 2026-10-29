@@ -10,6 +10,7 @@ import { StoryCard } from "@/components/story-card";
 import { EmphaticTitle, StoryBody } from "@/components/story-body";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
+import { monthDayFromIso, monthDayLabel, onThisDayPath } from "@/lib/calendar-day";
 import { packByStart } from "@/lib/classroom-pack";
 import { cityHubForStory, getHubByPath, hubPathsForStory } from "@/lib/hubs";
 import { formatStoryDate } from "@/lib/format";
@@ -88,6 +89,13 @@ export default async function StoryPage({ params }: Props) {
   });
   const friday = packByStart(weekStart(story.date));
   const explainers = explainersForStory(story);
+  const anniversary = monthDayFromIso(story.date);
+  if (anniversary) {
+    hubLinks.push({
+      href: onThisDayPath(anniversary.month, anniversary.day),
+      label: `Good news on ${monthDayLabel(anniversary.month, anniversary.day)}`,
+    });
+  }
 
   return (
     <article className="story-page">

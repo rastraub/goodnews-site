@@ -68,6 +68,7 @@ export default function WeekIndexPage() {
         </p>
         <p className="link-pills">
           {quiz ? <Link href={quiz.path}>Good News Quiz</Link> : null}
+          <Link href="/on-this-day">Good news on this day</Link>
           <Link href="/week/rss.xml">Week RSS</Link>
           <Link href="/stories">All stories</Link>
           <Link href="/kids">For classrooms</Link>

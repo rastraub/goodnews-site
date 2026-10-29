@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
 import { editionYear } from "@/lib/format";
+import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { latestQuiz } from "@/lib/quiz";
 import { THANKS_PATH } from "@/lib/thanks";
 import { siteConfig, socialLinks } from "@/site.config";
@@ -38,6 +39,7 @@ export function Footer() {
               <li><Link href={THANKS_PATH}>50 States of Thanks</Link></li>
               <li><Link href="/web-stories">Web stories</Link></li>
               {quiz ? <li><Link href={quiz.path}>Good News Quiz</Link></li> : null}
+              <li><Link href={ON_THIS_DAY_TODAY_PATH}>Good news on this day</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href="/topics">Topics</Link></li>

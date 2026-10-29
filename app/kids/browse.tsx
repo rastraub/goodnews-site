@@ -73,6 +73,7 @@ export function KidsBrowse({ page }: { page: number }) {
           {quiz ? (
             <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
           ) : null}
+          <Link href="/on-this-day/today">Good news on this day</Link>
           <a href="#teachers">Teacher email</a>
         </p>
         {listed.length ? (
