@@ -145,6 +145,7 @@ kidQuestions:
 - `/classroom` lists Good News Friday packs, newest first. `/classroom/week/2026-10-19` is one pack. The date is the Monday of that week, the same key as `/week`. The pack is what a class prints on Friday. It is built from that week's classroom stories: up to five, with a world story when the week has one, and a mix of categories and places. It prints the photo, `kidSummary`, the first two `kidQuestions`, and the place. A vocabulary line prints only when `kidWord` and `kidDefinition` are both set. The page does not invent a summary, a word, or a fact to fill a short week.
 - `/kids/state/colorado` and `/kids/country/japan` exist only when that place has at least one classroom story. A state and a country can share a name, so the path says which is which. An empty place is not a page.
 - The teacher email is a separate signup on `/kids` for adults and educators. The list tag is `teachers`. Do not collect a child's name, age, school, or email. Classroom pages do not run ads.
+- A published story is also eligible for that week's Good News Quiz. Set `kidFriendly: true` when a teacher could use it in kid mode. See [docs/good-news-quiz.md](docs/good-news-quiz.md).
 
 ### Listening
 

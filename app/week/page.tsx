@@ -3,6 +3,7 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { StoryImage } from "@/components/story-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { getQuiz, latestQuiz } from "@/lib/quiz";
 import { SITE_LAUNCH, formatLongDate, launchWeekStart, weeksToPrerender } from "@/lib/weeks";
 
 export const dynamic = "force-static";
@@ -35,6 +36,7 @@ export default function WeekIndexPage() {
   const weeks = weeksToPrerender();
   const description = indexDescription(weeks.length);
   const newestFirst = weeks.slice().reverse();
+  const quiz = latestQuiz();
 
   return (
     <div className="page-block">
@@ -65,6 +67,7 @@ export default function WeekIndexPage() {
           is over.
         </p>
         <p className="link-pills">
+          {quiz ? <Link href={quiz.path}>Good News Quiz</Link> : null}
           <Link href="/week/rss.xml">Week RSS</Link>
           <Link href="/stories">All stories</Link>
           <Link href="/kids">For classrooms</Link>
@@ -74,18 +77,28 @@ export default function WeekIndexPage() {
       <div className="wrap" style={{ paddingTop: 28 }}>
         {newestFirst.length ? (
           <div className="week-index">
-            {newestFirst.map((week) => (
-              <Link key={week.start} href={week.path} className="week-row">
-                <span className="week-row-img">
-                  <StoryImage src={week.image} alt={week.imageAlt} sizes="(max-width: 700px) 100vw, 180px" />
-                </span>
-                <span>
-                  <span className="kicker">{week.inProgress ? "So far" : "Week"}</span>
-                  <h2>{week.title}</h2>
-                  <p>{week.intro}</p>
-                </span>
-              </Link>
-            ))}
+            {newestFirst.map((week) => {
+              const weekQuiz = getQuiz(week.start);
+              return (
+                <div key={week.start}>
+                  <Link href={week.path} className="week-row">
+                    <span className="week-row-img">
+                      <StoryImage src={week.image} alt={week.imageAlt} sizes="(max-width: 700px) 100vw, 180px" />
+                    </span>
+                    <span>
+                      <span className="kicker">{week.inProgress ? "So far" : "Week"}</span>
+                      <h2>{week.title}</h2>
+                      <p>{week.intro}</p>
+                    </span>
+                  </Link>
+                  {weekQuiz ? (
+                    <p className="week-quiz-link">
+                      <Link href={weekQuiz.path}>Good News Quiz for this week</Link>
+                    </p>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="empty">

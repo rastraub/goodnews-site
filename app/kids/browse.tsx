@@ -7,6 +7,7 @@ import { ListenControls } from "@/components/listen-controls";
 import { StoryGrid } from "@/components/story-grid";
 import { getKidStories, kidPlaces } from "@/lib/kids";
 import { kidListSegments } from "@/lib/listen-text";
+import { latestQuiz } from "@/lib/quiz";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
@@ -37,6 +38,7 @@ export function KidsBrowse({ page }: { page: number }) {
   const path = page <= 1 ? "/kids" : `/kids/page/${page}`;
   const listed = pageSlice(stories, page);
   const pages = pageCount(stories.length);
+  const quiz = latestQuiz();
 
   return (
     <div className="page-block">
@@ -68,6 +70,9 @@ export function KidsBrowse({ page }: { page: number }) {
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
           <Link href="/classroom">Good News Friday packs</Link>
+          {quiz ? (
+            <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
+          ) : null}
           <a href="#teachers">Teacher email</a>
         </p>
         {listed.length ? (

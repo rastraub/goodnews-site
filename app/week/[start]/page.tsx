@@ -9,6 +9,7 @@ import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { toCard } from "@/lib/present";
 import type { Story } from "@/lib/stories";
 import { packByStart } from "@/lib/classroom-pack";
+import { getQuiz } from "@/lib/quiz";
 import { storiesInReadingOrder, usPlaceSentence, weeksToPrerender, type WeekRoundup } from "@/lib/weeks";
 import { siteConfig } from "@/site.config";
 
@@ -72,6 +73,7 @@ export default async function WeekPage({ params }: Props) {
   const next = index < weeks.length - 1 ? weeks[index + 1] : undefined;
   const storyWord = week.kids.length === 1 ? "story" : "stories";
   const pack = packByStart(week.start);
+  const quiz = getQuiz(week.start);
 
   return (
     <div className="page-block">
@@ -106,6 +108,7 @@ export default async function WeekPage({ params }: Props) {
           {previous ? <Link href={previous.path}>Previous week</Link> : null}
           <Link href="/week">All weeks</Link>
           {next ? <Link href={next.path}>Next week</Link> : null}
+          {quiz ? <Link href={quiz.path}>Good News Quiz</Link> : null}
           {week.kids.length ? <Link href="/kids">Classroom section</Link> : null}
           <Link href="/week/rss.xml">Week RSS</Link>
         </p>
@@ -181,6 +184,16 @@ export default async function WeekPage({ params }: Props) {
               ) : null}
             </p>
             <ListenControls label="Read all aloud" groupLabel="Read this week's classroom summaries aloud" segments={kidListSegments(week.kids)} />
+            {quiz?.kidQuestions.length ? (
+              <p style={{ marginTop: 12 }}>
+                <Link className="more" href={`${quiz.path}?kids=1`}>
+                  Kid mode quiz for this week
+                  <svg className="ico" aria-hidden="true">
+                    <use href="#i-arrow" />
+                  </svg>
+                </Link>
+              </p>
+            ) : null}
             <div style={{ marginTop: 18 }}>
               <Cards stories={week.kids} listen />
             </div>

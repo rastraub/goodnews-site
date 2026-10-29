@@ -3,6 +3,7 @@ import Link from "next/link";
 import { StoryImage } from "@/components/story-image";
 import { editionLabel, formatStoryDate } from "@/lib/format";
 import { kidPlaceForStory, storyOfTheDay } from "@/lib/kids";
+import { latestQuiz } from "@/lib/quiz";
 import { placeLabel } from "@/lib/present";
 import { pageAlternates } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
@@ -27,6 +28,7 @@ export function generateMetadata(): Metadata {
 export default function KidsPrintPage() {
   const story = storyOfTheDay(getPublishedStories());
   const placePath = story ? kidPlaceForStory(story) : undefined;
+  const quiz = latestQuiz();
 
   return (
     <div className="page-block">
@@ -71,6 +73,9 @@ export default function KidsPrintPage() {
             </p>
             <div className="print-actions no-print">
               <PrintButton />
+              {quiz ? (
+                <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
+              ) : null}
               <Link href={`/story/${story.slug}`}>Read the full story</Link>
               {placePath ? <Link href={placePath}>More classroom stories from this place</Link> : null}
               <Link href="/kids">All classroom stories</Link>

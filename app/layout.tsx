@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { IconSprite } from "@/components/icon-sprite";
 import { JsonLd } from "@/components/json-ld";
 import { editionLabel } from "@/lib/format";
+import { latestQuiz } from "@/lib/quiz";
 import { FAVICON_SIZES, faviconPath } from "@/lib/brand";
 import { pageAlternates, siteGraphJsonLd, xHandle } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
@@ -88,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a className="skip" href="#main">
           Skip to stories
         </a>
-        <Header edition={editionLabel()} />
+        <Header edition={editionLabel()} quizHref={latestQuiz()?.path} />
         <main id="main">{children}</main>
         <Footer />
       </body>

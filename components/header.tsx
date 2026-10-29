@@ -13,21 +13,23 @@ const PRIMARY = [
   ...CATEGORIES.map((category) => ({ href: `/category/${category.slug}`, label: category.label })),
 ];
 
-const MORE = [
-  { href: "/kids", label: "Kids" },
-  { href: "/topics", label: "Topics" },
-];
-
-export function Header({ edition }: { edition: string }) {
+export function Header({ edition, quizHref }: { edition: string; quizHref?: string }) {
   const pathname = usePathname();
   const [openPath, setOpenPath] = useState<string | null>(null);
   const open = openPath === pathname;
+
+  const more = [
+    ...(quizHref ? [{ href: quizHref, label: "Quiz" }] : []),
+    { href: "/kids", label: "Kids" },
+    { href: "/topics", label: "Topics" },
+  ];
 
   function active(href: string) {
     if (href === "/") return pathname === "/";
     if (href === "/local") return pathname === "/local" || pathname.startsWith("/state/");
     if (href === "/world") return pathname === "/world" || pathname.startsWith("/country/");
     if (href === "/topics") return pathname === "/topics" || pathname.startsWith("/topic/");
+    if (href === "/quiz" || href.startsWith("/quiz/")) return pathname === "/quiz" || pathname.startsWith("/quiz/");
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
@@ -59,6 +61,11 @@ export function Header({ edition }: { edition: string }) {
                 {link.label}
               </Link>
             ))}
+            {quizHref ? (
+              <Link href={quizHref} className={active(quizHref) ? "on" : undefined}>
+                Quiz
+              </Link>
+            ) : null}
             <Link href="/submit" className={`submit${active("/submit") ? " on" : ""}`}>
               <svg className="ico" aria-hidden="true">
                 <use href="#i-pen" />
@@ -91,7 +98,7 @@ export function Header({ edition }: { edition: string }) {
         </div>
       </header>
       <div className={`menu-panel${open ? " open" : ""}`} id="mobile-menu">
-        {[...PRIMARY, ...MORE].map((link) => (
+        {[...PRIMARY, ...more].map((link) => (
           <Link key={link.href} href={link.href}>
             {link.label}
           </Link>
@@ -102,7 +109,7 @@ export function Header({ edition }: { edition: string }) {
         <Link href="/subscribe">Subscribe</Link>
       </div>
       <div className="catbar">
-        {[...PRIMARY, ...MORE].map((link) => (
+        {[...PRIMARY, ...more].map((link) => (
           <Link key={link.href} href={link.href} className={active(link.href) ? "on" : undefined}>
             {link.label}
           </Link>

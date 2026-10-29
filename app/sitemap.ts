@@ -8,6 +8,7 @@ import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
 import { indexesToPrerender } from "@/lib/good-news-index";
+import { quizzesToPrerender } from "@/lib/quiz";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
@@ -74,6 +75,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     if (!date) return latest;
     return !latest || date > latest ? date : latest;
   }, undefined);
+  const quizzes = quizzesToPrerender();
+  const newestQuiz = quizzes[quizzes.length - 1];
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -138,6 +141,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: pack.latest,
         changeFrequency: (pack.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: pack.inProgress ? 0.6 : 0.5,
+      })),
+    {
+      url: absoluteUrl("/quiz"),
+      lastModified: newestQuiz?.latest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    },
+    ...quizzes
+      .slice()
+      .reverse()
+      .map((quiz) => ({
+        url: absoluteUrl(quiz.path),
+        lastModified: quiz.latest,
+        changeFrequency: (quiz.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: quiz.inProgress ? 0.7 : 0.6,
       })),
     ...CATEGORIES.map((category) => ({
       url: absoluteUrl(`/category/${category.slug}`),
