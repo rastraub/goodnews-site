@@ -394,11 +394,13 @@ export function listingJsonLd(options: {
   stories: Pick<Story, "slug" | "title">[];
   /** When set, the list is these pages instead of stories. Used by the week index. */
   items?: { name: string; path: string }[];
+  /** How many list entries to emit. Defaults to 40 so a long archive stays compact. */
+  listLimit?: number;
 }) {
   const entries = options.items
     ? options.items.map((item) => ({ name: item.name, url: absoluteUrl(item.path) }))
     : options.stories.map((story) => ({ name: story.title, url: absoluteUrl(`/story/${story.slug}`) }));
-  const listed = entries.slice(0, 40);
+  const listed = entries.slice(0, options.listLimit ?? 40);
   return {
     "@context": "https://schema.org",
     "@graph": [

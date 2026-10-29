@@ -6,6 +6,7 @@ import { CheerButton } from "@/components/cheer-button";
 import { EmphaticTitle } from "@/components/story-body";
 import { TopFiveCard } from "@/components/story-card";
 import { IndexPromo } from "@/components/index-promo";
+import { ThanksBanner } from "@/components/thanks-banner";
 import { WeekPromo } from "@/components/week-promo";
 import { WorldSpotlight } from "@/components/world-spotlight";
 import { StoryImage } from "@/components/story-image";
@@ -59,6 +60,7 @@ export default function HomePage() {
 
   return (
     <>
+      <ThanksBanner />
       {hero ? (
         <Hero story={hero} fridayHref={fridayHref} fridayLabel={fridayLabel} />
       ) : (

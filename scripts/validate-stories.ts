@@ -58,6 +58,7 @@ import { POPULATION_US_TOTAL, populationOf, populationTotal } from "../lib/popul
 import { absoluteUrl } from "../lib/seo";
 import { STATES } from "../lib/states";
 import { storySchema } from "../lib/story-schema";
+import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
 import { getPublishedStories, loadAllStories } from "../lib/stories";
 import { worldSpotlight } from "../lib/world-pick";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
@@ -1297,6 +1298,33 @@ function assertClassroomPacks() {
   );
 }
 
+function assertThanksBoard() {
+  const board = thanksBoard();
+  if (board.total !== 51 || board.slots.length !== 51) {
+    throw new Error("The thanks hub should cover 50 states and Washington, D.C.");
+  }
+  if (new Set(board.slots.map((slot) => slot.state.code)).size !== 51) {
+    throw new Error("The thanks hub repeated a state.");
+  }
+  if (board.filled !== board.slots.filter((slot) => slot.story).length) {
+    throw new Error("The thanks fill count does not match the slots.");
+  }
+  for (const slot of board.slots) {
+    if (!slot.story) continue;
+    if (slot.story.country !== "US" || (slot.story.state !== slot.state.code && !slot.story.alsoStates.includes(slot.state.code))) {
+      throw new Error(`${slot.state.code} picked ${slot.story.slug}, which is not filed there`);
+    }
+  }
+  const show = thanksBannerVisible(new Date("2026-11-15T18:00:00Z"));
+  const before = thanksBannerVisible(new Date("2026-10-22T18:00:00Z"));
+  const after = thanksBannerVisible(new Date("2026-12-01T18:00:00Z"));
+  if (thanksSeason.banner) {
+    if (!show || before || after) throw new Error("The thanks banner should show only from Nov 1 through Nov 30, 2026.");
+  } else if (show || before || after) {
+    throw new Error("thanksSeason.banner is false, so the homepage banner should stay hidden.");
+  }
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -1316,6 +1344,7 @@ assertOnlyMailbox();
 assertBrandLivesInOneFile();
 assertFeeds();
 assertPartnerKit();
+assertThanksBoard();
 const published = stories.filter((story) => !story.draft);
 const images = feedImageReport(published.map((story) => story.image));
 console.log(`Validated ${stories.length} stories. Feed images: ${images.large} large JPEGs, ${images.fallback} WebP fallbacks.`);

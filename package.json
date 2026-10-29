@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "validate-stories": "tsx scripts/validate-stories.ts",
+    "thanks-gaps": "tsx scripts/thanks-gaps.ts",
     "feed-images": "tsx scripts/generate-feed-images.ts"
   },
   "dependencies": {

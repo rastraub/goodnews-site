@@ -8,10 +8,11 @@ import { getPublishedStories } from "../lib/stories";
 import { getStateByCode } from "../lib/states";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "../lib/classroom-pack";
 import { indexesToPrerender } from "../lib/good-news-index";
+import { THANKS_PATH } from "../lib/thanks";
 import { weeksToPrerender } from "../lib/weeks";
 import { siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/topics", "/featured", "/widgets", "/good-news-index"];
+const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
