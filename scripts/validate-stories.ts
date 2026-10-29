@@ -164,8 +164,21 @@ import sitemap from "../app/sitemap";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
 import { BADGE_VARIANTS, badgeSvg } from "../lib/badges";
+import { isNewsBreakBannerActive } from "../lib/news-break-banner";
+import {
+  heavyNewsReason,
+  isHeavyNews,
+  NEWS_BREAK_DESCRIPTION,
+  NEWS_BREAK_TITLE,
+  newsBreakHubs,
+  newsBreakQuickRead,
+  newsBreakTop,
+  quickReadLine,
+  type NewsBreakStory,
+} from "../lib/news-break";
 import { badgeEmbedHtml, embedDocumentForSlug, embedScriptSource, iframeSnippet, renderEmbedDocument, storyShareLines } from "../lib/partner-kit";
-import { siteConfig, socialLinks } from "../site.config";
+import { newsBreakJsonLd } from "../lib/seo";
+import { newsBreakBanner, siteConfig, socialLinks } from "../site.config";
 
 const REQUIRED_SOURCES = [
   "https://www.ideastream.org/health/2026-10-06/mane-attraction-therapy-pony-brings-smiles-and-healing-to-local-hospitals",
@@ -1844,6 +1857,178 @@ function assertImageVariants() {
   }
 }
 
+function sampleStory(extra: Partial<NewsBreakStory> = {}): NewsBreakStory {
+  return {
+    slug: "sample",
+    title: "Neighbors planted a library garden",
+    dek: "A short verified summary with enough words to stand as a sentence.",
+    body: "Volunteers filled the beds and left the gate open for anyone who wanted tomatoes.",
+    tags: [],
+    sourceName: "A local paper",
+    ...extra,
+  };
+}
+
+function assertNewsBreak() {
+  const election = heavyNewsReason(sampleStory({ title: "A town election ends tonight", dek: "Voters chose a new council in a quiet count." }));
+  if (!election || !/election/i.test(election)) throw new Error("An election story should be filtered off the news break.");
+  if (!isHeavyNews(sampleStory({ body: "Witnesses described a shooting on the block before help arrived." }))) {
+    throw new Error("A shooting story should be filtered off the news break.");
+  }
+  if (!isHeavyNews(sampleStory({ body: "The department reviewed a use of force from the weekend call." }))) {
+    throw new Error("A use-of-force story should be filtered off the news break.");
+  }
+  if (!isHeavyNews(sampleStory({ tags: ["election"] }))) throw new Error("An election tag should be filtered.");
+  if (!isHeavyNews(sampleStory({ tags: ["use-of-force"] }))) throw new Error("A use-of-force tag should be filtered.");
+  if (!isHeavyNews(sampleStory({ body: "Congress passed a measure the town had asked for." }))) {
+    throw new Error("A Congress story should be filtered when it is not a street address.");
+  }
+  if (!isHeavyNews(sampleStory({ body: "She spoke at a congressional hearing about the park." }))) {
+    throw new Error("A congressional story should be filtered.");
+  }
+  if (!isHeavyNews(sampleStory({ dek: "The contest counted nearly a third of all ballots." }))) {
+    throw new Error("The word ballot should be filtered.");
+  }
+
+  const kept = [
+    sampleStory({ body: "The shaded vines grew longer shoots than the vines in full sun." }),
+    sampleStory({ dek: "It replaces a daily basal shot with one a week." }),
+    sampleStory({ body: "The library board president said the greenhouse is open during library hours." }),
+    sampleStory({ body: "The town inaugurated a seed cabinet anyone can use." }),
+    sampleStory({ body: "Grauer's gorillas live only in the eastern Democratic Republic of the Congo." }),
+    sampleStory({
+      sourceName: "Times Republican",
+      body: "The Times Republican reported that the library greenhouse is growing tomatoes.",
+    }),
+    sampleStory({
+      sourceName: "Arkansas Democrat-Gazette",
+      body: "The Arkansas Democrat-Gazette reported that the trail is open.",
+    }),
+    sampleStory({
+      sourceName: "The Cynthiana Democrat",
+      body: "The Cynthiana Democrat reported the welcome-home crowd.",
+    }),
+    sampleStory({ tags: ["police"] }),
+    sampleStory({ body: "The playground opened at 1310 Old Congress Ave. in West Palm Beach." }),
+    sampleStory({ imageCaption: "Illustrative photo from the Library of Congress." }),
+  ];
+  const falsePositive = kept.find((story) => isHeavyNews(story));
+  if (falsePositive) {
+    throw new Error(`News break filter rejected a calm story: ${heavyNewsReason(falsePositive)}`);
+  }
+
+  const line = quickReadLine(
+    "When the driver could not catch her breath, a fifth grader called her dad. He boarded the bus and called for help.",
+  );
+  if (line !== "When the driver could not catch her breath, a fifth grader called her dad.") {
+    throw new Error(`Quick-read line split in the wrong place: ${line}`);
+  }
+  if (quickReadLine("U.S. Fish and Wildlife opened a short refuge trail for visitors this month.") !== "U.S. Fish and Wildlife opened a short refuge trail for visitors this month.") {
+    throw new Error("A short first fragment should keep the whole dek.");
+  }
+
+  if (newsBreakBanner.start !== "2026-10-31" || newsBreakBanner.end !== "2026-11-06") {
+    throw new Error("News break banner window should be 2026-10-31 through 2026-11-06.");
+  }
+  if (newsBreakBanner.timeZone !== "America/New_York") {
+    throw new Error("News break banner should use the edition time zone.");
+  }
+  const windowCases: [string, boolean][] = [
+    ["2026-10-30T23:30:00-04:00", false],
+    ["2026-10-31T00:30:00-04:00", true],
+    ["2026-10-31T03:30:00.000Z", false],
+    ["2026-11-03T15:00:00.000Z", true],
+    ["2026-11-07T03:30:00.000Z", true],
+    ["2026-11-07T05:00:00.000Z", false],
+  ];
+  for (const [iso, expected] of windowCases) {
+    const actual = isNewsBreakBannerActive(new Date(iso));
+    if (actual !== expected) throw new Error(`Banner window for ${iso}: expected ${expected}, got ${actual}.`);
+  }
+
+  const banned = /\b(elections?|midterms?|ballots?|democrats?|republicans?|shootings?|congress|senators?)\b/i;
+  const page = fs.readFileSync(path.join(process.cwd(), "app/(site)/news-break/page.tsx"), "utf8");
+  const banner = fs.readFileSync(path.join(process.cwd(), "components/news-break-banner.tsx"), "utf8");
+  const hubs = newsBreakHubs();
+  const copy = [page, banner, NEWS_BREAK_TITLE, NEWS_BREAK_DESCRIPTION, newsBreakBanner.label, ...hubs.map((hub) => `${hub.title} ${hub.text} ${hub.cta}`)].join("\n");
+  const bannedHit = copy.match(banned);
+  if (bannedHit) throw new Error(`News break copy contains “${bannedHit[0]}”.`);
+  if (!page.includes('id="daily-email"') && !page.includes("id=\"daily-email\"")) {
+    throw new Error("News break page should use the existing email signup.");
+  }
+  if (!page.includes("max-image-preview")) throw new Error("News break metadata should allow a large image preview.");
+
+  const required = ["/kids", "/week", "/local", "/help", "/explainers", "/quiz", "/kindness-challenge", "/on-this-day", "/morning-announcements", "/heroes", "/classroom", "/es/buenas-noticias"];
+  const allowed = new Set([...required, "/topic/kindness"]);
+  for (const hub of hubs) {
+    if (!allowed.has(hub.href)) throw new Error(`News break linked a hub that was not confirmed: ${hub.href}`);
+  }
+  for (const href of required) {
+    if (!hubs.some((hub) => hub.href === href)) throw new Error(`News break is missing ${href}.`);
+  }
+  if (!getHubIndex().byPath.has("/topic/kindness") || !hubs.some((hub) => hub.href === "/topic/kindness")) {
+    throw new Error("News break should link the kindness topic that already exists.");
+  }
+
+  const schema = newsBreakJsonLd({
+    name: NEWS_BREAK_TITLE,
+    description: NEWS_BREAK_DESCRIPTION,
+    path: newsBreakBanner.path,
+    stories: [{ slug: "sample", title: "Neighbors planted a library garden" }],
+  });
+  const node = schema["@graph"][0] as { "@type": string[] };
+  if (!node["@type"].includes("WebPage") || !node["@type"].includes("CollectionPage")) {
+    throw new Error("News break schema should be a WebPage and a CollectionPage.");
+  }
+
+  const sitemap = fs.readFileSync(path.join(process.cwd(), "app/sitemap.ts"), "utf8");
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!sitemap.includes("newsBreakBanner.path")) throw new Error("Sitemap is missing the news break page.");
+  if (!footer.includes("newsBreakBanner.path")) throw new Error("Footer is missing the news break link.");
+
+  const published = getPublishedStories();
+  const top = newsBreakTop(published);
+  if (top.length < 5) throw new Error("News break should fill five stories from the current archive.");
+  if (top.some((story) => isHeavyNews(story))) throw new Error("News break top included a filtered story.");
+  const featured = published.find((story) => story.featured && !isHeavyNews(story));
+  if (featured && top[0]?.slug !== featured.slug) throw new Error("The story of the day should lead the news break.");
+  const ranks = top.slice(1).flatMap((story) => (story.top5 ? [story.top5] : []));
+  for (let index = 1; index < ranks.length; index += 1) {
+    if (ranks[index]! < ranks[index - 1]!) throw new Error("Ranked stories after the lead should stay in order.");
+  }
+  const quick = newsBreakQuickRead(published, top.map((story) => story.slug));
+  const topSlugs = new Set(top.map((story) => story.slug));
+  if (!quick.length || quick.some((story) => topSlugs.has(story.slug) || isHeavyNews(story))) {
+    throw new Error("The 60-second list should be calm stories that are not already in the five.");
+  }
+
+  const keep = [
+    "cedar-rapids-bus-hero",
+    "albion-library-greenhouse",
+    "tshiaberimu-gorilla-birth",
+    "little-rock-south-lake-trails",
+    "fayetteville-immerse-arkansas",
+    "cynthiana-honor-flight",
+    "laterza-agrivoltaic-grapes",
+    "silver-spring-awiqli",
+    "west-palm-addys-playground",
+  ];
+  for (const slug of keep) {
+    const story = published.find((item) => item.slug === slug);
+    if (story && isHeavyNews(story)) throw new Error(`${slug} should stay on the news break page.`);
+  }
+  const ginkgo = published.find((story) => story.slug === "geelong-ginkgo-tree");
+  if (ginkgo && !isHeavyNews(ginkgo)) {
+    throw new Error("The Geelong tree story uses ballots and should stay off this page.");
+  }
+  const policeHeavy = published.filter((story) => story.tags.includes("police") && isHeavyNews(story));
+  if (policeHeavy.length) {
+    throw new Error(`A police tag alone should not exclude stories: ${policeHeavy.map((story) => story.slug).join(", ")}`);
+  }
+  const excluded = published.filter((story) => isHeavyNews(story));
+  console.log(`News break filter excluded ${excluded.length}: ${excluded.map((story) => `${story.slug} (${heavyNewsReason(story)})`).join(", ") || "none"}.`);
+}
+
 function assertSpanishEditions() {
   const expectedNote = `Resúmenes traducidos del inglés por el equipo de ${siteConfig.name}. Las fuentes originales están en inglés.`;
   if (SPANISH_TRANSLATION_NOTE !== expectedNote) {
@@ -3235,6 +3420,7 @@ async function main() {
   assertFirstRespondersDay();
   assertKindnessChallenges();
   assertSpanishEditions();
+  assertNewsBreak();
   await assertGoodNeighbor();
   const published = stories.filter((story) => !story.draft);
   const images = feedImageReport(published.map((story) => story.image));

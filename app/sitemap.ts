@@ -23,9 +23,11 @@ import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { loadSpanishEditions } from "@/lib/spanish-editions";
 import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
+import { newsBreakBanner } from "@/site.config";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
+  { path: newsBreakBanner.path, changeFrequency: "daily", priority: 0.8 },
   { path: "/local", changeFrequency: "daily", priority: 0.8 },
   { path: "/heroes", changeFrequency: "daily", priority: 0.7 },
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },

@@ -431,3 +431,51 @@ export function listingJsonLd(options: {
     ],
   };
 }
+
+/** Landing page that is both a web page and a list of the current stories. */
+export function newsBreakJsonLd(options: {
+  name: string;
+  description: string;
+  path: string;
+  stories: Pick<Story, "slug" | "title">[];
+  image?: string;
+}) {
+  const url = absoluteUrl(options.path);
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["WebPage", "CollectionPage"],
+        "@id": `${url}#webpage`,
+        name: options.name,
+        description: options.description,
+        url,
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        inLanguage: "en-US",
+        ...(options.image
+          ? {
+              primaryImageOfPage: {
+                "@type": "ImageObject",
+                url: absoluteUrl(options.image),
+              },
+            }
+          : {}),
+        mainEntity: {
+          "@type": "ItemList",
+          numberOfItems: options.stories.length,
+          itemListElement: options.stories.map((story, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: story.title,
+            url: absoluteUrl(`/story/${story.slug}`),
+          })),
+        },
+      },
+      breadcrumbNode([
+        { name: "Today", path: "/" },
+        { name: "A news break", path: options.path },
+      ]),
+    ],
+  };
+}

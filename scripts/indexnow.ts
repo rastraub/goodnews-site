@@ -22,9 +22,9 @@ import { loadSpanishEditions } from "../lib/spanish-editions";
 import { VETERANS_DAY_PATH } from "../lib/veterans-day";
 import { weeksToPrerender } from "../lib/weeks";
 import { listWebStories } from "../lib/web-stories";
-import { siteConfig } from "../site.config";
+import { newsBreakBanner, siteConfig } from "../site.config";
 
-const STATIC_PATHS = ["/", "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", MORNING_ANNOUNCEMENTS_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, FIRST_RESPONDERS_DAY_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes", "/es", "/es/buenas-noticias", "/es/rss.xml"];
+const STATIC_PATHS = ["/", newsBreakBanner.path, "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", MORNING_ANNOUNCEMENTS_PATH, "/topics", "/featured", "/widgets", "/good-news-index", THANKS_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, FIRST_RESPONDERS_DAY_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes", "/es", "/es/buenas-noticias", "/es/rss.xml"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
