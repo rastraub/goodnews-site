@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.worldwildlife.org/species/giant-panda"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The Korea Herald reported on October 27, 2026, that a giant panda cub named Shu Bao will meet visitors at Everland in Yongin, South Korea, starting October 30. She was born on June 3 to mother Ai Bao and father Le Bao. She weighed 171 grams at birth and now weighs more than 9 kilograms. Her name means a treasure as bright as dawn light, and it won a public naming vote. She has been practicing walks and tree climbing with her mother before the crowds arrive. Keepers plan to add visitors slowly."
 kidQuestions:
