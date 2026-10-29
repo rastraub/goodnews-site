@@ -57,6 +57,7 @@ import { renderIndexMap } from "../components/index-map";
 import { POPULATION_US_TOTAL, populationOf, populationTotal } from "../lib/population";
 import { absoluteUrl } from "../lib/seo";
 import { STATES } from "../lib/states";
+import { buildOutlets, formatOutletCsv, getOutletForStory, getOutlets, outletNameKey, type OutletCredit } from "../lib/outlets";
 import { storySchema } from "../lib/story-schema";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
 import { getPublishedStories, loadAllStories } from "../lib/stories";
@@ -1325,6 +1326,148 @@ function assertThanksBoard() {
   }
 }
 
+function credit(partial: Partial<OutletCredit> & Pick<OutletCredit, "slug" | "sourceName" | "sourceUrl">): OutletCredit {
+  return {
+    slug: partial.slug,
+    title: partial.title ?? `A verified story from ${partial.sourceName}`,
+    date: partial.date ?? "2026-10-01",
+    sourceName: partial.sourceName,
+    sourceUrl: partial.sourceUrl,
+    country: partial.country ?? "US",
+    state: partial.state,
+    alsoStates: partial.alsoStates,
+    help: partial.help,
+  };
+}
+
+function assertOutlets() {
+  if (outletNameKey("  ABC   News ") !== "abc") throw new Error("A trailing News should fold into the shorter name.");
+  if (outletNameKey("ABC") !== "abc") throw new Error("Case should not split a newsroom.");
+  if (outletNameKey("Good News Network") !== "good news network") {
+    throw new Error("News in the middle of a name should stay.");
+  }
+  if (outletNameKey("The Herald-News") !== "the herald") throw new Error("A hyphenated trailing News should fold.");
+  if (outletNameKey("News") !== "news") throw new Error("A name that is only News should stay.");
+
+  const rows = buildOutlets([
+    credit({ slug: "a", sourceName: "ABC News", sourceUrl: "https://www.abc.net.au/news/one", date: "2026-10-01", country: "AU" }),
+    credit({ slug: "b", sourceName: "ABC", sourceUrl: "https://www.abc.net.au/news/two", date: "2026-10-02", country: "AU" }),
+    credit({ slug: "c", sourceName: "ABC News", sourceUrl: "https://abcnews.go.com/one", date: "2026-10-03", country: "US", state: "NY" }),
+    credit({ slug: "d", sourceName: "  Fox   2 Detroit ", sourceUrl: "https://www.fox2detroit.com/d", date: "2026-10-04", state: "MI" }),
+    credit({ slug: "e", sourceName: "fox 2 detroit", sourceUrl: "https://fox2detroit.com/e", date: "2026-10-05", state: "MI" }),
+    credit({ slug: "f", sourceName: "CBS Colorado", sourceUrl: "https://www.cbsnews.com/colorado/f", date: "2026-10-06", state: "CO" }),
+    credit({ slug: "g", sourceName: "CBS Detroit", sourceUrl: "https://www.cbsnews.com/detroit/g", date: "2026-10-07", state: "MI" }),
+    credit({ slug: "h", sourceName: "The Herald", sourceUrl: "https://www.herald.example/h", date: "2026-10-08", state: "OH" }),
+    credit({ slug: "i", sourceName: "The Herald News", sourceUrl: "https://www.other.example/i", date: "2026-10-09", state: "PA" }),
+    credit({ slug: "j", sourceName: "The Herald News", sourceUrl: "https://www.herald.example/j", date: "2026-10-10", state: "OH", alsoStates: ["KY"] }),
+    credit({
+      slug: "k",
+      sourceName: "Lone Star",
+      sourceUrl: "https://www.lone.example/k",
+      date: "2026-10-11",
+      state: "TX",
+      alsoStates: ["OK"],
+      help: [
+        { label: "Friends, Inc.", url: "https://friends.example/help" },
+        { label: "Friends, Inc.", url: "https://friends.example/help" },
+      ],
+    }),
+  ]);
+
+  const abcAu = rows.find((outlet) => outlet.domain === "abc.net.au");
+  if (!abcAu || abcAu.count !== 2 || !abcAu.hasPage || abcAu.homepage !== "https://www.abc.net.au" || abcAu.name !== "ABC") {
+    throw new Error("ABC and ABC News on the same domain should be one newsroom, named from the newest spelling when the counts tie.");
+  }
+  if (!abcAu.aliases.includes("ABC News") || abcAu.countries[0]?.code !== "AU" || abcAu.pagePath !== "/sources/abc") {
+    throw new Error("The merged ABC newsroom should keep the other spelling and its country.");
+  }
+  const abcUs = rows.find((outlet) => outlet.domain === "abcnews.go.com");
+  if (!abcUs || abcUs.count !== 1 || abcUs.hasPage || abcUs.slug === abcAu.slug) {
+    throw new Error("The same trailing News on a different domain is a different newsroom, and it does not get a page.");
+  }
+  const fox = rows.find((outlet) => outlet.domain === "fox2detroit.com");
+  if (!fox || fox.count !== 2 || fox.homepage !== "https://fox2detroit.com" || fox.name.toLowerCase() !== "fox 2 detroit") {
+    throw new Error("www and spacing should not split a newsroom. The homepage follows the newest origin when they tie.");
+  }
+  const cbs = rows.filter((outlet) => outlet.domain === "cbsnews.com");
+  if (cbs.length !== 2) throw new Error("Different station names on one domain stay separate.");
+  const herald = rows.find((outlet) => outlet.domain === "herald.example");
+  const otherHerald = rows.find((outlet) => outlet.domain === "other.example");
+  if (!herald || herald.count !== 2 || herald.name !== "The Herald News" || !herald.states.some((state) => state.code === "KY")) {
+    throw new Error("Trailing News merges only on the same domain, and alsoStates still count.");
+  }
+  if (!otherHerald || otherHerald.count !== 1 || otherHerald.slug === herald.slug) {
+    throw new Error("A trailing News on another domain keeps its own page slug.");
+  }
+  const lone = rows.find((outlet) => outlet.domain === "lone.example");
+  if (!lone || lone.states.map((state) => state.code).join(",") !== "OK,TX" || lone.help.length !== 1) {
+    throw new Error("State names should be alphabetical, and duplicate help links should collapse.");
+  }
+
+  const csv = formatOutletCsv([
+    {
+      outlet: 'Say "Hello", Friends',
+      domain: "example.com",
+      homepage: "https://example.com",
+      states: "Ohio",
+      storyCount: 2,
+      latestDate: "2026-10-11",
+      storyUrls: "https://example.com/story/a | https://example.com/story/b",
+      nonprofits: "Friends, Inc. (https://friends.example/help)",
+    },
+  ]);
+  if (!csv.startsWith("outlet,domain,homepage,states,story_count,latest_date,story_urls,nonprofits\n")) {
+    throw new Error("The outlet CSV header changed.");
+  }
+  if (!csv.includes('"Say ""Hello"", Friends"')) throw new Error("CSV fields should quote commas and escape quotes.");
+
+  const live = getOutlets();
+  const published = getPublishedStories();
+  if (live.reduce((sum, outlet) => sum + outlet.count, 0) !== published.length) {
+    throw new Error("Every published story should belong to exactly one newsroom.");
+  }
+  const slugs = new Set<string>();
+  for (const outlet of live) {
+    if (slugs.has(outlet.slug) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(outlet.slug)) {
+      throw new Error(`Newsroom slug is missing or duplicated: ${outlet.slug}`);
+    }
+    slugs.add(outlet.slug);
+    if (outlet.hasPage !== outlet.count >= 2 || Boolean(outlet.pagePath) !== outlet.hasPage) {
+      throw new Error(`${outlet.name} has a page flag that does not match its story count.`);
+    }
+    if (outlet.domain.startsWith("www.") || !outlet.homepage.startsWith("https://")) {
+      throw new Error(`${outlet.name} has a bad domain or homepage.`);
+    }
+  }
+  for (const story of published) {
+    const outlet = getOutletForStory(story);
+    if (!outlet?.stories.some((item) => item.slug === story.slug)) {
+      throw new Error(`${story.slug} is missing from the newsroom grouped by its source.`);
+    }
+  }
+  const abcStories = published.filter((story) => {
+    try {
+      return new URL(story.sourceUrl).hostname.toLowerCase().replace(/^www\./, "") === "abc.net.au";
+    } catch {
+      return false;
+    }
+  });
+  const abcSameName = abcStories.filter((story) => outletNameKey(story.sourceName) === "abc");
+  if (abcSameName.length >= 2) {
+    const outlet = getOutletForStory(abcSameName[0]);
+    const folded = abcSameName.every((story) => outlet?.stories.some((item) => item.slug === story.slug));
+    if (!outlet || outlet.domain !== "abc.net.au" || !folded) {
+      throw new Error("ABC and ABC News on abc.net.au should be one credited newsroom.");
+    }
+  }
+  if (live.filter((outlet) => outlet.domain === "cbsnews.com").length < 2) {
+    throw new Error("Station names on cbsnews.com should stay separate.");
+  }
+  if (live.filter((outlet) => outlet.domain === "fox19.com").length < 2) {
+    throw new Error("Different names on fox19.com should stay separate.");
+  }
+}
+
 const stories = loadAllStories();
 assertImageVariants();
 assertSchemaRejectsGarbage();
@@ -1342,6 +1485,7 @@ assertSeedSources(stories);
 assertTipMail();
 assertOnlyMailbox();
 assertBrandLivesInOneFile();
+assertOutlets();
 assertFeeds();
 assertPartnerKit();
 assertThanksBoard();

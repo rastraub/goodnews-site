@@ -220,6 +220,21 @@ The monthly index is built from published story files. Do not hand-edit ranks or
 - Stories per 1 million residents use the July 1, 2024 resident population in `lib/population.ts` (`NST-EST2024-POP`). Replacing that table changes every closed edition, so do it only on purpose.
 - The index counts stories this site published. It is not a measure of how good a state is.
 
+## Credited newsrooms
+
+Published stories name the original newsroom in `sourceName` and link the article in `sourceUrl`. The public thank-you list is `/sources`. A newsroom with at least two credited stories also has `/sources/{slug}`. A newsroom with one story stays on `/sources` and does not get its own page.
+
+The same site is one newsroom when the source URLs share a domain (a leading `www.` does not count as a different site). Names that differ only by case or spacing are the same newsroom. A trailing `News` is the same newsroom only when the domain matches, so "ABC" and "ABC News" on one site fold together, and the same words on two sites stay apart. Different names on one domain, such as two stations that publish on a shared site, stay separate.
+
+For outreach notes, print a CSV of every credited newsroom:
+
+```bash
+npm run credited-outlets-report
+npm run credited-outlets-report -- outlets.csv
+```
+
+With no path, the CSV goes to standard output. A path writes that file. Prefer a path when you want a clean file, because `npm run` also prints the command it is running. Drafts are skipped. Columns are `outlet`, `domain`, `homepage`, `states`, `story_count`, `latest_date`, `story_urls`, and `nonprofits`. `states` lists US state names and, for a story outside the United States, the country name. `story_urls` are the summaries on this site. `nonprofits` are the `howToHelp` labels and links on those stories. The row order matches `/sources`: most stories first.
+
 ## Health & Tech
 
 `health-tech` is displayed as "Health & Tech". It is for medical advances, longevity research with real human results, and technology that is already helping people. The bar is stricter than the other categories.

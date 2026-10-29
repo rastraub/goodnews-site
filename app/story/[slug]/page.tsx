@@ -17,6 +17,7 @@ import { placeLabel, toCard } from "@/lib/present";
 import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
+import { getOutletForStory } from "@/lib/outlets";
 import { getStory, relatedStories, storiesToPrerender } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { weekStart } from "@/lib/weeks";
@@ -77,6 +78,7 @@ export default async function StoryPage({ params }: Props) {
   const state = story.country === "US" ? getStateByCode(story.state) : undefined;
   const country = story.country === "US" ? undefined : getCountry(story.country);
   const related = relatedStories(story);
+  const outlet = getOutletForStory(story);
   const hubLinks = hubPathsForStory(story).flatMap((path) => {
     const hub = getHubByPath(path);
     return hub ? [{ href: hub.path, label: hub.linkLabel }] : [];
@@ -145,10 +147,17 @@ export default async function StoryPage({ params }: Props) {
               <h2>Read the original</h2>
               <p>The reporting lives at {story.sourceName}. Our summary is checked against it, and we link it on every story.</p>
             </div>
-            <a className="btn btn-ink" href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
-              Read it on {story.sourceName}
-              <svg className="ico" aria-hidden="true"><use href="#i-ext" /></svg>
-            </a>
+            <div className="source-actions">
+              <a className="btn btn-ink" href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
+                Read it on {story.sourceName}
+                <svg className="ico" aria-hidden="true"><use href="#i-ext" /></svg>
+              </a>
+              {outlet?.hasPage && outlet.pagePath ? (
+                <Link className="source-more" href={outlet.pagePath}>
+                  Stories we credit to {story.sourceName}
+                </Link>
+              ) : null}
+            </div>
           </div>
           <StoryBody markdown={story.body} />
           {story.kidFriendly && story.kidSummary && story.kidQuestions?.length ? (
