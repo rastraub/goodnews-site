@@ -33,7 +33,8 @@ import { loadGoodNeighborOverrides } from "../lib/good-neighbor-data";
 import { castFileVote, countsFromRedis, requestIpHash, voteMode } from "../lib/good-neighbor-store";
 import { parseEmailInterest } from "../lib/email";
 import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
-import { SMARTNEWS_DESCRIPTION, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
+import { SMARTNEWS_DESCRIPTION, feedCatalog, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
+import { currentHelp, followUpEntries, FOLLOW_UPS_PATH, renderFollowUpsRss, storyContentDate } from "../lib/follow-ups";
 import { feedImageReport } from "../lib/feed-image";
 import { largeJpegPath, storyThumbPath } from "../lib/images";
 import { citySlug } from "../lib/cities";
@@ -110,7 +111,7 @@ import {
 } from "../lib/good-news-index";
 import { renderIndexMap } from "../components/index-map";
 import { POPULATION_US_TOTAL, populationOf, populationTotal } from "../lib/population";
-import { absoluteUrl } from "../lib/seo";
+import { absoluteUrl, storyJsonLd, storyModifiedIso, storyPublishedIso } from "../lib/seo";
 import { STATES } from "../lib/states";
 import { buildOutlets, formatOutletCsv, getOutletForStory, getOutlets, outletNameKey, type OutletCredit } from "../lib/outlets";
 import { monthDayFromIso, onThisDayPath, parseMonthDaySlug } from "../lib/calendar-day";
@@ -1196,6 +1197,203 @@ function assertPartnerKit() {
   if (!urls.includes(absoluteUrl("/widgets"))) throw new Error("Sitemap should include /widgets.");
   if (urls.some((url) => url.includes("/featured/"))) throw new Error("Sitemap should not include per-story kits.");
   if (urls.some((url) => url.includes("/embed"))) throw new Error("Sitemap should not include embed widgets.");
+}
+
+function assertFollowUps() {
+  const plain = storySchema.parse(minimalStory({ state: "OH" }));
+  if (plain.updates.length !== 0) throw new Error("A story with no updates field should stay an empty list.");
+  const publishedOnly = storyModifiedIso({ ...plain, slug: "akron-example" });
+  if (publishedOnly !== storyPublishedIso({ ...plain, slug: "akron-example" })) {
+    throw new Error("A story with no follow-up should keep dateModified on the publish time.");
+  }
+  const corrected = storySchema.parse(minimalStory({ state: "OH", correction: "The town name was misspelled and is fixed." }));
+  const correctedPublished = Date.parse(storyPublishedIso({ ...corrected, slug: "akron-example" }));
+  const correctedModified = Date.parse(storyModifiedIso({ ...corrected, slug: "akron-example" }));
+  if (correctedModified - correctedPublished !== 12 * 60 * 60 * 1000) {
+    throw new Error("A correction should still move dateModified 12 hours after publish.");
+  }
+
+  const note = "The town finished the project the original report said was still underway.";
+  const parsed = storySchema.parse(
+    minimalStory({
+      state: "OH",
+      updates: [{ date: "2026-11-04", text: note, sourceName: "Ideastream", sourceUrl: "https://example.com/the-follow-up" }],
+    }),
+  );
+  const story = { ...parsed, slug: "akron-example", body: "Neighbors finished a project the local newsroom had already reported.", minutes: 1 };
+  const modified = storyModifiedIso(story);
+  if (modified !== "2026-11-04T09:00:00.000Z") {
+    throw new Error(`A later follow-up should set dateModified to 09:00 UTC that day, got ${modified}.`);
+  }
+  if (storyModifiedIso(story, { followUps: false }) !== storyPublishedIso(story)) {
+    throw new Error("Web stories should ignore follow-ups when they compute their own modified time.");
+  }
+  const json = JSON.stringify(storyJsonLd(story));
+  if (!json.includes('"dateModified":"2026-11-04T09:00:00.000Z"')) {
+    throw new Error("Article structured data should set dateModified when a follow-up exists.");
+  }
+  if (!json.includes(`"url":"${absoluteUrl("/story/akron-example")}"`)) {
+    throw new Error("A follow-up should keep the story's original URL in structured data.");
+  }
+  const sameDay = storySchema.parse(
+    minimalStory({
+      state: "OH",
+      updates: [{ date: "2026-10-06", text: "A same-day follow-up that should land twelve hours after that story's publish time." }],
+    }),
+  );
+  const sameDayStory = { ...sameDay, slug: "akron-example" };
+  const sameDayShift = Date.parse(storyModifiedIso(sameDayStory)) - Date.parse(storyPublishedIso(sameDayStory));
+  if (sameDayShift !== 12 * 60 * 60 * 1000) throw new Error("A same-day follow-up should use the 12-hour offset.");
+
+  const early = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      updates: [{ date: "2026-10-01", text: "This follow-up is dated before the story and should fail validation." }],
+    }),
+  );
+  if (early.success) throw new Error("A follow-up before the story date should fail.");
+  const short = storySchema.safeParse(
+    minimalStory({ state: "OH", updates: [{ date: "2026-11-04", text: "Too short to be a follow-up." }] }),
+  );
+  if (short.success) throw new Error("A follow-up note that is too short should fail.");
+  const halfSource = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      updates: [{ date: "2026-11-04", text: note, sourceName: "Ideastream" }],
+    }),
+  );
+  if (halfSource.success) throw new Error("A follow-up source needs both a name and an https URL.");
+  const httpSource = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      updates: [{ date: "2026-11-04", text: note, sourceName: "Ideastream", sourceUrl: "http://example.com/follow-up" }],
+    }),
+  );
+  if (httpSource.success) throw new Error("A follow-up source URL should require https.");
+  const duplicate = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      updates: [
+        { date: "2026-11-04", text: note },
+        { date: "2026-11-04", text: "A second note on the same date should fail validation as a duplicate." },
+      ],
+    }),
+  );
+  if (duplicate.success) throw new Error("Two follow-ups on the same date should fail.");
+  const extraField = storySchema.safeParse(
+    minimalStory({
+      state: "OH",
+      updates: [{ date: "2026-11-04", text: note, note: "not a field" }],
+    }),
+  );
+  if (extraField.success) throw new Error("An unknown follow-up field should fail.");
+
+  const helpUpdate = storySchema.parse(
+    minimalStory({
+      state: "OH",
+      updates: [
+        {
+          date: "2026-11-04",
+          text: note,
+          howToHelp: [{ label: "The group taking volunteers now", url: "https://example.org/now", kind: "volunteer" }],
+        },
+      ],
+    }),
+  );
+  const help = currentHelp(helpUpdate);
+  if (help.updatedOn !== "2026-11-04" || help.links[0]?.url !== "https://example.org/now") {
+    throw new Error("A follow-up howToHelp list should replace the sidebar links.");
+  }
+  const unchangedHelp = currentHelp(parsed);
+  if (unchangedHelp.updatedOn || unchangedHelp.links[0]?.url !== "https://example.org/help") {
+    throw new Error("A follow-up with no howToHelp should leave the original links in place.");
+  }
+  const repeated = storySchema.parse(
+    minimalStory({
+      state: "OH",
+      updates: [
+        {
+          date: "2026-11-04",
+          text: note,
+          howToHelp: [{ label: "A real place a reader can act", url: "https://example.org/help", kind: "donate" }],
+        },
+      ],
+    }),
+  );
+  if (currentHelp(repeated).updatedOn) throw new Error("Repeating the original help list should clear the now label.");
+
+  const html = storyHtml(story);
+  if (!html.includes("Update, Nov 4, 2026")) throw new Error("Feed HTML should include the follow-up when one exists.");
+  if (!html.includes("<strong>How to help:</strong>")) throw new Error("Feed HTML should keep the original help line when it did not change.");
+  const helpHtml = storyHtml({ ...helpUpdate, slug: "akron-example", body: story.body, minutes: 1 });
+  if (!helpHtml.includes("<strong>How to help now:</strong>")) throw new Error("Feed HTML should label a replaced help list.");
+
+  const live = getPublishedStories();
+  for (const item of live) {
+    if (storyContentDate(item) !== item.date && item.updates.length === 0) {
+      throw new Error(`${item.slug} changed its sitemap date without a follow-up.`);
+    }
+  }
+  const listed = followUpEntries(live);
+  const rss = renderFollowUpsRss();
+  const liveItems = rss.match(/<item>/g)?.length ?? 0;
+  if (liveItems !== Math.min(listed.length, 100)) throw new Error("The follow-ups feed should list each real update and nothing else.");
+  if (rss.includes("xmlns:nb") || rss.includes("xmlns:snf")) throw new Error("The follow-ups feed should not use the NewsBreak or SmartNews namespaces.");
+  if (!rss.includes("/follow-ups/rss.xml")) throw new Error("The follow-ups feed should point at its own URL.");
+  for (const entry of listed) {
+    const url = absoluteUrl(`/story/${entry.story.slug}`);
+    if (!rss.includes(`<link>${url}</link>`)) throw new Error(`Follow-up feed should link ${entry.story.slug} at its original URL.`);
+  }
+
+  const fixtureRss = renderFollowUpsRss([story]);
+  const storyUrl = absoluteUrl("/story/akron-example");
+  if (!fixtureRss.includes(`<link>${storyUrl}</link>`)) throw new Error("A follow-up item should link to the original story URL.");
+  if (!fixtureRss.includes(`<guid isPermaLink="false">${storyUrl}#update-2026-11-04</guid>`)) {
+    throw new Error("A follow-up guid should stay on the story URL and not be a new permalink.");
+  }
+  if (fixtureRss.includes("/story/akron-example/")) throw new Error("A follow-up must not invent a new story path.");
+  if (!fixtureRss.includes(note)) throw new Error("A follow-up item should include the note.");
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl(FOLLOW_UPS_PATH))) throw new Error("The sitemap should include /follow-ups.");
+  const sample = live[0];
+  if (sample) {
+    const entry = sitemap().find((item) => item.url === absoluteUrl(`/story/${sample.slug}`));
+    const expected = storyContentDate(sample);
+    const lastModified = entry?.lastModified instanceof Date ? entry.lastModified.toISOString().slice(0, 10) : entry?.lastModified;
+    if (lastModified !== expected) throw new Error(`Story sitemap date should be ${expected}, got ${String(lastModified)}.`);
+  }
+  if (!feedCatalog().some((group) => group.feeds.some((feed) => feed.path === "/follow-ups/rss.xml"))) {
+    throw new Error("The feeds page should list the follow-ups RSS file.");
+  }
+
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes('href="/follow-ups"')) throw new Error("The footer should link to /follow-ups.");
+  if (!footer.includes("Have an update on a story we covered?")) {
+    throw new Error("The footer should link the follow-up tip line to the submit form.");
+  }
+  if (!footer.includes('href="/submit">Have an update')) throw new Error("The follow-up tip line should use the existing submit form.");
+  const page = fs.readFileSync(path.join(process.cwd(), "app/(site)/follow-ups/page.tsx"), "utf8");
+  if (!page.includes("Have an update on a story we covered?") || !page.includes('href="/submit"')) {
+    throw new Error("The follow-ups page should link the tip line to /submit.");
+  }
+  if (!page.includes("No follow-ups yet.")) throw new Error("The follow-ups page should include an empty state.");
+  const storyPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/story/[slug]/page.tsx"), "utf8");
+  if (!storyPage.includes("<StoryUpdates") || !storyPage.includes("storyModifiedIso")) {
+    throw new Error("The story page should show follow-ups and keep dateModified.");
+  }
+  const docs = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!docs.includes("## Follow-ups") || !docs.includes("updates:")) throw new Error("ADDING_STORIES.md should explain follow-ups.");
+  const news = fs.readFileSync(path.join(process.cwd(), "app/(site)/news-sitemap.xml/route.ts"), "utf8");
+  if (!news.includes("storyPublishedIso") || news.includes("storyModifiedIso")) {
+    throw new Error("The news sitemap should keep the original publication time.");
+  }
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes('"/follow-ups"') || !indexNow.includes('"/follow-ups/rss.xml"')) {
+    throw new Error("IndexNow should ping the follow-ups page and its feed.");
+  }
+  const config = fs.readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
+  if (!config.includes('"/follow-ups/rss.xml"')) throw new Error("Follow-ups RSS should use the feed cache header.");
 }
 
 function assertFeeds() {
@@ -3412,6 +3610,7 @@ async function main() {
   assertOnlyMailbox();
   assertBrandLivesInOneFile();
   assertOutlets();
+  assertFollowUps();
   assertFeeds();
   assertPartnerKit();
   assertThanksBoard();

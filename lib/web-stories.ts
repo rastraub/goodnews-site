@@ -131,8 +131,9 @@ export function selectWebStoryStories<T extends WebStoryCandidate>(stories: T[])
 function toEdition(date: string, stories: Story[]): WebStoryEdition {
   const lead = stories[0];
   const published = publishedIso(date);
+  // A follow-up stays on /story/{slug}. It does not rewrite this day's web story.
   const modified = stories.reduce((latest, story) => {
-    const value = storyModifiedIso(story);
+    const value = storyModifiedIso(story, { followUps: false });
     return value > latest ? value : latest;
   }, published);
   return {

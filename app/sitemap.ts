@@ -10,6 +10,7 @@ import { absoluteUrl } from "@/lib/seo";
 import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
 import { FIRST_RESPONDERS_DAY_PATH, getFirstRespondersDayHub } from "@/lib/first-responders-day";
 import { getOutlets } from "@/lib/outlets";
+import { FOLLOW_UPS_PATH, followUpEntries, storyContentDate } from "@/lib/follow-ups";
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { parseMonthDaySlug } from "@/lib/calendar-day";
@@ -105,6 +106,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const neighborLatest = getBallot(neighborCurrent)?.nominees[0]?.date ?? siteLatest;
   const spanishEditions = loadSpanishEditions();
   const newestSpanish = spanishEditions[spanishEditions.length - 1];
+  const newestFollowUp = followUpEntries(stories)[0]?.update.date;
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -113,6 +115,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: page.changeFrequency,
       priority: page.priority,
     })),
+    {
+      url: absoluteUrl(FOLLOW_UPS_PATH),
+      lastModified: newestFollowUp ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
     {
       url: absoluteUrl(GIVING_TUESDAY_PATH),
       lastModified: givingLatest ?? siteLatest,
@@ -302,7 +310,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
     ...stories.map((story) => ({
       url: absoluteUrl(`/story/${story.slug}`),
-      lastModified: story.date,
+      lastModified: storyContentDate(story),
       changeFrequency: "monthly" as const,
       priority: 0.8,
       images: [absoluteUrl(story.image)],

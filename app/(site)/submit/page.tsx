@@ -17,6 +17,9 @@ export default function SubmitPage() {
         <p className="lede">
           Tell us about a neighbor, a teacher, a clinic, or a town doing something kind. Include a source if you have one. A story we publish is checked against its original report, and we link that source.
         </p>
+        <p className="lede">
+          Have an update on a story we covered? Include the link to that story and what happened next.
+        </p>
       </div>
       <div className="wrap" style={{ paddingTop: 24, maxWidth: 860 }}>
         <SubmitForm />

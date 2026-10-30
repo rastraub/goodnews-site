@@ -96,8 +96,45 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `draft` | no | `true` keeps it out of the site. It is still validated. |
 | `editorApproved` | yes | Must be `true` for anything that is not a draft. This is the publish switch. |
 | `correction` | no | Public correction. It appears on the story and on `/corrections`. Feeds and article markup then use a modified time 12 hours after that story's publish time. The file has a date, not a clock time. |
+| `updates` | no | Follow-ups on this same URL. Leave it off when there is nothing new. See Follow-ups below. |
 
 The body under the front matter is the original summary. Write it yourself. Do not paste the source article. Aim for a short, sourced account, at least 40 words. Paragraphs separated by a blank line. Links look like `[label](https://example.com)`.
+
+## Follow-ups
+
+A follow-up is original reporting on a story that is already published: what happened next, or where things stand now. Edit the existing file. Do not add a second story, and do not change the filename. The public URL stays `/story/your-slug`.
+
+Leave `updates` off until you have a checked note. Do not invent a follow-up, a source, or a help link to fill the page. `/follow-ups` is an intentional empty state until the first real note lands.
+
+Add the field to the story's front matter:
+
+```yaml
+updates:
+  - date: "2026-11-04"
+    text: "A short original note on what happened next. Checked against a source. Do not paste the other outlet's article."
+    sourceName: "Ideastream"
+    sourceUrl: "https://example.com/the-follow-up"
+    howToHelp:
+      - label: "A real place a reader can act now"
+        url: "https://example.org/help-now"
+        kind: donate
+```
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `date` | yes | `YYYY-MM-DD`, quoted. On or after the story `date`. One note per date. The story `date` stays the publication date. |
+| `text` | yes | Your own note, 40 to 800 characters. It shows as `Update, Nov 4, 2026` near the top of the story, after the summary. |
+| `sourceName` | no | The outlet or page you checked. Set it only together with `sourceUrl`. |
+| `sourceUrl` | no | `https` link for that source. Omit both fields when the note has no separate source. |
+| `howToHelp` | no | The way to help **now**. Same shape as the story's `howToHelp`: `label`, `url` (`https`), and `kind` (`donate`, `volunteer`, `thank`, or `learn`). At most six links. |
+
+`howToHelp` on a follow-up replaces the sidebar until a newer follow-up sets its own list. A later note that omits `howToHelp` leaves the previous follow-up's links in place. To go back to the original story links, repeat that original list on the new note. Omit `howToHelp` when the way to help has not changed.
+
+The newest follow-up sets `dateModified` in the article markup and the story's sitemap date. The publish date does not move, and the news sitemap still uses the original publication time. A follow-up on a later day is 09:00 UTC that day. A follow-up on the story's own date has no clock, so it is 12 hours after that story's publish time, the same offset as a correction.
+
+`/follow-ups` lists every story that has a note, newest first, and links each one back to `/story/your-slug`. The footer links there. `/follow-ups/rss.xml` is one item per note, and each item's link is the original story URL. A reader who has an update uses the existing form at `/submit`.
+
+Run `npm run validate-stories` after the edit. A date before the story, a duplicate date, a source with only one of the two fields, or an `http` link fails the build.
 
 ## Stories outside the United States
 

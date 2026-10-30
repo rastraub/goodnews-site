@@ -18,16 +18,36 @@ export function publishedIso(date: string): string {
  * Stories filed on the same calendar day share one edition time.
  * The batch is staggered by one second so two items never share atom:updated.
  * A correction has no clock time in the file, so dateModified is 12 hours later.
+ * A follow-up dated after the story uses 09:00 UTC on that date.
+ * A follow-up on the story's own date also has no clock, so it uses the same 12-hour offset.
  */
 export function storyPublishedIso(story: Pick<Story, "date" | "slug">): string {
   const base = Date.parse(publishedIso(story.date));
   return new Date(base + editionIndex(story.slug) * 1000).toISOString();
 }
 
-export function storyModifiedIso(story: Pick<Story, "date" | "slug" | "correction">): string {
+/** Instant for one follow-up. Later calendar days win over a same-day correction offset. */
+export function followUpInstant(story: Pick<Story, "date" | "slug">, updateDate: string): string {
   const published = Date.parse(storyPublishedIso(story));
-  if (!story.correction) return new Date(published).toISOString();
-  return new Date(published + 12 * 60 * 60 * 1000).toISOString();
+  const stamp = Date.parse(publishedIso(updateDate));
+  if (Number.isNaN(stamp)) return new Date(published).toISOString();
+  const at = stamp <= published ? published + 12 * 60 * 60 * 1000 : stamp;
+  return new Date(at).toISOString();
+}
+
+export function storyModifiedIso(
+  story: Pick<Story, "date" | "slug" | "correction"> & { updates?: { date: string }[] },
+  options?: { followUps?: boolean },
+): string {
+  const published = Date.parse(storyPublishedIso(story));
+  let modified = story.correction ? published + 12 * 60 * 60 * 1000 : published;
+  if (options?.followUps !== false) {
+    for (const update of story.updates ?? []) {
+      const at = Date.parse(followUpInstant(story, update.date));
+      if (at > modified) modified = at;
+    }
+  }
+  return new Date(modified).toISOString();
 }
 
 let editionStories: Story[] | undefined;
@@ -288,6 +308,7 @@ export function storyJsonLd(story: Story) {
         ],
         thumbnailUrl: image,
         datePublished: published,
+        // Newest follow-up when the story has one; otherwise the publish time, or 12 hours later when a correction is on file.
         dateModified: modified,
         inLanguage: "en-US",
         isAccessibleForFree: true,

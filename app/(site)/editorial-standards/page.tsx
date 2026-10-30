@@ -55,6 +55,11 @@ export default function EditorialStandardsPage() {
           A photograph is illustrative unless its caption says it shows the people, animals, or place in the story. Captions name the photographer and the license, and they say when the picture is not of the subject.
         </p>
 
+        <h2>Follow-ups</h2>
+        <p>
+          A follow-up is new reporting on a story we already published: what happened next, or where things stand now. It is a dated note on the original story. We do not give it a new URL. Those notes are listed on the <Link href="/follow-ups">follow-ups page</Link>. <Link href="/submit">Have an update on a story we covered?</Link> Send the story link and a source. We check it the same way we check a new story, and we do not publish a follow-up we have not read.
+        </p>
+
         <h2>Corrections</h2>
         <p>
           If a summary is wrong, we correct the story in public and list the correction on the <Link href="/corrections">corrections page</Link>. We do not quietly rewrite the past. To ask for a correction, write <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a> with the story link, the sentence you believe is wrong, and a source for the fix. We read every request.

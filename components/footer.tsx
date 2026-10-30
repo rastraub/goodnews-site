@@ -38,6 +38,7 @@ export function Footer() {
               <li><Link href="/local">Local</Link></li>
               <li><Link href="/world">World</Link></li>
               <li><Link href="/week">This week</Link></li>
+              <li><Link href="/follow-ups">Follow-ups</Link></li>
               <li><Link href="/good-news-index">Good News Index</Link></li>
               <li><Link href={THANKS_PATH}>50 States of Thanks</Link></li>
               <li><Link href="/web-stories">Web stories</Link></li>
@@ -81,6 +82,7 @@ export function Footer() {
               <li><Link href="/kids#teachers">Teacher email</Link></li>
               <li><Link href="/giving-tuesday">Giving Tuesday</Link></li>
               <li><Link href="/submit">Submit a story</Link></li>
+              <li><Link href="/submit">Have an update on a story we covered?</Link></li>
               <li><Link href="/membership">Membership</Link></li>
               <li><Link href="/partner">Partner with us</Link></li>
               <li><Link href="/featured">Featured on {siteConfig.name}</Link></li>
