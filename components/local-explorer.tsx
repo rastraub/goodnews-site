@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getStateByCode, stateFromZip, STATES } from "@/lib/states";
+import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 const UsMap = dynamic(() => import("./us-map").then((mod) => mod.UsMap), {
   ssr: false,
@@ -145,6 +146,9 @@ export function LocalExplorer({
               ))}
               <Link href="/local" className="chip">
                 See all 50 states
+              </Link>
+              <Link href={GOOD_NEWS_MAP_PATH} className="chip">
+                Good News Map
               </Link>
             </div>
           </div>

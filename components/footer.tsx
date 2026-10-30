@@ -8,6 +8,7 @@ import { latestQuiz } from "@/lib/quiz";
 import { THANKS_PATH } from "@/lib/thanks";
 import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { newsBreakBanner, siteConfig, socialLinks } from "@/site.config";
+import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 export function Footer() {
   const year = editionYear();
@@ -39,6 +40,7 @@ export function Footer() {
               <li><Link href="/world">World</Link></li>
               <li><Link href="/week">This week</Link></li>
               <li><Link href="/good-news-index">Good News Index</Link></li>
+              <li><Link href={GOOD_NEWS_MAP_PATH}>Good News Map</Link></li>
               <li><Link href={THANKS_PATH}>50 States of Thanks</Link></li>
               <li><Link href="/web-stories">Web stories</Link></li>
               {quiz ? <li><Link href={quiz.path}>Good News Quiz</Link></li> : null}

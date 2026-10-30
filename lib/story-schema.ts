@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CATEGORIES } from "./categories";
 import { getCountry } from "./countries";
 import { getStateByCode } from "./states";
+import { stateContains } from "./state-bounds";
 import { isTag } from "./tags";
 
 const categorySlugs = CATEGORIES.map((category) => category.slug) as [
@@ -10,6 +11,17 @@ const categorySlugs = CATEGORIES.map((category) => category.slug) as [
 ];
 
 type CategorySlug = (typeof CATEGORIES)[number]["slug"];
+
+function optionalCoordinate(label: string, min: number, max: number) {
+  return z.preprocess((value) => {
+    if (value === undefined || value === "") return undefined;
+    if (typeof value === "string" && value.trim() !== "") {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : value;
+    }
+    return value;
+  }, z.number({ invalid_type_error: `${label} must be a decimal number` }).gte(min).lte(max).optional());
+}
 
 const isoDate = z.preprocess((value) => {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -42,6 +54,8 @@ export const storySchema = z
     state: z.string().regex(/^[A-Z]{2}$/, "Use a two-letter USPS code").optional(),
     alsoStates: z.array(z.string().regex(/^[A-Z]{2}$/)).optional().default([]),
     place: z.string().min(2).optional(),
+    latitude: optionalCoordinate("Latitude", -90, 90),
+    longitude: optionalCoordinate("Longitude", -180, 180),
     category: z.enum(categorySlugs),
     tags: z
       .array(
@@ -84,6 +98,15 @@ export const storySchema = z
   })
   .strict()
   .superRefine((data, ctx) => {
+    const hasLat = data.latitude !== undefined;
+    const hasLng = data.longitude !== undefined;
+    if (hasLat !== hasLng) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [hasLat ? "longitude" : "latitude"],
+        message: "Set both latitude and longitude, or leave both off. The map can place a city by its name.",
+      });
+    }
     if (data.kidFriendly) {
       if (!data.kidSummary) {
         ctx.addIssue({
@@ -156,11 +179,18 @@ export const storySchema = z
           message: "worldPick is only for stories outside the United States",
         });
       }
-      if (!getStateByCode(data.state)) {
+      const stateCode = data.state ?? "";
+      if (!getStateByCode(stateCode)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["state"],
           message: "US stories need a two-letter USPS state code",
+        });
+      } else if (hasLat && hasLng && !stateContains(stateCode, data.latitude as number, data.longitude as number)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["latitude"],
+          message: "Those coordinates are outside the story's state. Leave them off to place the city by name.",
         });
       }
       for (const extra of data.alsoStates) {
@@ -180,6 +210,13 @@ export const storySchema = z
         }
       }
       return;
+    }
+    if (hasLat || hasLng) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["latitude"],
+        message: "Leave latitude and longitude off stories outside the United States.",
+      });
     }
     if (data.state) {
       ctx.addIssue({

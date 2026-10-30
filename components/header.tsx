@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
+import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 const PRIMARY = [
   { href: "/", label: "Today" },
@@ -19,6 +20,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
   const open = openPath === pathname;
 
   const more = [
+    { href: GOOD_NEWS_MAP_PATH, label: "Map" },
     ...(quizHref ? [{ href: quizHref, label: "Quiz" }] : []),
     { href: "/heroes", label: "Hometown Heroes" },
     { href: "/kindness-challenge", label: "Kindness" },

@@ -16,6 +16,7 @@ import { stateIndexLink } from "@/lib/good-news-index";
 import { kidStoriesInState } from "@/lib/kids";
 import { getByState, stateCounts } from "@/lib/stories";
 import { getStateBySlug, neighborStates, type StateInfo } from "@/lib/states";
+import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 function stateDescription(name: string) {
   return `Good news from ${name}: verified, uplifting stories from cities and towns across the state. Every story is checked and linked to its original source.`;
@@ -100,11 +101,10 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
             ? `Good news from ${state.name}${cityPhrase}. ${stories.length} verified ${stories.length === 1 ? "story" : "stories"}, each one checked and linked to the original report.`
             : `Good news from ${state.name} will land here once a story is checked and published. If you know one, send it in.`}
         </p>
-        {indexLink ? (
-          <p className="link-pills">
-            <Link href={indexLink.href}>{indexLink.label}</Link>
-          </p>
-        ) : null}
+        <p className="link-pills">
+          <Link href={GOOD_NEWS_MAP_PATH}>See {state.name} on the Good News Map</Link>
+          {indexLink ? <Link href={indexLink.href}>{indexLink.label}</Link> : null}
+        </p>
         {categories.length ? (
           <p className="link-pills">
             {categories.map((category) => {

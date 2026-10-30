@@ -7,6 +7,7 @@ import { toCard } from "@/lib/present";
 import { STORY_PAGE_SIZE } from "@/lib/paging";
 import { getPublishedStories, stateCounts } from "@/lib/stories";
 import { THANKS_PATH } from "@/lib/thanks";
+import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 import { getStateByCode, stateName, STATES } from "@/lib/states";
 
 export const metadata: Metadata = {
@@ -34,7 +35,11 @@ export default function LocalPage() {
             <div>
               <h2>All 50 states</h2>
               <p>
-                Plus Washington, D.C. States with a gold count have a story up right now.{" "}
+                Plus Washington, D.C. States with a gold count have a story up right now. The{" "}
+                <Link href={GOOD_NEWS_MAP_PATH} style={{ color: "var(--blue-d)", fontWeight: 700 }}>
+                  Good News Map
+                </Link>{" "}
+                places the last 30 days by city.{" "}
                 <Link href={THANKS_PATH} style={{ color: "var(--blue-d)", fontWeight: 700 }}>
                   50 States of Thanks
                 </Link>{" "}
