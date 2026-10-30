@@ -117,6 +117,11 @@ import { monthDayFromIso, onThisDayPath, parseMonthDaySlug } from "../lib/calend
 import { loadOnThisDay, storiesForMonthDay } from "../lib/on-this-day";
 import { onThisDayFileSchema } from "../lib/on-this-day-schema";
 import { storySchema } from "../lib/story-schema";
+import { geocodeUsPlace } from "../lib/geocode";
+import { goodNewsMap, inMapWindow } from "../lib/good-news-map";
+import { GOOD_NEWS_MAP_PATH, MAP_WINDOW_DAYS } from "../lib/map-path";
+import { stateContains } from "../lib/state-bounds";
+import { MAP_VIEWBOX, mapShapeCodes, projectToState } from "../lib/us-map-geometry";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
 import { getPublishedStories, getStory, loadAllStories, type Story } from "../lib/stories";
 import { quizShareText, quizShareUrl } from "../lib/quiz-copy";
@@ -3387,6 +3392,119 @@ async function assertGoodNeighbor() {
 }
 
 
+function assertGoodNewsMap() {
+  if (MAP_WINDOW_DAYS !== 30) throw new Error("The Good News Map window is 30 days.");
+  if (!inMapWindow("2026-10-01", "2026-10-30") || inMapWindow("2026-09-30", "2026-10-30") || inMapWindow("2026-10-31", "2026-10-30")) {
+    throw new Error("The map window should include today and the 29 days before it.");
+  }
+  if (mapShapeCodes().length !== 51) throw new Error("The map should draw every state and Washington, D.C.");
+  const denver = geocodeUsPlace("CO", "Denver");
+  if (denver.precision !== "city" || Math.abs(denver.lat - 39.76) > 0.05 || Math.abs(denver.lng + 104.88) > 0.05) {
+    throw new Error(`Denver should match the census place. Got ${denver.precision} ${denver.lat}, ${denver.lng}.`);
+  }
+  if (!stateContains("CO", denver.lat, denver.lng) || stateContains("WY", denver.lat, denver.lng)) {
+    throw new Error("Denver's coordinates should fall in Colorado only.");
+  }
+  const denverPoint = projectToState("CO", denver.lat, denver.lng);
+  if (denverPoint.clamped || denverPoint.x < 250 || denverPoint.x > 400 || denverPoint.y < 200 || denverPoint.y > 340) {
+    throw new Error(`Denver should sit on Colorado. Got ${denverPoint.x}, ${denverPoint.y}, clamped ${denverPoint.clamped}.`);
+  }
+  if (geocodeUsPlace("AK", "Juneau").precision !== "city") throw new Error("Juneau should match a census place.");
+  if (geocodeUsPlace("HI", "Honolulu").precision !== "city") throw new Error("Honolulu should match the urban Honolulu census place.");
+  if (geocodeUsPlace("NY", "Staten Island").precision !== "city") throw new Error("Staten Island should match Richmond County.");
+  const missing = geocodeUsPlace("CO", "Not A Real City");
+  if (missing.precision !== "state") throw new Error("An unknown city should be placed on the state.");
+  const given = geocodeUsPlace("CO", "Not A Real City", { latitude: 39.7, longitude: -105 });
+  if (given.precision !== "given" || given.lat !== 39.7) throw new Error("Story coordinates should override the city lookup.");
+
+  const paired = storySchema.safeParse(minimalStory({ state: "OH", latitude: 41.08, longitude: -81.52 }));
+  if (!paired.success) throw new Error(`Akron coordinates should pass. ${paired.success ? "" : paired.error.issues.map((issue) => issue.message).join("; ")}`);
+  if (storySchema.safeParse(minimalStory({ state: "OH", latitude: 41.08 })).success) {
+    throw new Error("Latitude without longitude should fail.");
+  }
+  if (storySchema.safeParse(minimalStory({ state: "OH", latitude: 39.74, longitude: -104.99 })).success) {
+    throw new Error("Coordinates outside the story's state should fail.");
+  }
+  if (storySchema.safeParse(minimalStory({ country: "JP", city: "Osaka", latitude: 34.69, longitude: 135.5 })).success) {
+    throw new Error("Coordinates on a story outside the United States should fail.");
+  }
+
+  const places = JSON.parse(fs.readFileSync(path.join(process.cwd(), "data/us-places.json"), "utf8")) as {
+    places: Record<string, Record<string, [number, number]>>;
+  };
+  let indexed = 0;
+  for (const [code, bucket] of Object.entries(places.places)) {
+    for (const [key, point] of Object.entries(bucket)) {
+      indexed += 1;
+      if (!stateContains(code, point[0], point[1])) throw new Error(`${code} ${key} is outside its state box.`);
+    }
+  }
+  if (indexed < 30_000) throw new Error("The census place list looks empty.");
+
+  const published = getPublishedStories();
+  let matched = 0;
+  let domestic = 0;
+  for (const story of published) {
+    if (story.country !== "US" || !story.state) continue;
+    domestic += 1;
+    if (geocodeUsPlace(story.state, story.city).precision === "city") matched += 1;
+  }
+  if (domestic && matched / domestic < 0.95) {
+    throw new Error(`Only ${matched} of ${domestic} U.S. stories matched a city.`);
+  }
+
+  const latest = published.find((story) => story.country === "US")?.date;
+  if (!latest) throw new Error("The map needs a United States story.");
+  const board = goodNewsMap(published, latest);
+  if (board.states.length !== STATES.length) throw new Error("The map list should include every state.");
+  if (board.start !== addDays(latest, -29)) throw new Error("The map start should be 29 days before the latest U.S. story.");
+  const listed = new Map<string, number>();
+  for (const state of board.states) {
+    if (state.href !== `/state/${state.slug}`) throw new Error(`${state.name} should link to its state page.`);
+    for (const place of state.places) {
+      for (const story of place.stories) {
+        listed.set(story.slug, (listed.get(story.slug) ?? 0) + 1);
+        if (!story.title || !story.category) throw new Error(`${story.slug} is missing a title or category.`);
+      }
+    }
+  }
+  for (const story of published) {
+    if (story.country !== "US" || !story.state) continue;
+    const count = listed.get(story.slug) ?? 0;
+    const expected = inMapWindow(story.date, latest) ? 1 : 0;
+    if (count !== expected) throw new Error(`${story.slug} should appear ${expected} time on the map, not ${count}.`);
+  }
+  for (const pin of board.pins) {
+    if (pin.x < 0 || pin.y < 0 || pin.x > MAP_VIEWBOX.width || pin.y > MAP_VIEWBOX.height) {
+      throw new Error(`A pin is outside the map (${pin.x}, ${pin.y}).`);
+    }
+    if (!pin.href.startsWith("#newsmap-")) throw new Error("A pin should jump to the text list.");
+  }
+  if (board.storyCount && !board.svg.includes('id="newsmap"')) throw new Error("The map svg should be marked for this page.");
+  if (board.storyCount && !board.svg.includes("map-pin")) throw new Error("The map should include a place dot.");
+  if (!board.svg.includes('href="/state/colorado"')) throw new Error("Each state shape should keep its state-page link.");
+
+  const linked = [
+    "components/footer.tsx",
+    "components/header.tsx",
+    "components/local-explorer.tsx",
+    "app/(site)/state/[slug]/browse.tsx",
+    "app/(site)/kids/browse.tsx",
+    "app/(site)/local/page.tsx",
+    "app/sitemap.ts",
+    "scripts/indexnow.ts",
+    "app/(site)/map/page.tsx",
+  ];
+  for (const file of linked) {
+    const text = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!text.includes("GOOD_NEWS_MAP_PATH")) throw new Error(`${file} should link the Good News Map.`);
+  }
+  const guide = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!guide.includes("## Good News Map") || !guide.includes("`latitude`") || !guide.includes("`longitude`")) {
+    throw new Error("ADDING_STORIES.md should explain the map and the optional coordinates.");
+  }
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -3395,6 +3513,7 @@ async function main() {
   assertVeteransDayHub();
   assertSchemaRejectsGarbage();
   assertCountryRules();
+  assertGoodNewsMap();
   assertWorldSpotlight();
   assertHubs();
   assertKidClassrooms();

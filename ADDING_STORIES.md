@@ -69,6 +69,8 @@ correction: "Optional. If set, it shows on the story and the corrections page."
 | `city` | yes | Town or city the story is about. Use the same spelling each time (`Denver`, not `denver`). `St. Louis` and `Saint Louis` in the same state are one page. The same name in two states stays two pages. Use `place` when the label is a park, a county, or a region rather than the town. |
 | `country` | no | ISO 3166-1 alpha-2 code, uppercase, such as `JP` or `US`. Omit it on a United States story. The default is `US`. |
 | `state` | US only | Two-letter USPS code, including `DC`. Required when `country` is `US` or omitted. Leave it off for every other country. |
+| `latitude` | no | Decimal degrees. Set it with `longitude` only when the city name would put the Good News Map pin in the wrong place. It has to fall in `state`. Leave both off for a normal city. |
+| `longitude` | no | Decimal degrees. Set it with `latitude`, or leave both off. |
 | `alsoStates` | no | Other US states this story should appear in. Do not repeat `state`. Leave it off outside the United States. |
 | `place` | no | Overrides the default "City, State" or "City, Country" label. |
 | `category` | yes | `heroes`, `animals`, `science`, `community`, or `health-tech`. |
@@ -128,6 +130,14 @@ State topic pages and tag pages are created only when at least three published s
 A country page with fewer than three stories stays linked from the world index, but it is left out of the sitemap and marked noindex. State pages themselves stay up even when a state has only one story. Pick tags from `lib/tags.ts`. Do not invent a tag to force a page. If a real topic is missing from that list, add the slug, a human title such as "Good news about animal rescue", and a one-sentence intro there first. Validation rejects anything else. Indexable city hubs, state topic hubs, and topic hubs are in the sitemap and in the IndexNow ping. One-story city pages are not.
 
 `npm run city-report` lists every city by story count, marked index or noindex. `npm run validate-stories` prints the same report.
+
+## Good News Map
+
+`/map` places United States stories from the last 30 days on a map. The city is looked up in a public-domain Census Bureau list that ships with the site (`data/us-places.json`). There is no geocoding API and no map key. A city the list does not name, or a name that belongs to two different towns in one state, is shown on the state instead. The page lists the same stories by state, with a link to the story, the city page, and the state page.
+
+Leave `latitude` and `longitude` off a normal city. Set both only when that lookup would be wrong: the place is missing from the census list, or `place` names a park, a trail, or a rural spot and the city would mislead. Use decimal degrees inside the story's state. An Alaska longitude west of the antimeridian can be a positive number. Do not set them outside the United States, and do not invent a spot.
+
+The map uses the primary `city` and `state` only. `alsoStates` still adds the story to those state pages. It does not add a second pin. `kidFriendly` is the filter for classroom stories. It is not a new field.
 
 ### Stories for classrooms
 
