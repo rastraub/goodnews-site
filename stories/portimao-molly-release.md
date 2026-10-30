@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.worldwildlife.org/species/loggerhead-turtle"
     kind: learn
 featured: false
-worldPick: true
 cheers: 0
 draft: false
 editorApproved: true
