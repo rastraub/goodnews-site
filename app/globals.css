@@ -970,6 +970,54 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .gn-mail{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .gn-mail h3,.gn-mail-block h2{font-size:26px;margin-bottom:6px}
 .gn-mail p,.gn-mail-block p{color:var(--ink2);margin-bottom:12px}
+.newsmap-figure{margin:8px 0 0;background:#fff;border:1px solid var(--line);border-radius:28px;padding:12px 12px 4px}
+.newsmap svg{width:100%;height:auto;display:block;overflow:visible}
+.newsmap path,.newsmap circle.dccircle{stroke:#C4D7EA;stroke-width:1.2}
+.newsmap path.band-0,.newsmap circle.dccircle.band-0{fill:#F6F1E8}
+.newsmap path.band-1,.newsmap circle.dccircle.band-1{fill:#FFF1D2}
+.newsmap path.band-2,.newsmap circle.dccircle.band-2{fill:#FFE3A3}
+.newsmap path.band-3,.newsmap circle.dccircle.band-3{fill:#F3B23C}
+.newsmap path.band-4,.newsmap circle.dccircle.band-4{fill:#C98612}
+.newsmap a.state-link{cursor:pointer}
+.newsmap a.state-link:hover path,.newsmap a.state-link:hover circle,.newsmap a.state-link:focus-visible path,.newsmap a.state-link:focus-visible circle{stroke:var(--blue-d);stroke-width:2.4}
+.newsmap .pin-hit{fill:transparent}
+.newsmap .pin-halo{fill:#fff;stroke:var(--ink);stroke-width:1.2}
+.newsmap .pin-core{fill:var(--blue-d)}
+.newsmap .pin-count{font-size:12px;font-weight:700;fill:var(--ink);font-family:var(--font-sans)}
+.newsmap a.map-pin{cursor:pointer}
+.newsmap a.map-pin.is-off{display:none}
+.newsmap a.map-pin:hover .pin-core,.newsmap a.map-pin:focus-visible .pin-core{fill:var(--gold-d)}
+.newsmap a.map-pin:focus-visible .pin-halo{stroke:var(--blue-d);stroke-width:2.6}
+.newsmap figcaption,.newsmap-figure figcaption{color:var(--ink2);font-size:14.5px;margin-top:8px}
+.newsmap-figure figcaption p{margin-top:8px;line-height:1.5}
+.newsmap-tools{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;margin:18px 0 14px}
+.newsmap-fieldset{border:0;padding:0;margin:0;min-inline-size:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.newsmap-fieldset legend{padding:0;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+.newsmap-choice-row{display:flex;flex-wrap:wrap;gap:8px}
+.newsmap-choice{position:relative;display:inline-flex}
+.newsmap-choice input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
+.newsmap-choice label{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:650;font-size:14px;cursor:pointer}
+.newsmap-choice input:checked + label{background:var(--ink);color:#fff;border-color:var(--ink)}
+.newsmap-choice input:focus-visible + label{outline:3px solid var(--blue-d);outline-offset:2px}
+.newsmap-status,.newsmap-filter-note{color:var(--ink2);font-size:15px;line-height:1.5}
+.newsmap-status{min-height:1.4em;margin:0}
+.newsmap-filter-note{margin:0 0 12px}
+.newsmap-states{display:grid;gap:28px;margin-top:28px}
+.newsmap-states > h2{font-family:var(--font-serif);font-weight:600;font-size:34px;letter-spacing:-.02em}
+.newsmap-state{scroll-margin-top:20px}
+.newsmap-state h3{font-family:var(--font-serif);font-weight:600;font-size:30px;letter-spacing:-.02em;margin-top:4px}
+.newsmap-state h3 a,.newsmap-place h4 a{text-decoration:underline;text-underline-offset:3px}
+.newsmap-tally,.newsmap-approx,.newsmap-none{color:var(--ink2);margin-top:6px}
+.newsmap-none a,.newsmap-filter-empty a{color:var(--blue-d);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.newsmap-place{margin-top:16px;scroll-margin-top:20px}
+.newsmap-place h4{font-size:18px;font-weight:700}
+.newsmap-place.is-off,.newsmap-story.is-off{display:none}
+.newsmap-stories{list-style:none;margin:8px 0 0;padding:0}
+.newsmap-story{padding:10px 0;border-top:1px solid var(--line)}
+.newsmap-story a{color:var(--blue-d);font-weight:700;text-decoration:underline;text-underline-offset:3px;line-height:1.35}
+.newsmap-meta{display:block;color:var(--ink2);font-size:14px;margin-top:3px}
+.newsmap-kid{font-weight:700;color:var(--green)}
+.newsmap-filter-empty{color:var(--ink2);margin-top:8px}
 @media (max-width:700px){
   .gn-card{grid-template-columns:1fr}
   .gn-card h3,.gn-share h2{font-size:24px}
@@ -983,4 +1031,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .announce-signoff{font-size:18pt}
   .announce-kindness{border:0;padding:0}
   .announce-script a{color:#000;text-decoration:none}
+  .newsmap-state h3{font-size:26px}
+  .newsmap .pin-count{display:none}
 }

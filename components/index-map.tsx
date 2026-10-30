@@ -1,14 +1,8 @@
 import { US_MAP_SVG } from "./us-map-svg";
 import type { IndexStateRow } from "@/lib/good-news-index";
+import { bandFor } from "@/lib/map-bands";
 
-export function bandFor(count: number, max: number): 0 | 1 | 2 | 3 | 4 {
-  if (count <= 0 || max <= 0) return 0;
-  const ratio = count / max;
-  if (ratio > 0.75) return 4;
-  if (ratio > 0.5) return 3;
-  if (ratio > 0.25) return 2;
-  return 1;
-}
+export { bandFor };
 
 function escapeXml(value: string): string {
   return value

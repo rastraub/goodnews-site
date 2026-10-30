@@ -20,6 +20,7 @@ import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_IND
 import { quizzesToPrerender } from "@/lib/quiz";
 import { getKindnessChallenges } from "@/lib/kindness";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
+import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { loadSpanishEditions } from "@/lib/spanish-editions";
 import { mountainDay, weeksToPrerender } from "@/lib/weeks";
@@ -174,6 +175,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: absoluteUrl(THANKS_PATH),
       lastModified: thanksLatest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl(GOOD_NEWS_MAP_PATH),
+      lastModified: siteLatest,
       changeFrequency: "daily" as const,
       priority: 0.8,
     },
