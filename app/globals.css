@@ -334,6 +334,24 @@ footer a:hover{color:#fff}
 .share button,.share a{height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:14px;cursor:pointer;display:inline-flex;align-items:center}
 .correction{background:#FFF1D2;border-radius:16px;padding:14px 16px;margin-bottom:16px;color:#5A4415}
 .correction strong{color:var(--ink)}
+.story-updates{display:grid;gap:12px;margin:0 0 18px}
+.story-update{background:var(--sky);border-radius:16px;padding:14px 16px}
+.story-update-label{font-family:var(--font-serif);font-size:22px;font-weight:600;letter-spacing:-.015em;line-height:1.2;margin:0 0 8px}
+.story-update p{font-size:16.5px;line-height:1.55}
+.story-update p+p,.story-update-help{margin-top:8px}
+.story-update a{color:var(--blue-d);text-decoration:underline;text-underline-offset:2px}
+.story-update-help ul{list-style:none;display:grid;gap:6px;margin-top:6px}
+.story-update-help li{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.story-update-help span{color:var(--blue-d);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;flex:none}
+.story-update-more{font-weight:600}
+.story-update-more a{color:var(--blue-d)}
+.follow-list{display:grid;gap:14px;padding:8px 0 48px}
+.follow-list .side-card p{color:var(--ink2);line-height:1.55;margin-top:8px}
+.follow-list .side-card .time{margin-top:4px}
+.follow-list .follow-source a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.page-hero .empty{margin-top:24px}
+.page-hero .empty h2{margin-top:0}
+.follow-intro a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 
 .form-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:28px;box-shadow:var(--shadow);display:grid;gap:8px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}

@@ -1,6 +1,7 @@
 import { SMARTNEWS_LOGO, SMARTNEWS_LOGO_DARK } from "./brand";
 import { CATEGORIES, getCategory } from "./categories";
 import { getCountry } from "./countries";
+import { currentHelp, FOLLOW_UPS_FEED_PATH, followUpFeedHtml } from "./follow-ups";
 import { editionYear } from "./format";
 import { HELP_FEED_LINE } from "./help";
 import { storyFeedImage } from "./feed-image";
@@ -41,6 +42,7 @@ export function feedCatalog(): { heading: string; feeds: FeedLink[] }[] {
       heading: "Main",
       feeds: [
         { title: "Latest stories", path: "/rss.xml", blurb: "The main RSS feed." },
+        { title: "Follow-ups", path: FOLLOW_UPS_FEED_PATH, blurb: "Updates on stories already published. Each item links to the original story URL." },
         { title: "Atom", path: "/atom.xml", blurb: "The same latest stories, as Atom." },
         { title: "SmartNews", path: "/smartnews.xml", blurb: "SmartFormat feed for the SmartNews app." },
         { title: "World", path: "/world/rss.xml", blurb: "Stories from outside the United States." },
@@ -128,11 +130,13 @@ export function storyDescription(story: Pick<Story, "dek" | "body">): string {
 }
 
 function helpParagraph(story: Story): string {
-  const parts = story.howToHelp.map((item) => {
+  const help = currentHelp(story);
+  const parts = help.links.map((item) => {
     const line = HELP_FEED_LINE[item.kind];
     return `<a href="${escapeHtml(item.url)}">${escapeHtml(item.label)}</a> — ${escapeHtml(line)}`;
   });
-  return `<p><strong>How to help:</strong> ${parts.join(". ")}.</p>`;
+  const label = help.updatedOn ? "How to help now" : "How to help";
+  return `<p><strong>${label}:</strong> ${parts.join(". ")}.</p>`;
 }
 
 export function storyHtml(story: Story): string {
@@ -146,13 +150,16 @@ export function storyHtml(story: Story): string {
     .map((block) => `<p>${inlineMarkdown(block)}</p>`)
     .join("");
   const caption = `${story.imageCaption} ${story.imageCredit}. ${story.imageLicense}.`;
-  return [
+  const parts = [
     `<figure><img src="${escapeHtml(src)}" alt="${escapeHtml(story.imageAlt)}"${size} /><figcaption>${escapeHtml(caption)}</figcaption></figure>`,
     `<p>${escapeHtml(story.dek)}</p>`,
     paragraphs,
     helpParagraph(story),
     `<p>Read the original report: <a href="${escapeHtml(story.sourceUrl)}">${escapeHtml(story.sourceName)}</a>.</p>`,
-  ].join("");
+  ];
+  const updates = followUpFeedHtml(story);
+  if (updates) parts.splice(2, 0, updates);
+  return parts.join("");
 }
 
 function cdata(value: string) {

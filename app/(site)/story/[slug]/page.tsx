@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/json-ld";
 import { ShareButtons } from "@/components/share-buttons";
 import { StoryCard } from "@/components/story-card";
 import { EmphaticTitle, StoryBody } from "@/components/story-body";
+import { StoryUpdates } from "@/components/story-updates";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getCategory } from "@/lib/categories";
 import { monthDayFromIso, monthDayLabel, onThisDayPath } from "@/lib/calendar-day";
@@ -16,6 +17,7 @@ import { packByStart } from "@/lib/classroom-pack";
 import { closedNomination, recordedWinnerFor } from "@/lib/good-neighbor-data";
 import { votesEnabled } from "@/lib/good-neighbor-store";
 import { cityHubForStory, getHubByPath, hubPathsForStory } from "@/lib/hubs";
+import { currentHelp, latestUpdate } from "@/lib/follow-ups";
 import { formatStoryDate } from "@/lib/format";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { kidListenSegments, storyListenSegments } from "@/lib/listen-text";
@@ -96,6 +98,8 @@ export default async function StoryPage({ params }: Props) {
   });
   const friday = packByStart(weekStart(story.date));
   const explainers = explainersForStory(story);
+  const followUp = latestUpdate(story);
+  const help = currentHelp(story);
   const anniversary = monthDayFromIso(story.date);
   if (anniversary) {
     hubLinks.push({
@@ -144,7 +148,14 @@ export default async function StoryPage({ params }: Props) {
             </span>
             <VerifiedBadge source={story.sourceName} withSourceWord />
             <span className="time">
-              {formatStoryDate(story.date)} · {story.minutes} min read
+              {formatStoryDate(story.date)}
+              {followUp ? (
+                <>
+                  {" · "}
+                  <time dateTime={followUp.date}>Updated {formatStoryDate(followUp.date)}</time>
+                </>
+              ) : null}
+              {` · ${story.minutes} min read`}
             </span>
           </div>
           <div className="actions">
@@ -160,6 +171,7 @@ export default async function StoryPage({ params }: Props) {
               {story.correction}
             </div>
           ) : null}
+          <StoryUpdates story={story} />
           <figure>
             <div className="story-figure">
               <StoryImage src={story.image} alt={story.imageAlt} priority sizes="(max-width: 700px) 100vw, 720px" treatment={story.imageTreatment} />
@@ -256,9 +268,10 @@ export default async function StoryPage({ params }: Props) {
         </div>
         <aside className="story-side">
           <section className="side-card" id="how-to-help">
-            <h2>How to help</h2>
+            <h2>{help.updatedOn ? "How to help now" : "How to help"}</h2>
+            {help.updatedOn ? <p className="time">Updated {formatStoryDate(help.updatedOn)}</p> : null}
             <div className="help-list">
-              {story.howToHelp.map((item) => (
+              {help.links.map((item) => (
                 <a key={item.url} href={item.url} target="_blank" rel="noopener noreferrer">
                   <span>{item.label}</span>
                   <small>{HELP_KIND_LABEL[item.kind]}</small>

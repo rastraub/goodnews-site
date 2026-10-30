@@ -38,6 +38,36 @@ export const helpLinkSchema = z
   })
   .strict();
 
+/**
+ * A dated follow-up on a story that is already published.
+ * The story URL does not change. Leave the list off when there is no update.
+ */
+export const storyUpdateSchema = z
+  .object({
+    date: isoDate,
+    text: z.string().trim().min(40, "A follow-up needs a short original note").max(800),
+    sourceName: z.string().trim().min(2).optional(),
+    sourceUrl: z
+      .string()
+      .trim()
+      .url()
+      .refine((url) => url.startsWith("https://"), "Follow-up source URL must use https")
+      .optional(),
+    howToHelp: z.array(helpLinkSchema).min(1).max(6).optional(),
+  })
+  .strict()
+  .superRefine((update, ctx) => {
+    const hasName = Boolean(update.sourceName);
+    const hasUrl = Boolean(update.sourceUrl);
+    if (hasName !== hasUrl) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [hasName ? "sourceUrl" : "sourceName"],
+        message: "A follow-up source needs both sourceName and an https sourceUrl",
+      });
+    }
+  });
+
 export const storySchema = z
   .object({
     title: z.string().min(12),
@@ -95,6 +125,10 @@ export const storySchema = z
     draft: z.boolean().optional().default(false),
     editorApproved: z.boolean(),
     correction: z.string().min(8).optional(),
+    updates: z.preprocess(
+      (value) => (value == null ? [] : value),
+      z.array(storyUpdateSchema).max(12, "A story can carry at most 12 follow-ups"),
+    ),
   })
   .strict()
   .superRefine((data, ctx) => {
@@ -144,6 +178,24 @@ export const storySchema = z
           message: "A vocabulary word needs a short definition a teacher can read",
         });
       }
+    }
+    const seenUpdates = new Set<string>();
+    for (const update of data.updates) {
+      if (update.date < data.date) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["updates"],
+          message: `Follow-up ${update.date} is before the story date ${data.date}`,
+        });
+      }
+      if (seenUpdates.has(update.date)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["updates"],
+          message: `Two follow-ups share ${update.date}. Use one note per date.`,
+        });
+      }
+      seenUpdates.add(update.date);
     }
     const seenTags = new Set<string>();
     for (const tag of data.tags) {
@@ -236,3 +288,4 @@ export const storySchema = z
 
 export type StoryFrontmatter = z.infer<typeof storySchema>;
 export type HelpLink = z.infer<typeof helpLinkSchema>;
+export type StoryUpdate = z.infer<typeof storyUpdateSchema>;
