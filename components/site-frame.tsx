@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Script from "next/script";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import { IconSprite } from "./icon-sprite";
@@ -30,6 +31,8 @@ export function SiteFrame({
   return (
     <html lang={lang} className={className}>
       <body>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-BQTQ75PLBB" strategy="afterInteractive" />
+        <Script id="ga4-init" strategy="afterInteractive">{`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-BQTQ75PLBB');`}</Script>
         <JsonLd data={siteGraphJsonLd()} />
         <IconSprite />
         <a className="skip" href="#main">
