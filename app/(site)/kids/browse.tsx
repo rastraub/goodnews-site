@@ -12,6 +12,7 @@ import { latestQuiz } from "@/lib/quiz";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 const TITLE = "Good news for kids";
@@ -77,6 +78,7 @@ export function KidsBrowse({ page }: { page: number }) {
             <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
           ) : null}
           <Link href="/on-this-day/today">Good news on this day</Link>
+          <Link href={CALENDAR_PATH}>Good News Calendar</Link>
           <Link href="/morning-announcements">Morning announcements</Link>
           <a href="#teachers">Teacher email</a>
         </p>

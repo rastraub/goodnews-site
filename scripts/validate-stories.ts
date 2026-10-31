@@ -19,6 +19,15 @@ import {
   readsAsPositive,
   storyQualifies,
 } from "../lib/first-responders-day";
+import { CALENDAR_HUBS, CALENDAR_PATH } from "../lib/calendar-path";
+import { GIVING_TUESDAY_PATH } from "../lib/giving-tuesday";
+import {
+  CALENDAR_ICS_PATH,
+  buildIcs,
+  getCalendarView,
+} from "../lib/good-news-calendar";
+import { KINDNESS_INDEX_PATH } from "../lib/kindness";
+import { THANKS_PATH } from "../lib/thanks";
 import { GET, POST } from "../app/(site)/api/good-neighbor/route";
 import {
   badgeLabel,
@@ -3703,6 +3712,80 @@ function assertGoodNewsMap() {
   }
 }
 
+function assertGoodNewsCalendar() {
+  if (CALENDAR_HUBS.veterans.path !== VETERANS_DAY_PATH) throw new Error("Calendar veterans hub drifted.");
+  if (CALENDAR_HUBS.responders.path !== FIRST_RESPONDERS_DAY_PATH) throw new Error("Calendar responders hub drifted.");
+  if (CALENDAR_HUBS.giving.path !== GIVING_TUESDAY_PATH) throw new Error("Calendar giving hub drifted.");
+  if (CALENDAR_HUBS.thanks.path !== THANKS_PATH) throw new Error("Calendar thanks hub drifted.");
+  if (CALENDAR_HUBS.kindness.path !== KINDNESS_INDEX_PATH) throw new Error("Calendar kindness hub drifted.");
+  if (CALENDAR_HUBS.neighbor.path !== "/good-neighbor") throw new Error("Calendar neighbor hub drifted.");
+
+  const view = getCalendarView("2026-10-31");
+  if (view.windowEnd !== "2027-10-31") throw new Error(`Calendar window should end 2027-10-31, got ${view.windowEnd}.`);
+  const kindness = view.bySlug.get("world-kindness-day");
+  if (!kindness || kindness.start !== "2026-11-13") throw new Error("World Kindness Day should next fall on 2026-11-13.");
+  const veterans = view.bySlug.get("veterans-day");
+  if (!veterans || veterans.start !== "2026-11-11") throw new Error("Veterans Day should next fall on 2026-11-11.");
+  const giving = view.bySlug.get("giving-tuesday");
+  if (!giving || giving.start !== "2026-12-01") throw new Error("GivingTuesday should next fall on 2026-12-01.");
+  if (view.upcoming.some((item) => item.end < "2026-10-31" || item.start > view.windowEnd)) {
+    throw new Error("The calendar index should keep the next 12 months only.");
+  }
+  if (view.upcoming[0]?.observance.slug !== "veterans-day") {
+    throw new Error(`On 2026-10-31 the first observance should be Veterans Day, got ${view.upcoming[0]?.observance.slug ?? "nothing"}.`);
+  }
+  for (const item of view.upcoming) {
+    if (item.stories.length > 4) throw new Error(`${item.observance.slug} shows more than 4 stories.`);
+    if (item.indexable !== item.stories.length >= 2) throw new Error(`${item.observance.slug} index flag does not match its story count.`);
+    const slugs = new Set(item.stories.map((story) => story.slug));
+    if (slugs.size !== item.stories.length) throw new Error(`${item.observance.slug} repeated a story.`);
+  }
+
+  const urls = new Set(sitemap().map((entry) => entry.url));
+  if (!urls.has(absoluteUrl(CALENDAR_PATH))) throw new Error("The sitemap should include /calendar.");
+  if (urls.has(absoluteUrl(CALENDAR_ICS_PATH))) throw new Error("The sitemap should not include the calendar file.");
+  for (const item of view.upcoming) {
+    const listed = urls.has(absoluteUrl(item.path));
+    if (listed !== item.indexable) {
+      throw new Error(`${item.path} is ${item.indexable ? "indexable" : "thin"} but the sitemap disagrees (${item.stories.length} stories).`);
+    }
+  }
+
+  const ics = buildIcs("2026-10-31", new Date("2026-10-31T18:00:00Z"));
+  if (!ics.startsWith("BEGIN:VCALENDAR") || !ics.includes("END:VCALENDAR")) throw new Error("The calendar file should be an iCalendar document.");
+  if (!ics.includes("DTSTART;VALUE=DATE:20261111")) throw new Error("The calendar file should include Veterans Day 2026.");
+  if (!ics.includes("DTSTART;VALUE=DATE:20261113")) throw new Error("The calendar file should include World Kindness Day 2026.");
+  if (ics.includes("DTSTART;VALUE=DATE:20251028")) throw new Error("The calendar file should not include a past First Responders Day.");
+  if (!ics.includes(`@${siteConfig.domain}`)) throw new Error("Calendar event ids should use the site domain.");
+
+  const linked = [
+    "components/footer.tsx",
+    "components/header.tsx",
+    "components/coming-up.tsx",
+    "app/(site)/kids/browse.tsx",
+    "scripts/indexnow.ts",
+  ];
+  for (const file of linked) {
+    const text = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!text.includes("CALENDAR_PATH")) throw new Error(`${file} should link the Good News Calendar.`);
+  }
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  const heroAt = home.indexOf("<Hero");
+  const comingAt = home.indexOf("<ComingUp");
+  if (heroAt < 0 || comingAt < heroAt) throw new Error("Coming up should sit below the Story of the Day.");
+  const guide = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!guide.includes("## Good News Calendar") || !guide.includes("data/good-news-calendar.ts")) {
+    throw new Error("ADDING_STORIES.md should explain how to add an observance.");
+  }
+  const observancePage = fs.readFileSync(path.join(process.cwd(), "app/(site)/calendar/[slug]/page.tsx"), "utf8");
+  if (!observancePage.includes("index: false") || !observancePage.includes("EmailSignup")) {
+    throw new Error("Observance pages should noindex thin pages and reuse the newsletter signup.");
+  }
+  const thin = view.upcoming.filter((item) => !item.indexable).length;
+  const ready = view.upcoming.length - thin;
+  console.log(`Good News Calendar: ${view.upcoming.length} observances in the next 12 months, ${ready} indexable, ${thin} still thin.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -3739,6 +3822,7 @@ async function main() {
   assertKindnessChallenges();
   assertSpanishEditions();
   assertNewsBreak();
+  assertGoodNewsCalendar();
   await assertGoodNeighbor();
   const published = stories.filter((story) => !story.draft);
   const images = feedImageReport(published.map((story) => story.image));

@@ -1018,6 +1018,36 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .newsmap-meta{display:block;color:var(--ink2);font-size:14px;margin-top:3px}
 .newsmap-kid{font-weight:700;color:var(--green)}
 .newsmap-filter-empty{color:var(--ink2);margin-top:8px}
+.coming-up{margin:0 0 22px}
+.coming-up-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px 16px;box-shadow:var(--shadow)}
+.coming-up-bar .kicker{margin:0}
+.coming-up-bar ol{display:flex;flex-wrap:wrap;gap:6px 16px;list-style:none;margin:0;padding:0}
+.coming-up-bar li a{font-weight:650;font-size:15px}
+.coming-up-bar time{color:var(--gold-d);font-weight:700;margin-right:6px}
+.coming-up-bar .more{margin-left:auto}
+.cal-fine{color:var(--ink2);font-size:14.5px;margin-top:12px;max-width:640px}
+.cal-month{margin-top:36px}
+.cal-month h2{font-family:var(--font-serif);font-size:32px;font-weight:600;letter-spacing:-.02em;margin:0 0 14px}
+.cal-list{display:grid;gap:14px}
+.cal-item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
+.cal-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cal-date{font-weight:700;color:var(--blue-d)}
+.cal-item h3{font-family:var(--font-serif);font-size:26px;font-weight:600;letter-spacing:-.02em;margin:6px 0}
+.cal-item h3 a:hover{color:var(--blue-d)}
+.cal-item > p{color:var(--ink2);line-height:1.55}
+.cal-class{margin-top:8px}
+.cal-class b{color:var(--ink)}
+.kid-mark{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--gold-l);color:var(--gold-d);border-radius:999px;padding:4px 8px}
+.cal-stories{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.cal-stories a{color:var(--blue-d);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.cal-stories span{display:block;color:var(--muted);font-size:13.5px}
+.cal-note{color:var(--ink2);margin:8px 0 14px}
+.cal-month,.cal-item{scroll-margin-top:16px}
+@media (max-width:700px){
+  .coming-up-bar .more{margin-left:0}
+  .cal-month h2{font-size:28px}
+  .cal-item h3{font-size:22px}
+}
 @media (max-width:700px){
   .gn-card{grid-template-columns:1fr}
   .gn-card h3,.gn-share h2{font-size:24px}

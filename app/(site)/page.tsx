@@ -14,6 +14,7 @@ import { KindnessPromo } from "@/components/kindness-promo";
 import { OnThisDayPromo } from "@/components/on-this-day-promo";
 import { ThanksBanner } from "@/components/thanks-banner";
 import { VeteransDayBanner } from "@/components/veterans-day-banner";
+import { ComingUp } from "@/components/coming-up";
 import { WeekPromo } from "@/components/week-promo";
 import { WorldSpotlight } from "@/components/world-spotlight";
 import { StoryImage } from "@/components/story-image";
@@ -83,6 +84,7 @@ export default function HomePage() {
       )}
       <section className="top5">
         <div className="wrap">
+          <ComingUp />
           <div className="shead">
             <div>
               <h2>Today&apos;s Top 5</h2>

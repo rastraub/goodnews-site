@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
+import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 const PRIMARY = [
@@ -29,6 +30,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
     { href: "/topics", label: "Topics" },
     { href: "/explainers", label: "Explainers" },
     { href: "/on-this-day", label: "On this day" },
+    { href: CALENDAR_PATH, label: "Calendar" },
     { href: "/good-neighbor", label: "Good Neighbor" },
   ];
 
