@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.wildlifevictoria.org.au/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "On Friday, October 30, 2026, Matt Smith was on a boat at the marina in Portland, in south-west Victoria, Australia. Seagulls were noisy, and he saw an animal swimming. He thought it was a dog. It was a wallaby, more than 100 metres from shore, and it was getting tired. He rowed a small boat out. The wallaby climbed in, jumped out because it was scared, and then he got it to dry land. Wildlife carers are looking after it. ABC News said wallabies sometimes swim to get away from a dog. This story is one animal that reached the shore."
 kidQuestions:
