@@ -15,6 +15,7 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run validate-stories   # check story files and the rename rule
 npm run credited-outlets-report   # CSV of newsrooms credited in published stories
 npm run giving-tuesday-coverage   # states still missing a Giving Tuesday pick
+npm run calendar-coverage   # observances in the next 60 days with fewer than 2 stories
 npm run lint
 npm run build
 npm start
@@ -39,6 +40,10 @@ Set the public URL with `url` (it follows `domain` today). Point the real domain
 ## Listen
 
 Story pages and classroom pages can read aloud in the browser, using the device's built-in speech. No speech service, API key, or audio file is required. The controls stay hidden when the browser cannot speak. Speed and voice choices are saved on the device. See [ADDING_STORIES.md](ADDING_STORIES.md) for what the Kid version reads.
+
+## Good News Calendar
+
+`/calendar` lists kindness days and other positive observances for the next 12 months in America/Denver. Each date links to archive stories and, when one exists, a hub such as Veterans Day or Giving Tuesday. `/calendar/{slug}` is one observance. A page with fewer than two matching stories stays up and is left out of the sitemap. `/calendar/good-news.ics` is a static calendar file. Dates and classroom lines live in `data/good-news-calendar.ts`. See [ADDING_STORIES.md](ADDING_STORIES.md).
 
 ## Good news on this day
 
