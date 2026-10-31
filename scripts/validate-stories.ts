@@ -55,7 +55,7 @@ import {
 } from "../lib/classroom-pack";
 import { buildHubs, getHubIndex, indexableHubs, MAX_PRERENDERED_HUBS, MIN_CITY_INDEX_STORIES, MIN_HUB_STORIES, slugify, type HubStory } from "../lib/hubs";
 import { getStateByCode } from "../lib/states";
-import { assertKindnessHelpers, getKindnessChallenges } from "../lib/kindness";
+import { assertKindnessHelpers, getKindnessChallenges, KINDNESS_INDEX_PATH } from "../lib/kindness";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { assertListenText } from "../lib/listen-text";
 import {
@@ -142,6 +142,8 @@ import { GIVING_TUESDAY_PINS } from "../lib/giving-tuesday-pins";
 import {
   buildGivingGuide,
   freeActionOf,
+  GIVING_TUESDAY_BANNER_END,
+  GIVING_TUESDAY_BANNER_START,
   isGivingTuesdaySeason,
   organizationName,
   type GivingStory,
@@ -157,6 +159,31 @@ import {
   veteransDayInSeason,
   VETERANS_DAY_PATH,
 } from "../lib/veterans-day";
+import {
+  activeHomepageBanner,
+  emptyBannerFlags,
+  GIVING_TUESDAY_BANNER_WINDOW,
+  pickHomepageBanner,
+  THANKS_BANNER_WINDOW,
+  WORLD_KINDNESS_BANNER,
+} from "../lib/homepage-banner";
+import {
+  buildWorldKindnessHub,
+  CLASSROOM_QUESTIONS as KINDNESS_CLASSROOM_QUESTIONS,
+  getWorldKindnessDayHub,
+  KINDNESS_ACTS,
+  kindnessBlockReason,
+  kindnessQuality,
+  kindnessThemes,
+  loadWorldKindnessEditorConfig,
+  parseWorldKindnessEditorConfig,
+  RELATED_HUBS,
+  storyQualifies as kindnessStoryQualifies,
+  WORLD_KINDNESS_PATH,
+  WORLD_KINDNESS_SHARE,
+  worldKindnessDayInSeason,
+  worldKindnessJsonLd,
+} from "../lib/world-kindness-day";
 import { editionLanguageAlternates, weekIndexLanguageAlternates } from "../lib/i18n";
 import {
   SPANISH_TRANSLATION_NOTE,
@@ -165,7 +192,7 @@ import {
   renderSpanishRss,
   suggestSpanishStories,
 } from "../lib/spanish-editions";
-import { worldSpotlight } from "../lib/world-pick";
+import { editionDay, worldSpotlight } from "../lib/world-pick";
 import sitemap from "../app/sitemap";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
 import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
@@ -2047,6 +2074,372 @@ function assertFirstRespondersDay() {
   );
 }
 
+function assertWorldKindnessDay() {
+  const published = getPublishedStories();
+  const base = published.find((story) => story.country === "US" && story.state);
+  if (!base) throw new Error("Expected a US story to clone for the World Kindness Day checks.");
+
+  function fixture(extra: Partial<Story> & Pick<Story, "slug" | "title" | "dek">): Story {
+    return {
+      ...base,
+      draft: false,
+      country: "US",
+      state: "CO",
+      alsoStates: [],
+      category: "community",
+      tags: ["kindness"],
+      body: "Neighbors shared a meal and nobody was asked for money.",
+      kidFriendly: false,
+      kidSummary: undefined,
+      kidQuestions: undefined,
+      featured: false,
+      top5: undefined,
+      date: "2026-06-01",
+      ...extra,
+    } as Story;
+  }
+
+  const calm = fixture({
+    slug: "co-calm",
+    title: "Neighbors shared a free supper in Denver",
+    dek: "A church opened its tables and anyone could sit down.",
+  });
+  if (kindnessBlockReason(calm)) throw new Error("A supper story should not be blocked.");
+  if (!kindnessThemes(calm).includes("neighbors") || !kindnessThemes(calm).includes("community")) {
+    throw new Error("A neighbors kindness story should carry those themes.");
+  }
+
+  const phone = fixture({
+    slug: "co-phone",
+    title: "Neighbors brought water to a hiker",
+    dek: "He got one message out before his phone died, and neighbors met him with water.",
+    tags: ["neighbors", "kindness"],
+  });
+  if (kindnessBlockReason(phone)) throw new Error("A phone that died should not make the story a tragedy.");
+
+  const quote = fixture({
+    slug: "co-quote",
+    title: "Eastlake Park reopens with a new playground",
+    dek: "One neighbor said it is the first makeover she has seen there.",
+    tags: ["playgrounds", "kids", "parks"],
+  });
+  if (kindnessThemes(quote).length) throw new Error("A quote from one neighbor should not qualify the story.");
+
+  const birth = fixture({
+    slug: "fi-pups",
+    title: "Six puppies are on a livestream until new homes",
+    dek: "Hilkka gave birth on October 10 to two females and four males.",
+    tags: ["dogs", "kids"],
+    category: "animals",
+    country: "FI",
+    state: undefined,
+  });
+  if (kindnessThemes(birth).length) throw new Error("Gave birth is not an act of kindness.");
+
+  const congress = fixture({
+    slug: "co-congress",
+    title: "A library garden opened for neighbors",
+    dek: "Illustrative photo from the Library of Congress.",
+    tags: ["community-garden", "neighbors"],
+    imageCaption: "Illustrative photo from the Library of Congress.",
+  });
+  if (kindnessBlockReason(congress)) throw new Error("Library of Congress should not be read as politics.");
+
+  const suspects = fixture({
+    slug: "co-suspects",
+    title: "Volunteers fostered a litter of guinea pigs",
+    dek: "Foster carers took the animals home the same day.",
+    body: "She suspects many of the females are pregnant.",
+    tags: ["kindness", "volunteers", "animal-rescue"],
+  });
+  if (kindnessBlockReason(suspects)) throw new Error("The verb suspects should not be read as a crime story.");
+  if (!kindnessThemes(suspects).includes("animals")) throw new Error("Fostering animals should count as animal kindness.");
+
+  const shooting = fixture({
+    slug: "co-shooting",
+    title: "Officers shot a suspect after a pursuit",
+    dek: "Police shot and killed a suspect after a high-speed chase.",
+    body: "The department described the use of force.",
+    tags: ["kindness"],
+  });
+  if (!kindnessBlockReason(shooting)) throw new Error("A shooting and use-of-force story should be excluded.");
+
+  const politics = fixture({
+    slug: "co-politics",
+    title: "A political rally collected coats",
+    dek: "The election night party filled a station parking lot.",
+    tags: ["kindness", "winter-clothes"],
+  });
+  if (!kindnessBlockReason(politics)) throw new Error("A political story should be excluded.");
+
+  const tragedy = fixture({
+    slug: "co-tragedy",
+    title: "Neighbors gathered after a teacher died",
+    dek: "The town brought meals to the family.",
+    tags: ["neighbors", "kindness"],
+  });
+  if (!kindnessBlockReason(tragedy)) throw new Error("A death in the headline should be excluded.");
+
+  const stranger = fixture({
+    slug: "co-stranger",
+    title: "A stranger paid for the next table",
+    dek: "Pay it forward started at a diner counter.",
+    tags: [],
+  });
+  if (!kindnessThemes(stranger).includes("strangers")) throw new Error("A stranger helping should qualify.");
+
+  const wildlife = fixture({
+    slug: "co-hatch",
+    title: "Thousands of hatchlings reached the sea",
+    dek: "Volunteers released the nests at dawn.",
+    tags: ["sea-turtles", "wildlife-conservation", "volunteers"],
+    category: "animals",
+  });
+  if (kindnessThemes(wildlife).length) throw new Error("A hatchling release should stay off the kindness hub.");
+
+  const strong = fixture({
+    slug: "co-strong",
+    date: "2026-01-01",
+    title: "A child gave a stranger the shoes off his feet",
+    dek: "Neighbors said the kindness started in a checkout line.",
+    tags: ["kindness", "neighbors", "kids"],
+    kidFriendly: true,
+    kidSummary: "A child gave his shoes to a stranger who needed them, and neighbors helped.",
+    kidQuestions: ["What did the child give away?", "Who else helped?"],
+  });
+  const weak = fixture({
+    slug: "co-weak",
+    date: "2026-10-20",
+    title: "Volunteers picked up litter along a creek",
+    dek: "A Saturday cleanup filled a dozen bags.",
+    tags: ["cleanups", "volunteers"],
+  });
+  if (kindnessQuality(strong) <= kindnessQuality(weak)) {
+    throw new Error("A stranger-and-kids kindness story should outrank a cleanup.");
+  }
+  const picked = buildWorldKindnessHub([strong, weak], { exclude: [], states: {}, world: [], kids: [] });
+  const colorado = picked.slots.find((slot) => slot.state.code === "CO");
+  if (colorado?.story?.slug !== "co-strong") {
+    throw new Error(`Colorado should use the stronger kindness story, not ${colorado?.story?.slug}.`);
+  }
+
+  const excluded = buildWorldKindnessHub([strong, weak], { exclude: ["co-strong"], states: {}, world: [], kids: [] });
+  if (excluded.slots.find((slot) => slot.state.code === "CO")?.story?.slug !== "co-weak") {
+    throw new Error("An exclude slug should leave the next kindness story.");
+  }
+  if (kindnessStoryQualifies(strong, { exclude: ["co-strong"], states: {}, world: [], kids: [] })) {
+    throw new Error("An excluded story should not qualify.");
+  }
+
+  const blockedPin = buildWorldKindnessHub([shooting, strong], { exclude: [], states: { CO: "co-shooting" }, world: [], kids: [] });
+  if (!blockedPin.pinErrors.some((error) => error.includes("co-shooting") && error.includes("content filter"))) {
+    throw new Error("A pin should not put a blocked story back on the hub.");
+  }
+  if (blockedPin.slots.find((slot) => slot.state.code === "CO")?.story?.slug === "co-shooting") {
+    throw new Error("The blocked pin should not fill the state.");
+  }
+
+  const worldPin = buildWorldKindnessHub([strong], {
+    exclude: [],
+    states: {},
+    world: ["co-strong"],
+    kids: [],
+  });
+  if (!worldPin.pinErrors.some((error) => error.includes("United States"))) {
+    throw new Error("A world pin should reject a United States story.");
+  }
+
+  const kidPin = buildWorldKindnessHub([weak], { exclude: [], states: {}, world: [], kids: ["co-weak"] });
+  if (!kidPin.pinErrors.some((error) => error.includes("kid-friendly"))) {
+    throw new Error("A kids pin should reject a story that is not kid-friendly.");
+  }
+
+  const missing = buildWorldKindnessHub([], { exclude: ["missing-slug"], states: { CO: "missing-slug" }, world: ["missing-world"], kids: ["missing-kid"] });
+  if (missing.pinErrors.length < 4) throw new Error(`Expected pin errors for missing slugs, got ${missing.pinErrors.join(" | ")}`);
+
+  if (Object.keys(parseWorldKindnessEditorConfig({ exclude: [], states: {}, world: [], kids: [] })).length !== 4) {
+    throw new Error("An empty editor file should keep the four lists.");
+  }
+  for (const value of [{ exclude: ["Not A Slug"], states: {}, world: [], kids: [] }, { exclude: [], states: {}, world: ["dup", "dup"], kids: [] }, { extra: true }]) {
+    let threw = false;
+    try {
+      parseWorldKindnessEditorConfig(value);
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`World Kindness config should reject ${JSON.stringify(value)}`);
+  }
+
+  if (!worldKindnessDayInSeason("2026-11-06") || !worldKindnessDayInSeason("2026-11-13") || !worldKindnessDayInSeason("2027-11-14")) {
+    throw new Error("The World Kindness Day banner should be eligible November 6 through November 14, every year.");
+  }
+  if (worldKindnessDayInSeason("2026-11-05") || worldKindnessDayInSeason("2026-11-15") || worldKindnessDayInSeason("November 13")) {
+    throw new Error("The World Kindness Day banner should stay ineligible outside November 6 through November 14.");
+  }
+  if (WORLD_KINDNESS_BANNER.timeZone !== "America/Denver" || WORLD_KINDNESS_BANNER.start !== "11-06" || WORLD_KINDNESS_BANNER.end !== "11-14") {
+    throw new Error("The kindness banner window should be November 6 through 14, America/Denver.");
+  }
+
+  if (THANKS_BANNER_WINDOW.start !== thanksSeason.start || THANKS_BANNER_WINDOW.end !== thanksSeason.end || THANKS_BANNER_WINDOW.enabled !== thanksSeason.banner) {
+    throw new Error("The homepage banner copy of the thanks window drifted.");
+  }
+  if (GIVING_TUESDAY_BANNER_WINDOW.start !== GIVING_TUESDAY_BANNER_START || GIVING_TUESDAY_BANNER_WINDOW.end !== GIVING_TUESDAY_BANNER_END) {
+    throw new Error("The homepage banner copy of the Giving Tuesday window drifted.");
+  }
+
+  const flags = emptyBannerFlags();
+  if (pickHomepageBanner(flags, "2026-11-11") !== null) throw new Error("No banner should show when none are in season.");
+  flags.veterans = true;
+  if (pickHomepageBanner(flags, "2026-11-03") !== "veterans") throw new Error("A lone banner should show even inside another hub's month.");
+  flags["news-break"] = true;
+  flags.thanks = true;
+  if (pickHomepageBanner(flags, "2026-11-03") !== "news-break") throw new Error("The news break should lead through November 5.");
+  flags["world-kindness"] = true;
+  if (pickHomepageBanner(flags, "2026-11-06") !== "world-kindness") throw new Error("World Kindness Day should lead on November 6.");
+  if (pickHomepageBanner(flags, "2026-11-10") !== "world-kindness") throw new Error("World Kindness Day should lead on November 10.");
+  if (pickHomepageBanner(flags, "2026-11-11") !== "veterans") throw new Error("Veterans Day should take November 11.");
+  if (pickHomepageBanner(flags, "2026-11-12") !== "world-kindness") throw new Error("World Kindness Day should return on November 12.");
+  flags["news-break"] = false;
+  flags.veterans = false;
+  flags["world-kindness"] = false;
+  flags["giving-tuesday"] = true;
+  if (pickHomepageBanner(flags, "2026-11-24") !== "giving-tuesday") throw new Error("Giving Tuesday should lead over Thanksgiving.");
+
+  const bannerCases: [string, string | null][] = [
+    ["2026-10-25T19:00:00Z", "first-responders"],
+    ["2026-10-30T19:00:00Z", null],
+    ["2026-10-31T19:00:00Z", "news-break"],
+    ["2026-11-05T19:00:00Z", "news-break"],
+    ["2026-11-06T06:30:00Z", "news-break"],
+    ["2026-11-06T07:30:00Z", "world-kindness"],
+    ["2026-11-10T19:00:00Z", "world-kindness"],
+    ["2026-11-11T19:00:00Z", "veterans"],
+    ["2026-11-12T19:00:00Z", "world-kindness"],
+    ["2026-11-14T19:00:00Z", "world-kindness"],
+    ["2026-11-15T19:00:00Z", "thanks"],
+    ["2026-11-24T19:00:00Z", "giving-tuesday"],
+    ["2026-12-02T19:00:00Z", "giving-tuesday"],
+    ["2026-12-03T19:00:00Z", null],
+  ];
+  for (const [iso, expected] of bannerCases) {
+    const actual = activeHomepageBanner(new Date(iso));
+    if (actual !== expected) throw new Error(`Homepage banner at ${iso}: expected ${expected}, got ${actual}.`);
+  }
+  for (let cursor = Date.UTC(2026, 9, 1); cursor <= Date.UTC(2026, 11, 31); cursor += 86_400_000) {
+    const now = new Date(cursor + 19 * 60 * 60 * 1000);
+    const picked = activeHomepageBanner(now);
+    if (!picked) continue;
+    const ny = editionDay(now);
+    const inSeason =
+      (picked === "news-break" && isNewsBreakBannerActive(now)) ||
+      (picked === "veterans" && veteransDayInSeason(ny)) ||
+      (picked === "world-kindness" && worldKindnessDayInSeason(mountainDay(now))) ||
+      (picked === "thanks" && thanksBannerVisible(now)) ||
+      (picked === "giving-tuesday" && isGivingTuesdaySeason(ny)) ||
+      (picked === "first-responders" && ny.slice(5) >= "10-21" && ny.slice(5) <= "10-29");
+    if (!inSeason) throw new Error(`${picked} was chosen on ${ny} outside its season.`);
+  }
+
+  if (KINDNESS_ACTS.length !== 13) throw new Error("World Kindness Day needs 13 free acts.");
+  const actTitles = new Set<string>();
+  for (const act of KINDNESS_ACTS) {
+    if (act.title.length < 8 || act.detail.length < 40) throw new Error(`Act “${act.title}” is too short.`);
+    if (actTitles.has(act.title)) throw new Error(`Duplicate act ${act.title}`);
+    actTitles.add(act.title);
+    if (/@|https?:/i.test(`${act.title} ${act.detail}`)) throw new Error(`Act “${act.title}” should not add a link or an email.`);
+  }
+  if (KINDNESS_CLASSROOM_QUESTIONS.length !== 3) throw new Error("The classroom corner needs 3 discussion questions.");
+  if (WORLD_KINDNESS_SHARE.length > 200) throw new Error("The share text should stay short enough to post.");
+  const relatedHrefs = RELATED_HUBS.map((item) => item.href);
+  for (const href of [KINDNESS_INDEX_PATH, "/good-neighbor", "/50-states-of-thanks", "/giving-tuesday"]) {
+    if (!relatedHrefs.includes(href)) throw new Error(`Related hubs should include ${href}.`);
+  }
+  if (relatedHrefs.some((href) => href.includes("/calendar"))) throw new Error("Do not link /calendar unless that route is on main.");
+
+  const config = loadWorldKindnessEditorConfig();
+  const live = getWorldKindnessDayHub();
+  const rebuilt = buildWorldKindnessHub(published, config);
+  if (live.pinErrors.length || rebuilt.pinErrors.length) {
+    throw new Error(`World Kindness Day config: ${[...live.pinErrors, ...rebuilt.pinErrors].join("; ")}`);
+  }
+  if (live.slots.length !== 51 || live.covered.length + live.gaps.length !== 51) {
+    throw new Error("The hub should have one slot for every state and Washington, D.C.");
+  }
+  if (live.stories.length < 8) throw new Error("The hub should render real archive stories.");
+  const countries = new Set<string>();
+  for (const item of live.world) {
+    if (item.story.country === "US") throw new Error(`${item.story.slug} is a US story in the world section.`);
+    if (countries.has(item.story.country)) throw new Error(`${item.story.country} appears twice in the world section.`);
+    countries.add(item.story.country);
+  }
+  for (const item of live.kids) {
+    if (!item.story.kidFriendly || !item.story.kidSummary) {
+      throw new Error(`${item.story.slug} is in the kids section without a read-aloud summary.`);
+    }
+  }
+  for (const story of live.stories) {
+    if (kindnessBlockReason(story)) throw new Error(`${story.slug} is on the hub but matches the content filter.`);
+    if (config.exclude.includes(story.slug)) throw new Error(`${story.slug} is excluded and still on the hub.`);
+    if (!kindnessStoryQualifies(story, config)) throw new Error(`${story.slug} is on the hub without qualifying.`);
+  }
+  if (!live.imageStory || !live.stories.some((story) => story.slug === live.imageStory?.slug)) {
+    throw new Error("The social image has to be a story that is actually on the hub.");
+  }
+  for (const slot of live.covered) {
+    if (!slot.story) continue;
+    if (slot.story.state !== slot.state.code && !slot.story.alsoStates.includes(slot.state.code)) {
+      throw new Error(`${slot.story.slug} is filed on ${slot.state.code} without a matching state.`);
+    }
+  }
+
+  const schema = worldKindnessJsonLd(live);
+  const node = schema["@graph"][0] as { "@type": string[] };
+  if (!node["@type"].includes("Article") || !node["@type"].includes("CollectionPage")) {
+    throw new Error("World Kindness Day schema should be an Article and a CollectionPage.");
+  }
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.some((url) => url.endsWith(WORLD_KINDNESS_PATH))) {
+    throw new Error("The sitemap should include the World Kindness Day hub.");
+  }
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("WORLD_KINDNESS_PATH")) throw new Error("IndexNow should ping the World Kindness Day hub.");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  if (!home.includes("WorldKindnessDayBanner")) throw new Error("The homepage should mount the World Kindness Day banner.");
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("WORLD_KINDNESS_PATH")) throw new Error("The footer should link to the World Kindness Day hub.");
+  const topic = fs.readFileSync(path.join(process.cwd(), "components/hub-browse.tsx"), "utf8");
+  if (!topic.includes("WORLD_KINDNESS_PATH")) throw new Error("The kindness topic page should link to the hub.");
+  const page = fs.readFileSync(path.join(process.cwd(), "app/(site)/world-kindness-day/page.tsx"), "utf8");
+  for (const heading of ["Kindness around the world", "Kindness in all 50 states", "Kids being kind", "13 free acts of kindness for Nov 13"]) {
+    if (!page.includes(heading)) throw new Error(`The hub page is missing “${heading}”.`);
+  }
+  if (!page.includes("siteConfig.editor.name") || !page.includes("EmailSignup") || !page.includes("ShareButtons") || !page.includes("worldKindnessJsonLd")) {
+    throw new Error("The hub page should use the masthead byline, schema, a newsletter signup, and share text.");
+  }
+  if (page.includes("/calendar") || page.includes("Jane ") || page.includes("By John")) {
+    throw new Error("The hub page should not link a missing calendar or use a personal name.");
+  }
+  for (const file of [
+    "components/news-break-banner.tsx",
+    "components/thanks-banner.tsx",
+    "components/giving-tuesday-banner.tsx",
+    "components/veterans-day-banner.tsx",
+    "components/first-responders-day-banner.tsx",
+    "components/world-kindness-day-banner.tsx",
+  ]) {
+    const source = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!source.includes("activeHomepageBanner")) throw new Error(`${file} should use the single homepage banner.`);
+  }
+
+  const open = live.gaps.map((slot) => slot.state.name);
+  console.log(
+    open.length
+      ? `World Kindness Day: ${live.covered.length} of ${live.slots.length} places covered. Still open: ${open.join(", ")}`
+      : `World Kindness Day: all ${live.slots.length} places covered. World stories: ${live.world.length}. Kids stories: ${live.kids.length}.`,
+  );
+}
+
 function assertImageVariants() {
   const versioned = "/images/stories/pony-v2.webp";
   if (storyThumbPath(versioned) !== "/images/stories/pony-v2-sm.webp") {
@@ -3736,6 +4129,7 @@ async function main() {
   assertExplainers();
   assertGivingTuesday(stories);
   assertFirstRespondersDay();
+  assertWorldKindnessDay();
   assertKindnessChallenges();
   assertSpanishEditions();
   assertNewsBreak();

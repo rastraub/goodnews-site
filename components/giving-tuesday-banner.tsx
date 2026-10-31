@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { GIVING_TUESDAY_PATH, isGivingTuesdaySeason } from "@/lib/giving-tuesday";
-import { editionDay } from "@/lib/world-pick";
+import { GIVING_TUESDAY_PATH } from "@/lib/giving-tuesday";
+import { activeHomepageBanner } from "@/lib/homepage-banner";
 
-export function GivingTuesdayBanner({ today = editionDay() }: { today?: string }) {
-  if (!isGivingTuesdaySeason(today)) return null;
+export function GivingTuesdayBanner() {
+  if (activeHomepageBanner() !== "giving-tuesday") return null;
   return (
     <aside className="season-banner">
       <div className="wrap">

@@ -22,6 +22,7 @@ import { getKindnessChallenges } from "@/lib/kindness";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
+import { getWorldKindnessDayHub, WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { loadSpanishEditions } from "@/lib/spanish-editions";
 import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
@@ -101,6 +102,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return latest;
   }, undefined);
   const veterans = getVeteransDayHub();
+  const kindnessDay = getWorldKindnessDayHub();
   const responders = getFirstRespondersDayHub();
   const neighborMonths = ballotMonths();
   const neighborCurrent = editionMonth();
@@ -131,6 +133,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: absoluteUrl(VETERANS_DAY_PATH),
       lastModified: veterans.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    {
+      url: absoluteUrl(WORLD_KINDNESS_PATH),
+      lastModified: kindnessDay.latest ?? siteLatest,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     },

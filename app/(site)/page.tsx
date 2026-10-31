@@ -14,6 +14,7 @@ import { KindnessPromo } from "@/components/kindness-promo";
 import { OnThisDayPromo } from "@/components/on-this-day-promo";
 import { ThanksBanner } from "@/components/thanks-banner";
 import { VeteransDayBanner } from "@/components/veterans-day-banner";
+import { WorldKindnessDayBanner } from "@/components/world-kindness-day-banner";
 import { WeekPromo } from "@/components/week-promo";
 import { WorldSpotlight } from "@/components/world-spotlight";
 import { StoryImage } from "@/components/story-image";
@@ -73,6 +74,7 @@ export default function HomePage() {
       <ThanksBanner />
       <GivingTuesdayBanner />
       <VeteransDayBanner />
+      <WorldKindnessDayBanner />
       <FirstRespondersDayBanner />
       {hero ? (
         <Hero story={hero} fridayHref={fridayHref} fridayLabel={fridayLabel} />

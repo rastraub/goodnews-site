@@ -358,7 +358,7 @@ The pinned story has to be published, has to qualify, and has to be filed in tha
 
 `npm run veterans-gaps` prints the states that still need a veteran story, plus the slug chosen for each covered state. The same open list is logged by `npm run validate-stories`. Open states do not fail the build. The daily run can use that list to fill the gaps.
 
-The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. The homepage shows a banner from November 1 through November 12, using the same New York date as the edition line, and only after a build during that window. The hub URL itself does not change.
+The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. The homepage banner is eligible from November 1 through November 12, using the same New York date as the edition line, and only after a build during that window. When another November banner is also eligible, the homepage shows one banner. The handoff is in the World Kindness Day section. The hub URL itself does not change.
 
 ## First Responders Day hub
 
@@ -413,6 +413,50 @@ The pinned story has to be published, filed in that state (`state` or `alsoState
 `npm run first-responders-gaps` prints each role group and the states that are still open. The same open list is logged by `npm run validate-stories`. Open states do not fail the build.
 
 The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. The homepage shows a banner from October 21 through October 29, using the same New York date as the edition line, every year, and only after a build during that window. `/topic/first-responders` links here all year. The hub URL itself does not change.
+
+## World Kindness Day hub
+
+`/world-kindness-day` stays up all year. World Kindness Day is November 13. The URL does not change. The byline is `siteConfig.editor.name`. Do not put a personal name on this page.
+
+The hub is built from stories already in the archive. A story qualifies when it is about strangers helping, kids doing a kind thing, neighbors, a community act, or a person being kind to an animal. The kindness and neighbors tags count. So do food, coat, toy, meal, library, repair, garden, and cleanup tags. A volunteers tag by itself does not. A wildlife census, a zoo birth, or a mass hatchling release does not, unless the story is also tagged kindness or neighbors, or the lead is one animal being rescued, fostered, or adopted. Drafts stay off.
+
+### What stays off the page
+
+The news-break heavy-news filter reads the title, deck, body, and classroom fields. A match rejects the story. It catches violence, use of force, and politics, and it leaves "Library of Congress" and "Democratic Republic" alone. The list lives in `lib/news-break.ts`.
+
+This hub also rejects a tragedy-centered headline. `died`, `death`, `killed`, `funeral`, and `tragic` in the title stay off. `tragic` and `was killed` in the deck stay off. A phone that "died" in the deck does not match. "One neighbor said" is a quote, not a neighbor story. "Gave birth" is not a gift.
+
+The editor file is `data/world-kindness-day.json`.
+
+```json
+{
+  "exclude": [],
+  "states": {},
+  "world": [],
+  "kids": []
+}
+```
+
+`exclude` drops a slug even when it would qualify. `states` pins one story to a USPS code, including `DC`. `world` pins stories filed outside the United States. `kids` pins kid-friendly stories. A pin cannot put back a story the content filter rejected. A bad pin or a bad exclude slug fails `npm run validate-stories` and the build. The card says "Pinned" when a pin is in use.
+
+The state section uses the shared one-story picker in `lib/state-story-hub.ts`. Home state wins, then the kindness score, then the newest date. A state with no match shows an open card linking to `/submit`.
+
+`npm run world-kindness-gaps` prints every state that still has no qualifying story. The same open list is logged by `npm run validate-stories`. Open states do not fail the build. The daily run can use that list to fill the gaps before November 13.
+
+The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. `/topic/kindness` links here all year. The hub URL itself does not change.
+
+### Homepage banner
+
+The banner is eligible November 6 through November 14, America/Denver, every year, and only after a build during that window. The homepage shows one seasonal banner at a time, so the story of the day stays in view. The order for the overlapping November windows is:
+
+- October 31 through November 5: the news-break banner
+- November 6 through November 10, and November 12 through November 14: this banner
+- November 11: Veterans Day
+- November 15 through November 23: 50 States of Thanks
+- November 24 through December 2: Giving Tuesday
+
+A banner that is the only one in season still shows. The rules live in `lib/homepage-banner.ts`.
+
 ## Weekly Kindness Challenge
 
 One page per Monday, at `/kindness-challenge` and `/kindness-challenge/YYYY-MM-DD`. The date is the Monday of that week, from the same helper as `/week`: `weekStart()` in `lib/weeks.ts`. The first page is the Monday of the launch week.

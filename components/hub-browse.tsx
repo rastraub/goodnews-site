@@ -11,6 +11,7 @@ import { HELP_KIND_LABEL } from "@/lib/help";
 import { getHubByPath, getHubIndex, storiesForHub, type Hub } from "@/lib/hubs";
 import { pageCount, pagePath, pageSlice } from "@/lib/paging";
 import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
+import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import type { Story } from "@/lib/stories";
@@ -136,6 +137,12 @@ export function HubBrowse({ path, page }: { path: string; page: number }) {
             <p className="lede" style={{ marginTop: 12 }}>
               October 28 is Honoring the Nation&apos;s First Responders Day.{" "}
               <Link href={FIRST_RESPONDERS_DAY_PATH}>Thank you, first responders</Link> gathers rescues, lifesaving help, and kindness from the archive.
+            </p>
+          ) : null}
+          {hub.path === "/topic/kindness" ? (
+            <p className="lede" style={{ marginTop: 12 }}>
+              November 13 is World Kindness Day.{" "}
+              <Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link> gathers kindness stories from the archive, plus 13 free acts and a classroom chain.
             </p>
           ) : null}
           {topicExplainers.length ? (

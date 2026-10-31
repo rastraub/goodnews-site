@@ -1018,6 +1018,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .newsmap-meta{display:block;color:var(--ink2);font-size:14px;margin-top:3px}
 .newsmap-kid{font-weight:700;color:var(--green)}
 .newsmap-filter-empty{color:var(--ink2);margin-top:8px}
+.kindness-acts{list-style:none;display:grid;gap:12px;margin:18px 0 8px;padding:0;counter-reset:act}
+.kindness-acts li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.kindness-acts li::before{counter-increment:act;content:counter(act);font-weight:700;color:var(--gold-d);background:var(--gold-l);border-radius:999px;width:32px;height:32px;display:grid;place-items:center}
+.kindness-acts strong{font-family:var(--font-serif);font-weight:600;font-size:18px}
+.kindness-acts p{margin:4px 0 0;color:var(--ink2);line-height:1.5}
+#world,#states,#kids,#acts,#classroom,#share,#related{scroll-margin-top:24px}
+@media print {
+  .kindness-acts li,.wk-chain{break-inside:avoid}
+}
 @media (max-width:700px){
   .gn-card{grid-template-columns:1fr}
   .gn-card h3,.gn-share h2{font-size:24px}
