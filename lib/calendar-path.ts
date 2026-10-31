@@ -13,6 +13,7 @@ export const CALENDAR_HUBS = {
   giving: { path: "/giving-tuesday", label: "50 states, 50 ways to help" },
   thanks: { path: "/50-states-of-thanks", label: "50 States of Thanks" },
   kindness: { path: "/kindness-challenge", label: "Kindness Challenge" },
+  "world-kindness": { path: "/world-kindness-day", label: "World Kindness Day stories" },
   responders: { path: "/first-responders-day", label: "First Responders Day stories" },
   neighbor: { path: "/good-neighbor", label: "Good Neighbor vote" },
 } as const;

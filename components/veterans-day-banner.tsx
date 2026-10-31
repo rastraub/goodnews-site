@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { VETERANS_DAY_PATH, veteransDayInSeason } from "@/lib/veterans-day";
+import { activeHomepageBanner } from "@/lib/homepage-banner";
+import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 
 /**
- * Shown from November 1 through November 12.
- * The date is the edition clock, so a static build picks it up on the next deploy.
+ * Eligible November 1 through November 12 on the edition clock.
+ * The homepage shows one seasonal banner. Veterans Day keeps November 11.
+ * A static build picks the day up on the next deploy.
  */
 export function VeteransDayBanner() {
-  if (!veteransDayInSeason()) return null;
+  if (activeHomepageBanner() !== "veterans") return null;
   return (
     <section className="season-banner">
       <div className="wrap">

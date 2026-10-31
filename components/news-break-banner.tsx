@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import { isNewsBreakBannerActive } from "@/lib/news-break-banner";
+import { activeHomepageBanner } from "@/lib/homepage-banner";
 import { newsBreakBanner } from "@/site.config";
 
 function subscribe() {
@@ -11,7 +11,7 @@ function subscribe() {
 
 /** Client clock. The server snapshot stays hidden so a static build does not freeze the window. */
 function bannerVisible() {
-  return isNewsBreakBannerActive();
+  return activeHomepageBanner() === "news-break";
 }
 
 function bannerHidden() {

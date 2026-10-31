@@ -77,7 +77,7 @@ export const OBSERVANCES: ObservanceRecord[] = [
       "Thank one person for a specific help they gave.",
       "Read a kindness story from the archive out loud. No purchase is required.",
     ],
-    hubs: ["kindness"],
+    hubs: ["world-kindness", "kindness"],
   },
   {
     slug: "america-recycles-day",

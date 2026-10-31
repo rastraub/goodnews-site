@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { THANKS_PATH, thanksBannerVisible, thanksBoard } from "@/lib/thanks";
+import { activeHomepageBanner } from "@/lib/homepage-banner";
+import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 
 export function ThanksBanner() {
-  if (!thanksBannerVisible()) return null;
+  if (activeHomepageBanner() !== "thanks") return null;
   const board = thanksBoard();
   return (
     <aside className="thanks-banner" aria-label="Thanksgiving">

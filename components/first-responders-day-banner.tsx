@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { FIRST_RESPONDERS_DAY_PATH, firstRespondersDayInSeason, firstRespondersYear } from "@/lib/first-responders-day";
+import { FIRST_RESPONDERS_DAY_PATH, firstRespondersYear } from "@/lib/first-responders-day";
+import { activeHomepageBanner } from "@/lib/homepage-banner";
 
 /**
- * Shown from October 21 through October 29, every year.
- * The date is the edition clock, so a static build picks it up on the next deploy.
+ * Eligible October 21 through October 29, every year, on the edition clock.
+ * Hidden when another seasonal banner has the single homepage slot.
+ * A static build picks the day up on the next deploy.
  */
 export function FirstRespondersDayBanner() {
-  if (!firstRespondersDayInSeason()) return null;
+  if (activeHomepageBanner() !== "first-responders") return null;
   const year = firstRespondersYear();
   return (
     <section className="season-banner">
