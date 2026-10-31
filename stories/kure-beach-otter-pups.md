@@ -24,8 +24,7 @@ howToHelp:
   - label: "North Carolina Aquarium at Fort Fisher"
     url: "https://www.ncaquariums.com/fort-fisher"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

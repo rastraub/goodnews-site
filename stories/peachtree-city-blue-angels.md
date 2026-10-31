@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.blueangels.navy.mil/"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
