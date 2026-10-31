@@ -18,6 +18,7 @@
     "giving-tuesday-coverage": "tsx scripts/giving-tuesday-coverage.ts",
     "veterans-gaps": "tsx scripts/veterans-day-gaps.ts",
     "world-kindness-gaps": "tsx scripts/world-kindness-day-gaps.ts",
+    "calendar-coverage": "tsx scripts/calendar-coverage-report.ts",
     "first-responders-gaps": "tsx scripts/first-responders-day-gaps.ts",
     "next-kindness-challenge": "tsx scripts/next-kindness-challenge.ts",
     "missing-spanish": "tsx scripts/missing-spanish-editions.ts"

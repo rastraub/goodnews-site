@@ -18,6 +18,7 @@ import {
   CLASSROOM_QUESTIONS,
   KINDNESS_ACTS,
   RELATED_HUBS,
+  WORLD_KINDNESS_CALENDAR_PATH,
   WORLD_KINDNESS_DESCRIPTION,
   WORLD_KINDNESS_PATH,
   WORLD_KINDNESS_SHARE,
@@ -133,6 +134,7 @@ export default function WorldKindnessDayPage() {
             <a href="#acts">13 free acts</a>
             <a href="#classroom">For classrooms</a>
             <a href="#share">Share</a>
+            <Link href={WORLD_KINDNESS_CALENDAR_PATH}>On the calendar</Link>
             <Link href={KINDNESS_INDEX_PATH}>Kindness Challenge</Link>
             <Link href="/kids">Kids section</Link>
             <Link href="/topic/kindness">All kindness stories</Link>

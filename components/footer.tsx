@@ -9,6 +9,7 @@ import { THANKS_PATH } from "@/lib/thanks";
 import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { newsBreakBanner, siteConfig, socialLinks } from "@/site.config";
+import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 export function Footer() {
@@ -47,6 +48,7 @@ export function Footer() {
               <li><Link href="/web-stories">Web stories</Link></li>
               {quiz ? <li><Link href={quiz.path}>Good News Quiz</Link></li> : null}
               <li><Link href={ON_THIS_DAY_TODAY_PATH}>Good news on this day</Link></li>
+              <li><Link href={CALENDAR_PATH}>Good News Calendar</Link></li>
               <li><Link href="/heroes">Hometown Heroes</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>

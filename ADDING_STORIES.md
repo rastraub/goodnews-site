@@ -443,7 +443,7 @@ The state section uses the shared one-story picker in `lib/state-story-hub.ts`. 
 
 `npm run world-kindness-gaps` prints every state that still has no qualifying story. The same open list is logged by `npm run validate-stories`. Open states do not fail the build. The daily run can use that list to fill the gaps before November 13.
 
-The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. `/topic/kindness` links here all year. The hub URL itself does not change.
+The page is in the sitemap. A production deploy pings it through IndexNow with the other static pages. `/topic/kindness` links here all year. The hub links to `/calendar/world-kindness-day`, and that calendar page links back here. The hub URL itself does not change.
 
 ### Homepage banner
 
@@ -605,6 +605,42 @@ The explainer page lists at most six stories. Pins take the first slots. The res
 Pick a new explainer when the archive already has several stories about that kind of help. A topic with one clear story can still be a page if the story is really about that system, as with a community fridge. Do not add a guide for a topic the archive does not cover.
 
 Set `draft: true` until the sources are checked. A draft is validated and left off the site. `date` is the day you published the explainer. Set `updated` when you change a fact. Run `npm run validate-stories` before you commit. The check fails if an explainer links no archive story, if a HowTo has no steps, or if the sitemap is missing the pages.
+
+## Good News Calendar
+
+`/calendar` is an evergreen list of kindness days, awareness dates, and other positive observances. It is not the same thing as `/on-this-day`, which is a page for every month and day in history. The calendar looks forward. Dates are computed in America/Denver, the same clock as the morning edition.
+
+`/calendar/{slug}` is one observance: the description, the next date, up to four matching archive stories, free ways to take part, a classroom prompt, and the existing newsletter signup. `/calendar/good-news.ics` is a static calendar file. Readers can download it or subscribe to that address in a calendar app. There is no paid calendar service.
+
+The footer, the kids page, and a small "Coming up" row on the homepage link here. The Story of the Day stays above that row.
+
+### Add an observance
+
+Edit `data/good-news-calendar.ts`. One object per observance. Do not add a date you are not sure is real. If a host announces the week fresh each year and there is no standing rule, leave it out.
+
+- `slug` is kebab-case and becomes the URL.
+- `name` is the public title. Do not put a personal name in the name, the description, the classroom line, or the take-part lines.
+- `description` is one neutral sentence.
+- `rule` is the date:
+  - `{ type: "fixed", month: 11, day: 13 }` is November 13 every year. Add `endMonth` and `endDay` for a span in the same year, such as May 6 through May 12.
+  - `{ type: "nthWeekday", month: 11, weekday: "thursday", n: 4 }` is the fourth Thursday of November. `days` is how many days the span lasts, counting the first day. Teacher Appreciation Week is the first Monday of May with `days: 5`.
+  - `{ type: "lastWeekday", month: 4, weekday: "friday" }` is the last Friday of April.
+  - `{ type: "nthWeekdayOffset", month: 11, weekday: "thursday", n: 4, offset: 5 }` is five days after the fourth Thursday of November. That is GivingTuesday. A negative offset walks backward. National Adoption Day is five days before that Thursday.
+- `tags` are slugs from `lib/tags.ts`. They are how archive stories are matched. Add a tag there before you use it. Do not invent a story to fill a date.
+- `keywords` are optional phrases. They match the title and the deck only, as whole words. Use them when a tag is too broad or a job word such as "nurse" is the real match.
+- `kidFriendly` shows the kid-friendly marker. Set it only when the classroom prompt is a fit for ages about 6 to 12.
+- `classroom` is one short prompt for a teacher. Every observance needs one, including the ones that are not kid-friendly.
+- `takePart` is two to four free actions. No fee, no student email address, and no trip a child would take alone.
+- `infoUrl` is optional. It has to be `https` and a page from the organization that keeps the date. `infoLabel` is the link text, such as "United Nations observances". Both fields go together.
+- `hubs` links an existing hub. The ids are `veterans`, `giving`, `thanks`, `kindness`, `world-kindness`, `responders`, and `neighbor`. `world-kindness` is `/world-kindness-day`. Do not add a hub path that this repo does not already serve.
+- `storyFilter: "first-responders"` keeps the same exclusion rules as `/first-responders-day`. Use it only for that observance.
+
+Skip elections, partisan dates, and observances whose point is a religious dispute. The byline stays the public masthead from `site.config.ts`.
+
+A page still renders when the archive has no matching story. It is `noindex` until it has at least two. The sitemap and IndexNow include `/calendar` and only the observance pages that clear that line.
+
+`npm run validate-stories` checks the rules, the known dates, the hub paths, and the sitemap split. `npm run calendar-coverage` lists observances in the next 60 days with fewer than two matching stories. Gaps do not fail the build. The daily run can use that list.
+
 ## Good news on this day
 
 `/on-this-day` is a calendar. `/on-this-day/october-25` is one evergreen page. `/on-this-day/today` sends a reader to the page for the current date in America/Denver. The pages are static. Historical milestones live in `data/on-this-day.json`, not in a story file.

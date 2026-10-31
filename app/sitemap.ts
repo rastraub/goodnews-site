@@ -21,6 +21,7 @@ import { quizzesToPrerender } from "@/lib/quiz";
 import { getKindnessChallenges } from "@/lib/kindness";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
+import { calendarSitemapEntries } from "@/lib/good-news-calendar";
 import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { getWorldKindnessDayHub, WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { loadSpanishEditions } from "@/lib/spanish-editions";
@@ -344,6 +345,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [absoluteUrl(edition.posterPath)],
     })),
     ...explainerSitemapEntries(),
+    ...calendarSitemapEntries(),
     {
       url: absoluteUrl(ON_THIS_DAY_INDEX_PATH),
       lastModified: siteLatest && siteLatest > onThisDayUpdated() ? siteLatest : onThisDayUpdated(),

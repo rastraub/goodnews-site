@@ -28,6 +28,9 @@ import { siteConfig } from "@/site.config";
 
 export const WORLD_KINDNESS_PATH = "/world-kindness-day";
 
+/** The calendar observance for this same date. The hub and that page link each other. */
+export const WORLD_KINDNESS_CALENDAR_PATH = "/calendar/world-kindness-day";
+
 export const WORLD_KINDNESS_TITLE = "World Kindness Day: stories and 13 free acts";
 
 export const WORLD_KINDNESS_DESCRIPTION =
@@ -188,6 +191,11 @@ export const CLASSROOM_QUESTIONS = [
 ] as const;
 
 export const RELATED_HUBS: { href: string; label: string; note: string }[] = [
+  {
+    href: WORLD_KINDNESS_CALENDAR_PATH,
+    label: "World Kindness Day on the calendar",
+    note: "November 13 on the Good News Calendar, with a classroom prompt and archive stories.",
+  },
   {
     href: KINDNESS_INDEX_PATH,
     label: "Weekly Kindness Challenge",
