@@ -5,6 +5,7 @@
  */
 export const PLACE_ALIASES: Record<string, Record<string, string>> = {
   HI: { honolulu: "urban honolulu" },
+  ID: { boise: "boise city" },
   NY: {
     "new york city": "new york",
     nyc: "new york",
