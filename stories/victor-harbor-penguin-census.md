@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.parks.sa.gov.au/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Little penguins live in burrows on Granite Island, near Victor Harbor in South Australia. ABC News reported on October 31, 2026, that volunteers counted 46 adults in this year's census. That is 10 more than last year and 16 more than in 2024. The colony once had more than 1,000 birds. In 2012 the number fell to 26. Students, park rangers, and neighbors searched the island on Friday for birds, chicks, and signs a burrow was in use. The penguins now breed for a longer part of the year. A bird-flu vaccine is approved for them, but it has not started yet."
 kidQuestions:
