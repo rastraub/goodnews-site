@@ -115,6 +115,7 @@ import {
   monthEnd,
   monthKey,
   renderIndexCsv,
+  latestIndex,
   stateIndexLink,
   storiesPerMillion,
   type IndexStory,
@@ -2953,10 +2954,12 @@ function assertGoodNewsIndex() {
     throw new Error("The October CSV should include Colorado's story count.");
   }
   const link = stateIndexLink({ name: "Colorado", slug: "colorado" }, today);
-  if (monthKey(today) === october.month && link?.label !== "See how Colorado ranks this month") {
+  const edition = latestIndex();
+  if (!edition) throw new Error("The archive should have a Good News Index edition.");
+  if (edition.month === monthKey(today) && link?.label !== "See how Colorado ranks this month") {
     throw new Error(`The open month should use the this-month state link. Got ${link?.label}.`);
   }
-  if (link?.href !== `${october.path}#colorado`) throw new Error(`State pages should link to the state row. Got ${link?.href}.`);
+  if (link?.href !== `${edition.path}#colorado`) throw new Error(`State pages should link to the state row. Got ${link?.href}.`);
   for (const code of ["MD", "DC", "WY"]) {
     const row = october.states.find((state) => state.code === code);
     const count = inState(code).length;
