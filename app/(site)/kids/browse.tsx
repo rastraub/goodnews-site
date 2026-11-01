@@ -12,6 +12,7 @@ import { latestQuiz } from "@/lib/quiz";
 import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
@@ -73,6 +74,7 @@ export function KidsBrowse({ page }: { page: number }) {
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
           <Link href="/classroom">Good News Friday packs</Link>
+          <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <Link href={GOOD_NEWS_MAP_PATH}>Good News Map</Link>
           {quiz ? (
             <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>

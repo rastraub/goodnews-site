@@ -1,7 +1,47 @@
+import {
+  AMBASSADOR_REPORT_TYPE,
+  AMBASSADOR_SIGNUP_TYPE,
+  parseAmbassadorReport,
+  parseAmbassadorSignup,
+} from "@/lib/ambassador-tip";
 import { handleStorySubmission } from "@/lib/submissions";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { getStateByCode } from "@/lib/states";
-import { TIP_LIMITS, cleanHttpUrl, isSafeMailbox, multiLine, singleLine } from "@/lib/tip-mail";
+import { AMBASSADOR_SIGNUP_LABEL, TIP_LIMITS, cleanHttpUrl, isSafeMailbox, multiLine, singleLine } from "@/lib/tip-mail";
+
+function pageFrom(data: Record<string, unknown>, request: Request): string {
+  const page = singleLine(data.pageUrl, TIP_LIMITS.pageUrl);
+  const referer = singleLine(request.headers.get("referer"), TIP_LIMITS.pageUrl);
+  return (
+    (!page.tooLong && cleanHttpUrl(page.value, TIP_LIMITS.pageUrl)) ||
+    (!referer.tooLong && cleanHttpUrl(referer.value, TIP_LIMITS.pageUrl)) ||
+    ""
+  );
+}
+
+async function submitAmbassador(request: Request, data: Record<string, unknown>, type: string) {
+  const parsed = type === AMBASSADOR_REPORT_TYPE ? parseAmbassadorReport(data) : parseAmbassadorSignup(data);
+  if ("error" in parsed) {
+    return Response.json({ ok: false, error: parsed.error }, { status: 400 });
+  }
+  const pageUrl = pageFrom(data, request);
+  try {
+    await handleStorySubmission({
+      name: parsed.name,
+      email: parsed.email,
+      city: parsed.city,
+      state: parsed.state,
+      region: parsed.region,
+      summary: parsed.summary,
+      pageUrl: pageUrl || undefined,
+      receivedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("[submit] handler failed", error);
+    return Response.json({ ok: false, error: "We couldn't save that tip. Please try again." }, { status: 500 });
+  }
+  return Response.json({ ok: true });
+}
 
 export async function POST(request: Request) {
   if (!rateLimit(clientKey(request, "submit"), 5)) {
@@ -15,6 +55,18 @@ export async function POST(request: Request) {
   // Honeypot. Real people never see this field. Pretend it worked.
   if (typeof data.company === "string" && data.company.trim()) {
     return Response.json({ ok: true });
+  }
+
+  const typeField = singleLine(data.type, 80);
+  if (typeField.tooLong) {
+    return Response.json({ ok: false, error: "That note is too long to send." }, { status: 400 });
+  }
+  if (
+    typeField.value === AMBASSADOR_SIGNUP_TYPE ||
+    typeField.value === AMBASSADOR_SIGNUP_LABEL ||
+    typeField.value === AMBASSADOR_REPORT_TYPE
+  ) {
+    return submitAmbassador(request, data, typeField.value);
   }
 
   const name = singleLine(data.name, TIP_LIMITS.name);

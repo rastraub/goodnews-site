@@ -8,6 +8,7 @@ import { placeLabel } from "@/lib/present";
 import { pageAlternates } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
+import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { KindnessLinks } from "@/components/kindness-links";
 import { ListenControls } from "@/components/listen-controls";
 import { kidListenSegments } from "@/lib/listen-text";
@@ -85,6 +86,7 @@ export default function KidsPrintPage() {
               {placePath ? <Link href={placePath}>More classroom stories from this place</Link> : null}
               <Link href="/kids">All classroom stories</Link>
               <Link href="/classroom">Good News Friday packs</Link>
+              <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
             </div>
           </>
         ) : (

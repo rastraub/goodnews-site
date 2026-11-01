@@ -1,11 +1,16 @@
 import { getStateByCode } from "@/lib/states";
 import { siteConfig } from "@/site.config";
 
+export const AMBASSADOR_SIGNUP_LABEL = "Kindness Ambassadors class signup";
+export const AMBASSADOR_NOTE_LABEL = "Kindness Ambassadors class note";
+
 export type StoryTip = {
   name: string;
   email: string;
   city: string;
   state: string;
+  /** Free-text state or country for a Kindness Ambassadors note. Story tips omit it. */
+  region?: string;
   summary: string;
   sourceUrl?: string;
   pageUrl?: string;
@@ -83,11 +88,13 @@ export function cleanHttpUrl(value: string, max = TIP_LIMITS.pageUrl): string {
 export function prepareStoryTip(tip: StoryTip): StoryTip {
   const sourceUrl = cleanHttpUrl(tip.sourceUrl ?? "", TIP_LIMITS.sourceUrl);
   const pageUrl = cleanHttpUrl(tip.pageUrl ?? "", TIP_LIMITS.pageUrl);
+  const region = tip.region ? sanitizeHeader(tip.region, 80) : "";
   return {
     name: sanitizeHeader(tip.name, TIP_LIMITS.name),
     email: sanitizeHeader(tip.email, TIP_LIMITS.email),
     city: sanitizeHeader(tip.city, TIP_LIMITS.city),
     state: sanitizeHeader(tip.state, 8).toUpperCase(),
+    ...(region ? { region } : {}),
     summary: multiLine(tip.summary, TIP_LIMITS.summary).value,
     sourceUrl: sourceUrl.startsWith("https://") ? sourceUrl : undefined,
     pageUrl: pageUrl || undefined,
@@ -99,6 +106,8 @@ export function storyTipSubject(summary: string): string {
   const prefix = `[${siteConfig.name} story tip] `;
   const flat = sanitizeHeader(summary, 500);
   if (!flat) return `${prefix}New tip`;
+  if (flat.startsWith(AMBASSADOR_SIGNUP_LABEL)) return `${prefix}${AMBASSADOR_SIGNUP_LABEL}`;
+  if (flat.startsWith(AMBASSADOR_NOTE_LABEL)) return `${prefix}${AMBASSADOR_NOTE_LABEL}`;
   const snippetMax = 72;
   if (flat.length <= snippetMax) return `${prefix}${flat}`;
   const cut = flat.slice(0, snippetMax);
@@ -120,11 +129,14 @@ export function storyTipBodies(tip: StoryTip): { text: string; html: string } {
     ["Name", shown(clean.name)],
     ["Email", shown(clean.email)],
     ["City", shown(clean.city)],
-    ["State", stateLine],
+  ];
+  if (clean.state) rows.push(["State", stateLine]);
+  if (clean.region) rows.push(["State or country", clean.region]);
+  rows.push(
     ["Source", shown(clean.sourceUrl)],
     ["Page", shown(clean.pageUrl)],
     ["Received", shown(clean.receivedAt)],
-  ];
+  );
   const text = [
     `Story tip for ${siteConfig.name}`,
     "",

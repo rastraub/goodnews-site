@@ -207,7 +207,21 @@ import {
 import { editionDay, worldSpotlight } from "../lib/world-pick";
 import sitemap from "../app/sitemap";
 import { readSmtpSettings, submissionMailbox } from "../lib/smtp";
-import { cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
+import { AMBASSADOR_NOTE_LABEL, AMBASSADOR_SIGNUP_LABEL, cleanHttpUrl, escapeHtml, singleLine, storyTipBodies, storyTipSubject } from "../lib/tip-mail";
+import {
+  AMBASSADOR_CERTIFICATE_PATH,
+  AMBASSADORS_PATH,
+  parseAmbassadorReport,
+  parseAmbassadorSignup,
+  shoutoutsPath,
+  stateCodeFromRegion,
+} from "../lib/ambassador-tip";
+import {
+  currentAmbassadorMonth,
+  indexableShoutoutMonths,
+  readAmbassadorFile,
+  shoutoutMonthsToPrerender,
+} from "../lib/kindness-ambassadors";
 import { BADGE_VARIANTS, badgeSvg } from "../lib/badges";
 import { isNewsBreakBannerActive } from "../lib/news-break-banner";
 import {
@@ -2727,6 +2741,176 @@ function assertKindnessChallenges() {
   if (slugs.size < 10) throw new Error("Curated kindness challenges should point at real stories.");
 }
 
+function assertKindnessAmbassadors() {
+  const empty = readAmbassadorFile({ months: [] });
+  if ("error" in empty) throw new Error(empty.error);
+  const extra = readAmbassadorFile({
+    months: [
+      {
+        month: "2026-11",
+        classes: [
+          {
+            group: "Room 4",
+            city: "Boise",
+            region: "Idaho",
+            act: "The class wrote thank-you notes to the school librarians.",
+            students: "hidden",
+          },
+        ],
+      },
+    ],
+  });
+  if (!("error" in extra)) throw new Error("A shoutout file should reject a student-name field.");
+  const mailed = readAmbassadorFile({
+    months: [
+      {
+        month: "2026-11",
+        classes: [
+          {
+            group: "Room 4",
+            city: "Boise",
+            region: "Idaho",
+            act: "Notes for the librarians, and a contact at class@example.com today.",
+          },
+        ],
+      },
+    ],
+  });
+  if (!("error" in mailed)) throw new Error("A shoutout should not publish an email address.");
+  const duplicate = readAmbassadorFile({
+    months: [
+      { month: "2026-11", classes: [] },
+      { month: "2026-11", classes: [] },
+    ],
+  });
+  if (!("error" in duplicate)) throw new Error("A shoutout file should reject a duplicate month.");
+
+  if (stateCodeFromRegion("Idaho") !== "ID") throw new Error("Idaho should map to a state code.");
+  if (stateCodeFromRegion("Washington, D.C.") !== "DC") throw new Error("Washington, D.C. should map to DC.");
+  if (stateCodeFromRegion("Kenya")) throw new Error("A country should not be stored as a US state code.");
+
+  const signup = parseAmbassadorSignup({
+    name: "Leader",
+    email: "leader@example.com",
+    city: "Boise",
+    region: "Idaho",
+    group: "Room 4",
+    grades: "3-5",
+  });
+  if ("error" in signup) throw new Error(signup.error);
+  if (!signup.summary.startsWith(AMBASSADOR_SIGNUP_LABEL)) {
+    throw new Error("The class signup should be labeled Kindness Ambassadors class signup.");
+  }
+  if (signup.state !== "ID" || !signup.summary.includes("Room 4") || !signup.summary.includes("3-5")) {
+    throw new Error("The class signup should keep the group, the grade range, and the state.");
+  }
+  const subject = storyTipSubject(signup.summary);
+  if (!subject.endsWith(AMBASSADOR_SIGNUP_LABEL)) {
+    throw new Error("The signup email subject should name the Kindness Ambassadors class signup.");
+  }
+  const bodies = storyTipBodies({ ...signup, receivedAt: "2026-11-01T15:00:00.000Z" });
+  if (!bodies.text.includes("Idaho (ID)") || !bodies.text.includes("State or country: Idaho")) {
+    throw new Error("The signup email should show the state or country the teacher typed.");
+  }
+
+  const abroad = parseAmbassadorSignup({
+    name: "Leader",
+    email: "leader@example.com",
+    city: "Nairobi",
+    region: "Kenya",
+    group: "Library club",
+    grades: "K-5",
+  });
+  if ("error" in abroad) throw new Error(abroad.error);
+  if (abroad.state) throw new Error("A country should stay in the region line, not a state code.");
+  const abroadBody = storyTipBodies({ ...abroad, receivedAt: "2026-11-01T15:00:00.000Z" });
+  if (abroadBody.text.includes("State: (not provided)")) {
+    throw new Error("A country signup should not say the state was missing.");
+  }
+  if (!abroadBody.text.includes("Kenya")) throw new Error("A country signup should keep the country.");
+
+  const roster = parseAmbassadorSignup({
+    name: "Ana, Ben, Cam, Dia",
+    email: "leader@example.com",
+    city: "Boise",
+    region: "Idaho",
+    group: "Room 4",
+    grades: "3-5",
+  });
+  if (!("error" in roster)) throw new Error("A list of names should not be accepted as the contact.");
+  const photos = parseAmbassadorSignup({
+    name: "Leader",
+    email: "leader@example.com",
+    city: "Boise",
+    region: "Idaho",
+    group: "Room 4",
+    grades: "3-5",
+    photos: "class.jpg",
+  });
+  if (!("error" in photos)) throw new Error("A photo field should be rejected.");
+
+  const report = parseAmbassadorReport({
+    name: "Leader",
+    email: "leader@example.com",
+    city: "Boise",
+    region: "Idaho",
+    group: "Room 4",
+    act: "The class wrote thank-you notes to the school librarians.",
+  });
+  if ("error" in report) throw new Error(report.error);
+  if (!report.summary.startsWith(AMBASSADOR_NOTE_LABEL)) {
+    throw new Error("A weekly note should be labeled as a Kindness Ambassadors class note.");
+  }
+  if (!storyTipSubject(report.summary).endsWith(AMBASSADOR_NOTE_LABEL)) {
+    throw new Error("The weekly note subject should name the class note.");
+  }
+
+  const months = shoutoutMonthsToPrerender();
+  const current = currentAmbassadorMonth();
+  if (!months.includes(current)) throw new Error("The current month should have a shoutouts page even when it is empty.");
+  const featured = indexableShoutoutMonths();
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl(AMBASSADORS_PATH))) throw new Error("The sitemap should include Kindness Ambassadors.");
+  if (!urls.includes(absoluteUrl(AMBASSADOR_CERTIFICATE_PATH))) {
+    throw new Error("The sitemap should include the Kindness Ambassador certificate.");
+  }
+  for (const month of featured) {
+    if (!urls.includes(absoluteUrl(shoutoutsPath(month)))) {
+      throw new Error(`The sitemap should include shoutouts for ${month}.`);
+    }
+  }
+  for (const month of months) {
+    if (!featured.includes(month) && urls.includes(absoluteUrl(shoutoutsPath(month)))) {
+      throw new Error(`${month} has no classes and should stay out of the sitemap.`);
+    }
+  }
+
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("AMBASSADORS_PATH")) throw new Error("The footer should link to Kindness Ambassadors.");
+  const week = fs.readFileSync(path.join(process.cwd(), "app/(site)/kindness-challenge/[start]/page.tsx"), "utf8");
+  if (!week.includes("Ambassador classes: tell us how it went")) {
+    throw new Error("Each kindness challenge week should invite ambassador classes to tell how it went.");
+  }
+  const shoutPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/kindness-ambassadors/shoutouts/[month]/page.tsx"), "utf8");
+  if (!shoutPage.includes("Be the first class featured")) {
+    throw new Error("An empty shoutouts month should invite the first class.");
+  }
+  if (!shoutPage.includes("index: false")) throw new Error("An empty shoutouts month should be noindex.");
+  const sheet = fs.readFileSync(path.join(process.cwd(), "app/(site)/kindness-ambassadors/certificate/certificate-sheet.tsx"), "utf8");
+  if (/localStorage|sessionStorage|indexedDB|fetch\(/.test(sheet)) {
+    throw new Error("The certificate should keep the class name on the page only.");
+  }
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("AMBASSADORS_PATH") || !indexNow.includes("indexableShoutoutMonths")) {
+    throw new Error("IndexNow should list the program and only shoutout months that have a class.");
+  }
+  const submit = fs.readFileSync(path.join(process.cwd(), "app/(site)/submit/page.tsx"), "utf8");
+  if (!submit.includes("kindness-ambassadors") && !submit.includes("ambassadorFormMode")) {
+    throw new Error("The signup should use the existing submit page.");
+  }
+  console.log(`Kindness Ambassadors: ${featured.length} months with shoutouts, ${months.length} pages built.`);
+}
+
 function sampleIndexStory(partial: Partial<IndexStory> & Pick<IndexStory, "slug" | "date">): IndexStory {
   return {
     title: `A verified good news story ${partial.slug}`,
@@ -4229,6 +4413,7 @@ async function main() {
   assertFirstRespondersDay();
   assertWorldKindnessDay();
   assertKindnessChallenges();
+  assertKindnessAmbassadors();
   assertSpanishEditions();
   assertNewsBreak();
   assertGoodNewsCalendar();

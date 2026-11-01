@@ -19,6 +19,7 @@ import {
 import { placeLabel } from "@/lib/present";
 import { listingMeta } from "@/lib/seo";
 import { addDays } from "@/lib/weeks";
+import { AMBASSADORS_PATH, ambassadorReportHref } from "@/lib/ambassador-tip";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -79,6 +80,7 @@ export default async function KindnessChallengePage({ params }: Props) {
           <Link href={KINDNESS_INDEX_PATH}>All challenges</Link>
           {next ? <Link href={next.path}>Next week</Link> : null}
           <Link href="/kids">Classroom stories</Link>
+          <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
         </p>
       </div>
       <div className="wrap kindness-layout">
@@ -184,8 +186,8 @@ export default async function KindnessChallengePage({ params }: Props) {
           </div>
         </section>
         <p className="print-source">
-          <Link href="/submit">Tell us how it went</Link>
-          . Your note uses the same tip form as every other story, and it is emailed to {siteConfig.contactEmail}.
+          <Link href={ambassadorReportHref()}>Ambassador classes: tell us how it went</Link>
+          . Your note uses the same tip form as every other story, and it is emailed to {siteConfig.contactEmail}. Do not include student names or photos of children.
         </p>
         <nav className="pager no-print" aria-label="Kindness challenges">
           {previous ? <Link href={previous.path}>Previous week</Link> : <span className="muted">Previous week</span>}

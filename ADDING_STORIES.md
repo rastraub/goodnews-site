@@ -686,3 +686,29 @@ October 25 through December 31 must keep two to four milestones each. Other days
 ## Good Neighbor of the Month
 
 The ballot is built from the month's archive. To force a story on, or to drop one the automatic pick included, edit `data/good-neighbor.json`. `pin` and `exclude` are slug lists for that `YYYY-MM`. A pinned story is dated in that month and already published. At most 12 pins. `winner` is optional and is used after the 25th. The README has the file shape and the storage flag for shared vote totals. Until that flag is set, readers cheer a favorite in the browser and nothing about them is stored.
+
+## Kindness Ambassadors shoutouts
+
+Classroom shoutouts are hand-written. Edit `data/kindness-ambassadors.json`. The file starts with an empty `months` array. Add a class only after a teacher sends a note. Do not invent a class.
+
+Each class has `group`, `city`, `region`, and `act`. Publish the group name, the city, the state or country, and what the class did. Do not add a child's name, a photo, an email address, or a link. A month with no classes still has a page, shows "Be the first class featured," and stays out of the sitemap.
+
+```json
+{
+  "months": [
+    {
+      "month": "2026-11",
+      "classes": [
+        {
+          "group": "Group name",
+          "city": "City",
+          "region": "State or country",
+          "act": "What the class did, in one or two sentences, with no children's names."
+        }
+      ]
+    }
+  ]
+}
+```
+
+The signup and the weekly note both use `/submit`. `type=kindness-ambassadors` is the class signup. `type=kindness-ambassadors-report` is the note about what the class did. Both are emailed to the same mailbox as every other tip.
