@@ -11,8 +11,9 @@ import { calendarDay, isNewsBreakBannerActive } from "./news-break-banner";
  * - Oct 31–Nov 5: election-week news break
  * - Nov 6–10 and Nov 12–14: World Kindness Day
  * - Nov 11: Veterans Day
- * - Nov 15–23: 50 States of Thanks
- * - Nov 24–Dec 2: Giving Tuesday
+ * - Nov 15: 50 States of Thanks
+ * - Nov 16–23: Good News Table Talk
+ * - Nov 24–Dec 2: Giving Tuesday (Table Talk stays eligible through Nov 27 and does not stack)
  * A banner that is the only one in season still shows, including Veterans Day
  * on a year when the others are off.
  */
@@ -20,8 +21,9 @@ export const HOMEPAGE_BANNER_IDS = [
   "news-break",
   "veterans",
   "world-kindness",
-  "thanks",
   "giving-tuesday",
+  "table-talk",
+  "thanks",
   "first-responders",
 ] as const;
 
@@ -53,6 +55,9 @@ export const GIVING_TUESDAY_BANNER_WINDOW = {
   timeZone: "America/New_York",
 } as const;
 
+/** Kept in step with `TABLE_TALK_BANNER_WINDOW` in lib/table-talk.ts. */
+export const TABLE_TALK_BANNER_WINDOW = { start: "11-16", end: "11-27", timeZone: "America/Denver" } as const;
+
 const NEW_YORK = "America/New_York";
 
 export function monthDayInRange(day: string, start: string, end: string): boolean {
@@ -72,6 +77,7 @@ export function emptyBannerFlags(): HomepageBannerFlags {
     "world-kindness": false,
     thanks: false,
     "giving-tuesday": false,
+    "table-talk": false,
     "first-responders": false,
   };
 }
@@ -80,7 +86,8 @@ export function emptyBannerFlags(): HomepageBannerFlags {
  * `nyDay` is the America/New_York calendar day, YYYY-MM-DD.
  * November 11 yields to Veterans Day when that banner is eligible.
  * Otherwise World Kindness Day wins inside its window, then the news break,
- * then any leftover Veterans Day days, then Giving Tuesday, then Thanksgiving.
+ * then any leftover Veterans Day days, then Giving Tuesday, then Table Talk,
+ * then Thanksgiving.
  */
 export function pickHomepageBanner(flags: HomepageBannerFlags, nyDay: string): HomepageBannerId | null {
   const active = HOMEPAGE_BANNER_IDS.filter((id) => flags[id]);
@@ -91,6 +98,7 @@ export function pickHomepageBanner(flags: HomepageBannerFlags, nyDay: string): H
   if (flags["news-break"]) return "news-break";
   if (flags.veterans) return "veterans";
   if (flags["giving-tuesday"]) return "giving-tuesday";
+  if (flags["table-talk"]) return "table-talk";
   if (flags.thanks) return "thanks";
   if (flags["first-responders"]) return "first-responders";
   return active[0] ?? null;
@@ -105,6 +113,7 @@ export function homepageBannerFlags(now = new Date()): HomepageBannerFlags {
     "world-kindness": monthDayInRange(denver, WORLD_KINDNESS_BANNER.start, WORLD_KINDNESS_BANNER.end),
     thanks: THANKS_BANNER_WINDOW.enabled && dateInRange(denver, THANKS_BANNER_WINDOW.start, THANKS_BANNER_WINDOW.end),
     "giving-tuesday": dateInRange(ny, GIVING_TUESDAY_BANNER_WINDOW.start, GIVING_TUESDAY_BANNER_WINDOW.end),
+    "table-talk": monthDayInRange(denver, TABLE_TALK_BANNER_WINDOW.start, TABLE_TALK_BANNER_WINDOW.end),
     "first-responders": monthDayInRange(ny, FIRST_RESPONDERS_BANNER_WINDOW.start, FIRST_RESPONDERS_BANNER_WINDOW.end),
   };
 }

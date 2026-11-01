@@ -138,13 +138,14 @@ export const OBSERVANCES: ObservanceRecord[] = [
     keywords: ["thanksgiving", "harvest"],
     kidFriendly: true,
     classroom:
-      "Ask each student to name one specific thing they appreciate, such as a lunch or a person who helped. A feast at home is not required.",
+      "Ask each student to name one specific thing they appreciate, such as a lunch or a person who helped. The week before the break, a teacher can read one Good News Table Talk card and let students answer the question with a partner. A feast at home is not required.",
     takePart: [
       "Tell someone one specific reason you are glad they are around.",
       "Add a can or a box you already have to a food drive. Buying more is optional.",
       "Read a gratitude story from 50 States of Thanks.",
+      "Print the Good News Table Talk cards and read one at the table.",
     ],
-    hubs: ["thanks"],
+    hubs: ["thanks", "table-talk"],
   },
   {
     slug: "giving-tuesday",

@@ -256,13 +256,30 @@ Editors can pin a story in `data/thanks-overrides.json`. Leave the file as `{}` 
 
 A bad code, or a slug that is not filed in that state, fails `npm run validate-stories` and the build.
 
-The homepage banner runs from November 1 through November 30, 2026. The date is America/Denver, the same clock as the morning edition. It is a single line so the Story of the Day headline stays put. Set `thanksSeason.banner` to `false` in `lib/thanks.ts` to hide the banner sooner. The footer link and the link on `/local` stay, so the page is still easy to find after the banner comes down.
+The homepage banner is eligible from November 1 through November 30, 2026, America/Denver. Good News Table Talk takes the single homepage slot from November 16 through November 23, and Giving Tuesday takes November 24 through December 2. Set `thanksSeason.banner` to `false` in `lib/thanks.ts` to hide the thanks banner sooner. The footer link and the link on `/local` stay, so the page is still easy to find after the banner comes down. The page links to Good News Table Talk, and that page links back.
 
 To see which states are still open:
 
 ```bash
 npm run thanks-gaps
 ```
+
+## Good News Table Talk
+
+`/table-talk` is the printable conversation deck for Thanksgiving. The URL stays the same every year. The page names the Thanksgiving of the edition year, the fourth Thursday of November. Cards are chosen from published stories. A summary is one or two sentences copied from that story's classroom text. The question is a generic prompt, not a new fact.
+
+The content filter rejects politics, crime, violence, use of force, shootings, disasters with deaths, and illness-heavy stories. A pin cannot put a rejected story back. Editor lists live in `data/table-talk.json`:
+
+```json
+{
+  "pins": [],
+  "exclude": []
+}
+```
+
+`pins` are story slugs, in order. `exclude` drops a slug even when it would qualify. A bad slug fails `npm run validate-stories` and the build.
+
+The homepage banner is eligible November 16 through November 27, America/Denver, every year. It uses the single banner slot. Giving Tuesday still leads on November 24 through December 2. The page, the footer, the sitemap, and the IndexNow ping stay up after the banner comes down.
 
 ## Good News Index
 
@@ -452,8 +469,9 @@ The banner is eligible November 6 through November 14, America/Denver, every yea
 - October 31 through November 5: the news-break banner
 - November 6 through November 10, and November 12 through November 14: this banner
 - November 11: Veterans Day
-- November 15 through November 23: 50 States of Thanks
-- November 24 through December 2: Giving Tuesday
+- November 15: 50 States of Thanks
+- November 16 through November 23: Good News Table Talk
+- November 24 through December 2: Giving Tuesday. Table Talk is still eligible through November 27 and does not stack on top of Giving Tuesday.
 
 A banner that is the only one in season still shows. The rules live in `lib/homepage-banner.ts`.
 

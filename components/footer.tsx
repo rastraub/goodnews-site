@@ -5,6 +5,7 @@ import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
 import { editionYear } from "@/lib/format";
 import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { latestQuiz } from "@/lib/quiz";
+import { TABLE_TALK_PATH } from "@/lib/table-talk";
 import { THANKS_PATH } from "@/lib/thanks";
 import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
@@ -45,6 +46,7 @@ export function Footer() {
               <li><Link href="/good-news-index">Good News Index</Link></li>
               <li><Link href={GOOD_NEWS_MAP_PATH}>Good News Map</Link></li>
               <li><Link href={THANKS_PATH}>50 States of Thanks</Link></li>
+              <li><Link href={TABLE_TALK_PATH}>Good News Table Talk</Link></li>
               <li><Link href="/web-stories">Web stories</Link></li>
               {quiz ? <li><Link href={quiz.path}>Good News Quiz</Link></li> : null}
               <li><Link href={ON_THIS_DAY_TODAY_PATH}>Good news on this day</Link></li>
