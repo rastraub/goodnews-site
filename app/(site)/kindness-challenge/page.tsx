@@ -11,6 +11,7 @@ import {
   type ResolvedKindnessChallenge,
 } from "@/lib/kindness";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { AMBASSADORS_PATH, ambassadorReportHref } from "@/lib/ambassador-tip";
 import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { siteConfig } from "@/site.config";
 
@@ -73,8 +74,9 @@ export default function KindnessIndexPage() {
           <p className="link-pills">
             <Link href={current.path}>This week&apos;s challenge</Link>
             <Link href="/kids">Classroom stories</Link>
+            <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
             <Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link>
-            <Link href="/submit">Tell us how it went</Link>
+            <Link href={ambassadorReportHref()}>Ambassador classes: tell us how it went</Link>
           </p>
         ) : null}
       </div>

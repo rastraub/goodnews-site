@@ -18,6 +18,7 @@ import {
 } from "@/lib/morning-announcements";
 import { listingMeta, pageAlternates } from "@/lib/seo";
 import { formatLongDate, parseIsoDate } from "@/lib/weeks";
+import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { siteConfig } from "@/site.config";
 import { TeacherAnnouncementSignup } from "../teacher-signup";
 
@@ -91,6 +92,10 @@ export default async function MorningAnnouncementPage({ params }: Props) {
         <p className="kicker">For teachers · {weekdayName(date)}</p>
         <h1>Good news for {formatLongDate(date)}.</h1>
         {day.kind === "script" ? <Script day={day} /> : <Thin day={day} nearest={nearest} />}
+        <p className="link-pills no-print">
+          <Link href="/kids">Classroom stories</Link>
+          <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
+        </p>
         <nav className="pager no-print" aria-label="School days">
           {previous ? <Link href={previous.path}>Previous school day</Link> : <span className="muted">Previous school day</span>}
           <Link href={MORNING_ANNOUNCEMENTS_PATH}>All announcements</Link>

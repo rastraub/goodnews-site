@@ -18,6 +18,7 @@ import { formatStoryDate } from "@/lib/format";
 import { openGraphImage } from "@/lib/feed-image";
 import { classroomJsonLd, listingMeta } from "@/lib/seo";
 import type { Story } from "@/lib/stories";
+import { ambassadorReportHref, AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -193,6 +194,11 @@ export default async function ClassroomPackPage({ params }: Props) {
         <section className="pack-challenge" aria-labelledby="kindness-challenge">
           <h2 id="kindness-challenge">Kindness Challenge</h2>
           <p>{pack.challenge}</p>
+          <p>
+            <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
+            {" · "}
+            <Link href={ambassadorReportHref()}>Ambassador classes: tell us how it went</Link>
+          </p>
           <p className="print-source">
             {siteConfig.name} · Good News Friday · {pack.rangeLabel}
           </p>

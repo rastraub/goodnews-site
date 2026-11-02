@@ -12,6 +12,7 @@ import {
   type AnnouncementDay,
 } from "@/lib/morning-announcements";
 import { formatLongDate, mountainDay } from "@/lib/weeks";
+import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { siteConfig } from "@/site.config";
 import { TeacherAnnouncementSignup } from "./teacher-signup";
 
@@ -83,6 +84,7 @@ export default function MorningAnnouncementsIndex() {
         <p className="link-pills">
           <Link href="/kids">Classroom stories</Link>
           <Link href="/kids/print">Story of the day</Link>
+          <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <a href="#how-to">How to use this</a>
         </p>
         {featured && featured.kind !== "weekend" ? (
@@ -132,7 +134,7 @@ export default function MorningAnnouncementsIndex() {
             <li>Saturday and Sunday open the previous Friday. Those days are left off this list.</li>
           </ol>
           <p>
-            Stories are chosen from that day&apos;s kid-friendly reports. Anything with crime, violence, injury details, politics, or anything scary is left out. {siteConfig.name} is published by {siteConfig.owner.name}.
+            Stories are chosen from that day&apos;s kid-friendly reports. Anything with crime, violence, injury details, politics, or anything scary is left out. {siteConfig.name} is published by {siteConfig.owner.name}. A class that wants to keep a weekly act of kindness can join <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>.
           </p>
         </div>
       </section>

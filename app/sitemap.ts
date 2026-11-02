@@ -18,6 +18,8 @@ import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
 import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
 import { quizzesToPrerender } from "@/lib/quiz";
+import { AMBASSADOR_CERTIFICATE_PATH, AMBASSADORS_PATH, shoutoutsPath } from "@/lib/ambassador-tip";
+import { indexableShoutoutMonths } from "@/lib/kindness-ambassadors";
 import { getKindnessChallenges } from "@/lib/kindness";
 import { TABLE_TALK_PATH, tableTalkDeck } from "@/lib/table-talk";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
@@ -37,6 +39,8 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/heroes", changeFrequency: "daily", priority: 0.7 },
   { path: "/kids", changeFrequency: "daily", priority: 0.6 },
   { path: "/kindness-challenge", changeFrequency: "weekly", priority: 0.7 },
+  { path: AMBASSADORS_PATH, changeFrequency: "monthly", priority: 0.6 },
+  { path: AMBASSADOR_CERTIFICATE_PATH, changeFrequency: "yearly", priority: 0.5 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
   { path: MORNING_ANNOUNCEMENTS_PATH, changeFrequency: "daily", priority: 0.6 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
@@ -288,6 +292,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "weekly" as const,
         priority: challenge.status === "this-week" ? 0.7 : 0.6,
       })),
+    ...indexableShoutoutMonths().map((month) => ({
+      url: absoluteUrl(shoutoutsPath(month)),
+      lastModified: `${month}-01`,
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
+    })),
     ...CATEGORIES.map((category) => ({
       url: absoluteUrl(`/category/${category.slug}`),
       lastModified: latestCategory.get(category.slug) ?? siteLatest,
