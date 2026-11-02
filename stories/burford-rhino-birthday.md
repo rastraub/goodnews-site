@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.savetherhino.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Two white rhino calves named Markus and Mo turned one at Cotswold Wildlife Park, near Burford in England. BBC News reported it on November 1, 2026. Keepers gave them cakes of soaked pellets, carrots, and salad leaves. They were born at the park last year. Each weighed about 70 kilograms then and about 500 kilograms now. The park has nine rhinos, the most in 56 years. White rhinos were close to disappearing in the early 1900s, when fewer than 50 were thought to remain in Africa. They are now the most numerous rhino species. The park says protection is still needed. This birthday is not a wild count."
 kidQuestions:
