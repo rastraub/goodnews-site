@@ -19,6 +19,7 @@ import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
 import { quizzesToPrerender } from "@/lib/quiz";
 import { getKindnessChallenges } from "@/lib/kindness";
+import { TABLE_TALK_PATH, tableTalkDeck } from "@/lib/table-talk";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 import { calendarSitemapEntries } from "@/lib/good-news-calendar";
@@ -90,6 +91,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const packs = packsToPrerender();
   const newestPack = packs[packs.length - 1];
   const thanks = thanksBoard(stories);
+  const tableTalk = tableTalkDeck(stories);
+  const tableTalkLatest = tableTalk.cards.reduce<string | undefined>((latest, card) => {
+    return !latest || card.story.date > latest ? card.story.date : latest;
+  }, undefined);
   const thanksLatest = thanks.slots.reduce<string | undefined>((latest, slot) => {
     const date = slot.story?.date;
     if (!date) return latest;
@@ -186,6 +191,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: thanksLatest ?? siteLatest,
       changeFrequency: "daily" as const,
       priority: 0.8,
+    },
+    {
+      url: absoluteUrl(TABLE_TALK_PATH),
+      lastModified: tableTalkLatest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
     },
     {
       url: absoluteUrl(GOOD_NEWS_MAP_PATH),

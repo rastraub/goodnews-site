@@ -5,6 +5,7 @@ import { StoryCard } from "@/components/story-card";
 import { ThanksMap } from "@/components/thanks-map";
 import { toCard } from "@/lib/present";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
+import { TABLE_TALK_PATH } from "@/lib/table-talk";
 import { THANKS_PATH, THANKS_TITLE, thanksBoard, thanksDescription } from "@/lib/thanks";
 import { siteConfig } from "@/site.config";
 
@@ -79,6 +80,7 @@ export default function ThanksPage() {
           </span>
         </p>
         <p className="link-pills">
+          <Link href={TABLE_TALK_PATH}>Good News Table Talk</Link>
           <Link href="/local">All states</Link>
           <Link href="/submit">Send a story</Link>
           <Link href="/help">Ways to help</Link>

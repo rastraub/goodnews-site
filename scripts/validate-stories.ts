@@ -29,6 +29,25 @@ import {
   getObservancePage,
 } from "../lib/good-news-calendar";
 import { THANKS_PATH } from "../lib/thanks";
+import {
+  buildTableTalkDeck,
+  CLASSROOM_NOTE,
+  GRATITUDE_ROUND,
+  parseTableTalkEditorConfig,
+  TABLE_TALK_BANNER_WINDOW,
+  TABLE_TALK_MAX,
+  TABLE_TALK_MIN,
+  TABLE_TALK_PATH,
+  TABLE_TALK_SHARE,
+  tableTalkBannerVisible,
+  tableTalkBlockReason,
+  tableTalkDeck,
+  splitTableTalkSentences,
+  tableTalkExcerpt,
+  tableTalkQuestions,
+  thanksgivingIso,
+  type TableTalkStory,
+} from "../lib/table-talk";
 import { GET, POST } from "../app/(site)/api/good-neighbor/route";
 import {
   badgeLabel,
@@ -175,6 +194,7 @@ import {
   emptyBannerFlags,
   GIVING_TUESDAY_BANNER_WINDOW,
   pickHomepageBanner,
+  TABLE_TALK_BANNER_WINDOW as HOME_TABLE_TALK_WINDOW,
   THANKS_BANNER_WINDOW,
   WORLD_KINDNESS_BANNER,
 } from "../lib/homepage-banner";
@@ -2316,6 +2336,13 @@ function assertWorldKindnessDay() {
   flags["world-kindness"] = false;
   flags["giving-tuesday"] = true;
   if (pickHomepageBanner(flags, "2026-11-24") !== "giving-tuesday") throw new Error("Giving Tuesday should lead over Thanksgiving.");
+  flags["table-talk"] = true;
+  if (pickHomepageBanner(flags, "2026-11-24") !== "giving-tuesday") throw new Error("Giving Tuesday should lead over Table Talk.");
+  flags["giving-tuesday"] = false;
+  if (pickHomepageBanner(flags, "2026-11-18") !== "table-talk") throw new Error("Table Talk should lead over 50 States of Thanks.");
+  flags.thanks = false;
+  if (pickHomepageBanner(flags, "2026-11-18") !== "table-talk") throw new Error("A lone Table Talk banner should show.");
+  flags["table-talk"] = false;
 
   const bannerCases: [string, string | null][] = [
     ["2026-10-25T19:00:00Z", "first-responders"],
@@ -2329,7 +2356,11 @@ function assertWorldKindnessDay() {
     ["2026-11-12T19:00:00Z", "world-kindness"],
     ["2026-11-14T19:00:00Z", "world-kindness"],
     ["2026-11-15T19:00:00Z", "thanks"],
+    ["2026-11-16T06:30:00Z", "thanks"],
+    ["2026-11-16T07:30:00Z", "table-talk"],
+    ["2026-11-23T19:00:00Z", "table-talk"],
     ["2026-11-24T19:00:00Z", "giving-tuesday"],
+    ["2026-11-27T19:00:00Z", "giving-tuesday"],
     ["2026-12-02T19:00:00Z", "giving-tuesday"],
     ["2026-12-03T19:00:00Z", null],
   ];
@@ -2348,6 +2379,7 @@ function assertWorldKindnessDay() {
       (picked === "world-kindness" && worldKindnessDayInSeason(mountainDay(now))) ||
       (picked === "thanks" && thanksBannerVisible(now)) ||
       (picked === "giving-tuesday" && isGivingTuesdaySeason(ny)) ||
+      (picked === "table-talk" && tableTalkBannerVisible(now)) ||
       (picked === "first-responders" && ny.slice(5) >= "10-21" && ny.slice(5) <= "10-29");
     if (!inSeason) throw new Error(`${picked} was chosen on ${ny} outside its season.`);
   }
@@ -2444,6 +2476,7 @@ function assertWorldKindnessDay() {
     "components/veterans-day-banner.tsx",
     "components/first-responders-day-banner.tsx",
     "components/world-kindness-day-banner.tsx",
+    "components/table-talk-banner.tsx",
   ]) {
     const source = fs.readFileSync(path.join(process.cwd(), file), "utf8");
     if (!source.includes("activeHomepageBanner")) throw new Error(`${file} should use the single homepage banner.`);
@@ -4120,6 +4153,7 @@ function assertGoodNewsCalendar() {
   if (CALENDAR_HUBS.responders.path !== FIRST_RESPONDERS_DAY_PATH) throw new Error("Calendar responders hub drifted.");
   if (CALENDAR_HUBS.giving.path !== GIVING_TUESDAY_PATH) throw new Error("Calendar giving hub drifted.");
   if (CALENDAR_HUBS.thanks.path !== THANKS_PATH) throw new Error("Calendar thanks hub drifted.");
+  if (CALENDAR_HUBS["table-talk"].path !== TABLE_TALK_PATH) throw new Error("Calendar table-talk hub drifted.");
   if (CALENDAR_HUBS.kindness.path !== KINDNESS_INDEX_PATH) throw new Error("Calendar kindness hub drifted.");
   if (CALENDAR_HUBS["world-kindness"].path !== WORLD_KINDNESS_PATH) throw new Error("Calendar world-kindness hub drifted.");
   if (CALENDAR_HUBS.neighbor.path !== "/good-neighbor") throw new Error("Calendar neighbor hub drifted.");
@@ -4194,6 +4228,157 @@ function assertGoodNewsCalendar() {
   console.log(`Good News Calendar: ${view.upcoming.length} observances in the next 12 months, ${ready} indexable, ${thin} still thin.`);
 }
 
+function talkStory(extra: Partial<TableTalkStory> = {}): TableTalkStory {
+  return {
+    slug: "hope-supper",
+    title: "Neighbors in Hope shared a free supper",
+    dek: "People in town set an extra place and passed the bread.",
+    body: "The meal was free and anyone could sit down.",
+    date: "2026-10-01",
+    city: "Hope",
+    country: "US",
+    state: "AR",
+    category: "community",
+    tags: ["kindness", "neighbors", "community-meals"],
+    sourceName: "Local Paper",
+    kidFriendly: true,
+    kidSummary: "Neighbors in Hope, Arkansas, set an extra place at a free supper. Anyone in town could sit down and eat.",
+    ...extra,
+  };
+}
+
+function assertTableTalk() {
+  if (thanksgivingIso(2026) !== "2026-11-26") throw new Error("Thanksgiving 2026 is Thursday, November 26.");
+  if (thanksgivingIso(2027) !== "2027-11-25") throw new Error("Thanksgiving 2027 is Thursday, November 25.");
+  if (
+    HOME_TABLE_TALK_WINDOW.start !== TABLE_TALK_BANNER_WINDOW.start ||
+    HOME_TABLE_TALK_WINDOW.end !== TABLE_TALK_BANNER_WINDOW.end ||
+    HOME_TABLE_TALK_WINDOW.timeZone !== TABLE_TALK_BANNER_WINDOW.timeZone
+  ) {
+    throw new Error("The homepage banner copy of the Table Talk window drifted.");
+  }
+  if (!tableTalkBannerVisible(new Date("2026-11-16T07:30:00Z")) || !tableTalkBannerVisible(new Date("2027-11-27T18:00:00Z"))) {
+    throw new Error("Table Talk should be eligible November 16 through November 27, America/Denver, every year.");
+  }
+  if (tableTalkBannerVisible(new Date("2026-11-16T06:30:00Z")) || tableTalkBannerVisible(new Date("2026-11-28T07:30:00Z")) || tableTalkBannerVisible(new Date(NaN))) {
+    throw new Error("Table Talk should stay ineligible outside November 16 through November 27.");
+  }
+  if (TABLE_TALK_SHARE.length > 200) throw new Error("The Table Talk share text should stay short enough to post.");
+  if (GRATITUDE_ROUND.length < 3 || CLASSROOM_NOTE.length < 80) throw new Error("The gratitude round and classroom note should stay on the page.");
+
+  const blocked: [string, TableTalkStory][] = [
+    ["politics", talkStory({ body: "The supper followed a campaign rally and election night." })],
+    ["shooting", talkStory({ body: "A shooting was reported across town before the supper." })],
+    ["use-of-force", talkStory({ body: "An officer used force on the way to the supper." })],
+    ["crime", talkStory({ title: "A guest was arrested after the supper" })],
+    ["disaster-deaths", talkStory({ body: "The hurricane killed three people before neighbors cooked." })],
+    ["illness", talkStory({ kidSummary: "Neighbors held a supper for a family facing cancer. The meal was free." })],
+    ["illness", talkStory({ tags: ["cancer-support", "kindness"] })],
+    ["death", talkStory({ dek: "A neighbor died the week of the supper." })],
+  ];
+  for (const [id, story] of blocked) {
+    const reason = tableTalkBlockReason(story);
+    if (reason !== id) throw new Error(`Expected ${story.slug} to be blocked as ${id}, got ${reason ?? "nothing"}.`);
+  }
+  const allowed = [
+    talkStory({ body: "The menu is filed at the Library of Congress." }),
+    talkStory({ body: "A guest grew up in the Democratic Republic of the Congo." }),
+    talkStory({ body: "Medics treated cardiac arrest and the guest sat up." }),
+    talkStory({ body: "The flood trapped a driver and nobody was hurt." }),
+    talkStory({ body: "A native tree nearly died out, then neighbors planted more." }),
+    talkStory({ body: "The town counted the ballots for its favorite tree." }),
+    talkStory({ title: "Neighbors took a shot at a free supper" }),
+  ];
+  for (const story of allowed) {
+    const reason = tableTalkBlockReason(story);
+    if (reason) throw new Error(`Table Talk blocked a safe story as ${reason}: ${story.title}`);
+  }
+
+  const excerpt = tableTalkExcerpt("The sky was gray that morning. Then neighbors gave a free supper to anyone who came. A third sentence stays off the card.");
+  if (!excerpt?.includes("gave a free supper") || excerpt.includes("third sentence")) {
+    throw new Error(`The card should keep the outcome and drop the extra sentence. Got: ${excerpt}`);
+  }
+  const dr = tableTalkExcerpt("Dr. Kim thanked the class. U.S. students wrote cards.");
+  if (!dr?.startsWith("Dr. Kim")) throw new Error("Abbreviations should not split a sentence.");
+
+  for (const value of [{ pins: ["Not A Slug"], exclude: [] }, { pins: ["dup", "dup"], exclude: [] }, { pins: [], exclude: [], extra: true }]) {
+    let threw = false;
+    try {
+      parseTableTalkEditorConfig(value);
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`Table Talk config should reject ${JSON.stringify(value)}`);
+  }
+  if (parseTableTalkEditorConfig({ pins: [], exclude: [] }).pins.length !== 0) {
+    throw new Error("An empty editor file should keep both lists.");
+  }
+
+  const safe = talkStory();
+  const violent = talkStory({ slug: "bad-shooting", body: "A shooting nearby kept people home." });
+  const missing = buildTableTalkDeck([safe], { pins: ["missing-slug"], exclude: ["also-missing"] });
+  if (missing.pinErrors.length < 2) throw new Error(`Expected pin errors for missing slugs, got ${missing.pinErrors.join(" | ")}`);
+  const blockedPin = buildTableTalkDeck([safe, violent], { pins: ["bad-shooting"], exclude: [] });
+  if (!blockedPin.pinErrors.some((error) => error.includes("blocked"))) throw new Error("A pin cannot bypass the content filter.");
+  if (blockedPin.cards.some((card) => card.story.slug === "bad-shooting")) throw new Error("A blocked pin was still dealt.");
+  const both = buildTableTalkDeck([safe], { pins: ["hope-supper"], exclude: ["hope-supper"] });
+  if (!both.pinErrors.some((error) => error.includes("excluded"))) throw new Error("A slug cannot be pinned and excluded.");
+  const pinned = buildTableTalkDeck([safe], { pins: ["hope-supper"], exclude: [] });
+  if (pinned.pinErrors.length || pinned.cards[0]?.story.slug !== "hope-supper" || !pinned.cards[0]?.pinned) {
+    throw new Error("A clean pin should lead the deck.");
+  }
+  const prompts = tableTalkQuestions(pinned.cards[0]!.lane);
+  if (!prompts.includes(pinned.cards[0]!.question)) throw new Error("The question should be a generic prompt.");
+
+  const live = tableTalkDeck();
+  if (live.pinErrors.length) throw new Error(`Table Talk config: ${live.pinErrors.join("; ")}`);
+  if (live.cards.length < TABLE_TALK_MIN || live.cards.length > TABLE_TALK_MAX) {
+    throw new Error(`Table Talk should deal ${TABLE_TALK_MIN} to ${TABLE_TALK_MAX} cards, got ${live.cards.length}.`);
+  }
+  const lanes = new Map<string, number>();
+  const states = new Set<string>();
+  const countries = new Set<string>();
+  for (const card of live.cards) {
+    lanes.set(card.lane, (lanes.get(card.lane) ?? 0) + 1);
+    if (tableTalkBlockReason(card.story)) throw new Error(`${card.story.slug} is on the table but matches the content filter.`);
+    const source = card.story.kidSummary?.replace(/\s+/g, " ").trim() ?? "";
+    if (!source.includes(card.summary)) throw new Error(`${card.story.slug} summary is not a verbatim classroom excerpt.`);
+    const sentences = splitTableTalkSentences(card.summary).length;
+    if (sentences < 1 || sentences > 2) throw new Error(`${card.story.slug} summary should be one or two sentences.`);
+    if (!tableTalkQuestions(card.lane).includes(card.question)) throw new Error(`${card.story.slug} question is not a generic prompt.`);
+    if (card.story.country === "US" && card.story.state) states.add(card.story.state);
+    if (card.story.country !== "US") countries.add(card.story.country);
+  }
+  for (const lane of ["states", "kids", "animals", "responders", "veterans", "world"]) {
+    if ((lanes.get(lane) ?? 0) < 3) throw new Error(`Table Talk needs at least 3 ${lane} cards, got ${lanes.get(lane) ?? 0}.`);
+  }
+  if (states.size < 8) throw new Error(`Table Talk should cover at least 8 states, got ${states.size}.`);
+  if (countries.size < 3) throw new Error(`Table Talk should cover at least 3 countries, got ${countries.size}.`);
+
+  const thanksgiving = getObservancePage("thanksgiving", "2026-10-01");
+  if (!thanksgiving?.hubs.some((hub) => hub.path === TABLE_TALK_PATH) || !thanksgiving.hubs.some((hub) => hub.path === THANKS_PATH)) {
+    throw new Error("The Thanksgiving calendar entry should link Table Talk and 50 States of Thanks.");
+  }
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.some((url) => url.endsWith(TABLE_TALK_PATH))) throw new Error("The sitemap should include Table Talk.");
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("TABLE_TALK_PATH")) throw new Error("IndexNow should ping Table Talk.");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  if (!home.includes("TableTalkBanner")) throw new Error("The homepage should mount the Table Talk banner.");
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("TABLE_TALK_PATH")) throw new Error("The footer should link Table Talk.");
+  const thanksPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/50-states-of-thanks/page.tsx"), "utf8");
+  if (!thanksPage.includes("TABLE_TALK_PATH")) throw new Error("50 States of Thanks should link Table Talk.");
+  const page = fs.readFileSync(path.join(process.cwd(), "app/(site)/table-talk/page.tsx"), "utf8");
+  for (const needle of ["THANKS_PATH", "EmailSignup", "ShareButtons", "listingJsonLd", "HowTo", "GRATITUDE_ROUND", "CLASSROOM_NOTE", "siteConfig.editor.name"]) {
+    if (!page.includes(needle)) throw new Error(`The Table Talk page is missing ${needle}.`);
+  }
+  if (page.includes("Jane ") || page.includes("By John")) throw new Error("The Table Talk page should use the public masthead, not a personal name.");
+  console.log(
+    `Table Talk: ${live.cards.length} cards. States ${lanes.get("states")}, kids ${lanes.get("kids")}, animals ${lanes.get("animals")}, responders ${lanes.get("responders")}, veterans ${lanes.get("veterans")}, world ${lanes.get("world")}.`,
+  );
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4224,6 +4409,7 @@ async function main() {
   assertFeeds();
   assertPartnerKit();
   assertThanksBoard();
+  assertTableTalk();
   assertExplainers();
   assertGivingTuesday(stories);
   assertFirstRespondersDay();
