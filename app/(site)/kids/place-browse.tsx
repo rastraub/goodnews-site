@@ -13,6 +13,7 @@ import { openGraphImage } from "@/lib/feed-image";
 import { latestQuiz } from "@/lib/quiz";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { getStateBySlug } from "@/lib/states";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 import type { Story } from "@/lib/stories";
 
 export type KidPlaceKind = "state" | "country";
@@ -89,6 +90,7 @@ export function KidPlaceBrowse({ kind, slug, page }: { kind: KidPlaceKind; slug:
         </p>
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
+          <Link href={LARGE_PRINT_PATH}>Large-print edition</Link>
           {quiz ? (
             <Link href={quiz.kidQuestions.length ? `${quiz.path}?kids=1` : quiz.path}>This week&apos;s quiz</Link>
           ) : null}

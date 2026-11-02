@@ -11,6 +11,7 @@ import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { newsBreakBanner, siteConfig, socialLinks } from "@/site.config";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
@@ -59,6 +60,7 @@ export function Footer() {
               <li><Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link></li>
               <li><Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link></li>
               <li><Link href="/morning-announcements">Morning announcements</Link></li>
+              <li><Link href={LARGE_PRINT_PATH}>Large print</Link></li>
               <li><Link href={VETERANS_DAY_PATH}>Veterans Day</Link></li>
               <li><Link href={FIRST_RESPONDERS_DAY_PATH}>First Responders Day</Link></li>
               <li><Link href="/topics">Topics</Link></li>
