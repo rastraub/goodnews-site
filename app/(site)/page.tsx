@@ -12,6 +12,7 @@ import { GoodNeighborPromo } from "@/components/good-neighbor-promo";
 import { IndexPromo } from "@/components/index-promo";
 import { KindnessPromo } from "@/components/kindness-promo";
 import { OnThisDayPromo } from "@/components/on-this-day-promo";
+import { TableTalkBanner } from "@/components/table-talk-banner";
 import { ThanksBanner } from "@/components/thanks-banner";
 import { VeteransDayBanner } from "@/components/veterans-day-banner";
 import { ComingUp } from "@/components/coming-up";
@@ -73,6 +74,7 @@ export default function HomePage() {
     <>
       <NewsBreakBanner />
       <ThanksBanner />
+      <TableTalkBanner />
       <GivingTuesdayBanner />
       <VeteransDayBanner />
       <WorldKindnessDayBanner />
