@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.cityrescueokc.org/"
     kind: donate
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
