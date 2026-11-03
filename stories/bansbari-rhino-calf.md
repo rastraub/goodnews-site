@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.ifaw.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "A baby greater one-horned rhino was born in Manas National Park in Assam, India. The Times of India reported it on October 31, 2026. The calf is healthy and is being watched in the Bansbari part of the park. It was born about 10 to 15 days earlier. The mother, Ganga-A, was born in Manas. Her mother, Ganga, was rescued as a four-month-old calf in the 2004 floods, raised by people, and released in 2010. Rhinos had disappeared from Manas before that. This calf is a third generation. It is one family, not a new total for the whole park."
 kidQuestions:
