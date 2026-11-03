@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.colorado.edu/"
     kind: learn
 featured: false
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true

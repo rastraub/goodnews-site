@@ -24,7 +24,7 @@ howToHelp:
   - label: "National Down Syndrome Society"
     url: "https://www.ndss.org/"
     kind: learn
-featured: true
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.umflint.edu/"
     kind: learn
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
