@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/json-ld";
 import { getHubIndex } from "@/lib/hubs";
-import { pageAlternates } from "@/lib/seo";
+import { listingJsonLd, pageAlternates } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Good news by topic",
@@ -12,8 +13,22 @@ export const metadata: Metadata = {
 export default function TopicsPage() {
   const topics = getHubIndex().topics.slice().sort((a, b) => a.linkLabel.localeCompare(b.linkLabel));
 
+  const description = "Browse verified good news by topic, from animal rescue and libraries to schools, veterans, and wildlife.";
   return (
     <section className="page-block">
+      <JsonLd
+        data={listingJsonLd({
+          name: "Good news by topic",
+          description,
+          path: "/topics",
+          crumbs: [
+            { name: "Today", path: "/" },
+            { name: "Topics", path: "/topics" },
+          ],
+          stories: [],
+          items: topics.map((topic) => ({ name: topic.linkLabel, path: topic.path })),
+        })}
+      />
       <div className="wrap page-hero">
         <p className="crumbs">
           <Link href="/">Today</Link>

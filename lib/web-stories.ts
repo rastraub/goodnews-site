@@ -288,6 +288,8 @@ export function renderWebStoryDocument(edition: WebStoryEdition): string {
 <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
 <title>${escapeHtml(edition.title)}</title>
 <link rel="canonical" href="${escapeHtml(canonical)}">
+<link rel="alternate" hreflang="en" href="${escapeHtml(canonical)}">
+<link rel="alternate" hreflang="x-default" href="${escapeHtml(canonical)}">
 <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 <meta name="description" content="${escapeHtml(edition.description)}">
 <meta name="robots" content="index,follow,max-image-preview:large">

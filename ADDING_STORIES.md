@@ -730,3 +730,7 @@ Each class has `group`, `city`, `region`, and `act`. Publish the group name, the
 ```
 
 The signup and the weekly note both use `/submit`. `type=kindness-ambassadors` is the class signup. `type=kindness-ambassadors-report` is the note about what the class did. Both are emailed to the same mailbox as every other tip.
+
+## SEO check
+
+After a batch of stories, run `npm run seo:audit`. It reads the generated routes and reports broken links, missing images, metadata, canonical and hreflang tags, sitemap gaps, structured data, orphan pages, and the news sitemap. It does not rename URLs or write stories. Warnings about large feed JPEGs and the shared Spanish week intro are expected. See the README for the noindex rules and what the command treats as a failure.

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import { listingJsonLd, pageAlternates } from "@/lib/seo";
 import Link from "next/link";
 import { LocalExplorer } from "@/components/local-explorer";
 import { StoryCard } from "@/components/story-card";
@@ -26,8 +27,21 @@ export default function LocalPage() {
     count: item.count,
   }));
 
+  const description = "Pick a state and read verified, uplifting stories from close to home.";
   return (
     <>
+      <JsonLd
+        data={listingJsonLd({
+          name: "Good news near you",
+          description,
+          path: "/local",
+          crumbs: [
+            { name: "Today", path: "/" },
+            { name: "Local", path: "/local" },
+          ],
+          stories: stories.filter((story) => story.country === "US").slice(0, STORY_PAGE_SIZE),
+        })}
+      />
       <LocalExplorer highlighted={counts.map((item) => item.code.toLowerCase())} chips={chips} />
       <section className="page-block" style={{ paddingTop: 0 }}>
         <div className="wrap">
