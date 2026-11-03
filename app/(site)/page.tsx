@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdventBanner } from "@/components/advent-banner";
 import { EmailSignup } from "@/components/email-signup";
 import { GivingTuesdayBanner } from "@/components/giving-tuesday-banner";
 import { NewsBreakBanner } from "@/components/news-break-banner";
@@ -79,6 +80,7 @@ export default function HomePage() {
       <VeteransDayBanner />
       <WorldKindnessDayBanner />
       <FirstRespondersDayBanner />
+      <AdventBanner />
       {hero ? (
         <Hero story={hero} fridayHref={fridayHref} fridayLabel={fridayLabel} />
       ) : (

@@ -216,6 +216,27 @@ import {
   worldKindnessDayInSeason,
   worldKindnessJsonLd,
 } from "../lib/world-kindness-day";
+import {
+  ADVENT_ACTS,
+  ADVENT_PATH,
+  ADVENT_PRINT_PATH,
+  ADVENT_SHARE,
+  adventActTagsAreReal,
+  adventBannerVisible,
+  adventBlockReason,
+  adventDayPath,
+  adventIndexablePaths,
+  adventNextPrompt,
+  adventOgLines,
+  adventToday,
+  adventUnpinnedDays,
+  buildAdventCalendar,
+  doorStatus,
+  getAdventCalendar,
+  loadAdventConfig,
+  parseAdventEditorConfig,
+  type AdventCandidate,
+} from "../lib/advent";
 import { editionLanguageAlternates, weekIndexLanguageAlternates } from "../lib/i18n";
 import {
   SPANISH_TRANSLATION_NOTE,
@@ -4563,6 +4584,238 @@ function assertTableTalk() {
   );
 }
 
+function adventFixture(extra: Partial<AdventCandidate> & Pick<AdventCandidate, "slug" | "tags">): AdventCandidate {
+  return {
+    title: "Neighbors shared a garden with children nearby",
+    dek: "A short verified summary with enough words to stand as a sentence.",
+    body: "Volunteers planted beds and left the gate open for the neighborhood.",
+    date: "2026-10-18",
+    sourceName: "A local paper",
+    sourceUrl: "https://example.com/story",
+    kidFriendly: true,
+    kidSummary: "Neighbors planted a garden and shared the food with children.",
+    ...extra,
+  };
+}
+
+function assertAdvent() {
+  if (ADVENT_ACTS.length !== 24) throw new Error("The advent calendar needs 24 kind acts.");
+  const titles = new Set<string>();
+  const banned = /\b(?:buy|purchase|purchases|donate|donation|donations|\$|dollars?|money|venmo|gofundme|paypal)\b|https?:|@/i;
+  for (const act of ADVENT_ACTS) {
+    if (act.day !== ADVENT_ACTS.indexOf(act) + 1) throw new Error(`Act ${act.title} is not in day order.`);
+    if (act.title.length < 8 || act.detail.length < 40) throw new Error(`Act “${act.title}” is too short.`);
+    if (titles.has(act.title)) throw new Error(`Duplicate act ${act.title}`);
+    titles.add(act.title);
+    if (banned.test(`${act.title} ${act.detail}`)) throw new Error(`Act “${act.title}” should stay free of purchases, donations, and links.`);
+  }
+  const tagError = adventActTagsAreReal();
+  if (tagError) throw new Error(tagError);
+  if (ADVENT_SHARE.length > 200) throw new Error("The advent share text should stay short enough to post.");
+
+  if (doorStatus(1, "2026-11-30") !== "locked" || doorStatus(1, "2026-12-01") !== "open") {
+    throw new Error("Door 1 should open on December 1.");
+  }
+  if (doorStatus(2, "2026-12-01") !== "locked" || doorStatus(24, "2026-12-24") !== "open" || doorStatus(24, "2026-12-26") !== "open") {
+    throw new Error("Door locks should follow the Denver calendar date.");
+  }
+  if (adventBannerVisible(new Date("2026-11-29T18:00:00Z")) || adventBannerVisible(new Date("2026-11-30T06:30:00Z"))) {
+    throw new Error("The advent line should stay off before November 30 in Denver.");
+  }
+  if (!adventBannerVisible(new Date("2026-11-30T07:00:00Z")) || !adventBannerVisible(new Date("2026-12-24T19:00:00Z"))) {
+    throw new Error("The advent line should show from November 30 through December 24.");
+  }
+  if (adventBannerVisible(new Date("2026-12-25T07:00:00Z"))) {
+    throw new Error("The advent line should come down on December 25.");
+  }
+  const dec1 = new Date("2026-12-01T19:00:00Z");
+  const dec3 = new Date("2026-12-03T19:00:00Z");
+  if (activeHomepageBanner(dec1) !== "giving-tuesday" || !adventBannerVisible(dec1)) {
+    throw new Error("On December 1 the Giving Tuesday banner should keep the single slot and the advent line should still show.");
+  }
+  if (activeHomepageBanner(dec3) !== null || !adventBannerVisible(dec3)) {
+    throw new Error("On December 3 the advent line should show with no other seasonal banner.");
+  }
+
+  const previewNow = new Date("2026-11-03T18:00:00Z");
+  if (adventToday("2026-12-10", previewNow, false) !== "2026-11-03") {
+    throw new Error("Production should ignore a preview date.");
+  }
+  if (adventToday("2026-12-10", previewNow, true) !== "2026-12-10") {
+    throw new Error("A dev server should be able to preview a Denver date.");
+  }
+  if (adventToday("2026-02-31", previewNow, true) !== "2026-11-03") {
+    throw new Error("A bad preview date should fall through.");
+  }
+
+  const tomorrow = adventNextPrompt(3, "2026-12-03");
+  if (tomorrow.text !== "Come back tomorrow for door 4." || tomorrow.href !== adventDayPath(4)) {
+    throw new Error("An open door should point to tomorrow.");
+  }
+  if (!adventNextPrompt(3, "2026-11-20").text.includes("December 1")) {
+    throw new Error("Before December, the prompt should say when the first door opens.");
+  }
+  if (!adventNextPrompt(10, "2026-12-26").text.includes("All 24 doors are open.")) {
+    throw new Error("After December 24, the prompt should say every door is open.");
+  }
+  if (adventNextPrompt(2, "2026-12-10").href !== adventDayPath(10)) {
+    throw new Error("A past door should point at today's door.");
+  }
+
+  const lockedLines = adventOgLines({
+    day: 4,
+    status: "locked",
+    act: ADVENT_ACTS[3],
+    story: adventFixture({ slug: "secret-story", tags: ["birds"], title: "Secret title that must not leak" }),
+  });
+  if (lockedLines.title.includes("Secret") || !lockedLines.title.includes("opens December 4")) {
+    throw new Error("A locked door image should not reveal the story.");
+  }
+
+  const both = adventFixture({ slug: "both-story", tags: ["libraries", "kids", "students"], date: "2026-10-01" });
+  const kids = adventFixture({ slug: "kids-story", tags: ["kids", "students"], date: "2026-10-02" });
+  const placed = buildAdventCalendar([both, kids], { pins: {} }, "2026-12-24");
+  if (placed.doors.find((door) => door.day === 1)?.story?.slug !== "both-story") {
+    throw new Error("A library story should stay on the reading door when a broader day could also use it.");
+  }
+  if (placed.doors.find((door) => door.day === 9)?.story?.slug !== "kids-story") {
+    throw new Error("The classmate door should take the remaining classroom story.");
+  }
+
+  const pinned = buildAdventCalendar([both, kids], { pins: { "9": "both-story" } }, "2026-12-24");
+  const pinnedDoor = pinned.doors.find((door) => door.day === 9);
+  if (!pinnedDoor?.pinned || pinnedDoor.story?.slug !== "both-story") throw new Error("A pin should choose that door's story.");
+  if (pinned.doors.some((door) => door.day !== 9 && door.story?.slug === "both-story")) {
+    throw new Error("A pinned story should not also be used on another door.");
+  }
+
+  const violent = adventFixture({
+    slug: "violent-story",
+    tags: ["libraries"],
+    title: "Neighbors held a vigil after the shooting",
+    kidSummary: "A class talked about a shooting in town and then planted flowers together.",
+  });
+  const blocked = buildAdventCalendar([violent, kids], { pins: { "1": "violent-story" } }, "2026-12-01");
+  if (!blocked.pinErrors.some((error) => error.includes("violent-story"))) {
+    throw new Error("A pin should not put a violent story on a door.");
+  }
+  if (blocked.doors.some((door) => door.story?.slug === "violent-story")) {
+    throw new Error("The blocked pin should not fill a door.");
+  }
+  const adult = buildAdventCalendar([adventFixture({ slug: "adult-story", tags: ["libraries"], kidFriendly: false })], { pins: { "1": "adult-story" } }, "2026-12-01");
+  if (!adult.pinErrors.some((error) => error.includes("kid-friendly"))) throw new Error("A pin should require a kid-friendly story.");
+  const missing = buildAdventCalendar([], { pins: { "4": "missing-slug" } }, "2026-12-04");
+  if (!missing.pinErrors.some((error) => error.includes("missing-slug"))) throw new Error("A missing pin should be reported.");
+  const duplicate = buildAdventCalendar([both], { pins: { "1": "both-story", "3": "both-story" } }, "2026-12-24");
+  if (!duplicate.pinErrors.some((error) => error.includes("already used"))) throw new Error("A story should not be pinned twice.");
+  if (duplicate.doors.filter((door) => door.story?.slug === "both-story").length !== 1) {
+    throw new Error("A repeated pin should only fill one door.");
+  }
+
+  for (const value of [{ pins: { "25": "both-story" } }, { pins: { "01": "both-story" } }, { pins: { "1": "Not A Slug" } }, { extra: true }]) {
+    let threw = false;
+    try {
+      parseAdventEditorConfig(value);
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`Advent config should reject ${JSON.stringify(value)}`);
+  }
+
+  const published = getPublishedStories();
+  const config = loadAdventConfig();
+  const live = buildAdventCalendar(published, config, "2026-12-24");
+  if (live.pinErrors.length) throw new Error(`Advent config: ${live.pinErrors.join("; ")}`);
+  if (live.doors.length !== 24) throw new Error("The calendar should have 24 doors.");
+  const slugs = new Set<string>();
+  for (const door of live.doors) {
+    if (!door.story) throw new Error(`Door ${door.day} has no archive story.`);
+    if (slugs.has(door.story.slug)) throw new Error(`${door.story.slug} is used on more than one door.`);
+    slugs.add(door.story.slug);
+    const reason = adventBlockReason(door.story);
+    if (reason) throw new Error(`${door.story.slug} is on door ${door.day} but ${reason}.`);
+    const pin = config.pins[String(door.day)];
+    if (door.pinned !== (pin === door.story.slug)) throw new Error(`Door ${door.day} pin flag does not match the editor file.`);
+    if (!door.pinned && door.score === 0) throw new Error(`Door ${door.day} (${door.act.theme}) has a weak automatic match.`);
+  }
+  const early = buildAdventCalendar(published, config, "2026-11-15");
+  if (early.doors.some((door) => door.status !== "locked")) throw new Error("Every door should be locked on November 15.");
+  if (early.doors.map((door) => door.story?.slug).join() !== live.doors.map((door) => door.story?.slug).join()) {
+    throw new Error("Story picks should not change just because a door is locked.");
+  }
+  const opened = buildAdventCalendar(published, config, "2026-12-10");
+  const openDays = opened.doors.filter((door) => door.status === "open").map((door) => door.day);
+  if (openDays.join(",") !== "1,2,3,4,5,6,7,8,9,10") throw new Error(`December 10 should open doors 1 through 10, got ${openDays.join(",")}.`);
+  const earlyPaths = adventIndexablePaths(early);
+  if (earlyPaths.includes(adventDayPath(1)) || !earlyPaths.includes(ADVENT_PATH) || !earlyPaths.includes(ADVENT_PRINT_PATH)) {
+    throw new Error("Before December, the sitemap list should be the calendar and the print page only.");
+  }
+  const midPaths = adventIndexablePaths(opened);
+  if (!midPaths.includes(adventDayPath(10)) || midPaths.includes(adventDayPath(11))) {
+    throw new Error("The sitemap list should include open doors and leave later doors out.");
+  }
+
+  const urls = new Set(sitemap().map((entry) => entry.url));
+  const current = getAdventCalendar();
+  for (const path of adventIndexablePaths(current)) {
+    if (!urls.has(absoluteUrl(path))) throw new Error(`The sitemap should include ${path}.`);
+  }
+  for (const door of current.doors) {
+    const listed = urls.has(absoluteUrl(door.path));
+    if (listed !== (door.status === "open" && Boolean(door.story))) {
+      throw new Error(`${door.path} sitemap entry does not match its lock on ${current.today}.`);
+    }
+    if (urls.has(absoluteUrl(door.printPath))) throw new Error(`${door.printPath} should stay out of the sitemap.`);
+  }
+  if (urls.has(absoluteUrl("/advent"))) throw new Error("The /advent redirect should stay out of the sitemap.");
+  if (adventUnpinnedDays(live).length !== live.doors.filter((door) => !door.pinned).length) {
+    throw new Error("The gap list should be the unpinned doors.");
+  }
+
+  if (CALENDAR_HUBS.advent.path !== ADVENT_PATH) throw new Error("The calendar advent hub drifted.");
+  const giving = getObservancePage("giving-tuesday", "2026-10-31");
+  const volunteers = getObservancePage("international-volunteer-day", "2026-10-31");
+  if (!giving?.hubs.some((hub) => hub.path === ADVENT_PATH) || !volunteers?.hubs.some((hub) => hub.path === ADVENT_PATH)) {
+    throw new Error("Giving Tuesday and International Volunteer Day should link the advent calendar.");
+  }
+
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  if (home.indexOf("<AdventBanner") < home.indexOf("<GivingTuesdayBanner")) {
+    throw new Error("The advent line should render after the single seasonal banner.");
+  }
+  const banner = fs.readFileSync(path.join(process.cwd(), "components/advent-banner.tsx"), "utf8");
+  if (banner.includes("activeHomepageBanner")) throw new Error("The advent line should stay outside the single-banner slot.");
+  const css = fs.readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
+  if (!css.includes(".advent-banner") || !css.includes(".advent-grid") || !css.includes(".advent-sheet")) {
+    throw new Error("Advent styles should include the banner, the door grid, and the print sheet.");
+  }
+  const dayPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/advent/2026/[day]/page.tsx"), "utf8");
+  const views = fs.readFileSync(path.join(process.cwd(), "components/advent-views.tsx"), "utf8");
+  if (!dayPage.includes("EmailSignup") || !dayPage.includes("AdventPromptLine") || !dayPage.includes("index: false") || !dayPage.includes("siteConfig.editor.name")) {
+    throw new Error("A door page should include the signup, the return prompt, a noindex lock, and the public masthead.");
+  }
+  if (!views.includes("ListenControls") || !views.includes("speak-kid") || !views.includes("Read aloud")) {
+    throw new Error("Open doors should use the read-aloud control and the kid summary.");
+  }
+  if (dayPage.includes("Jane ") || views.includes("Jane ")) throw new Error("Advent pages should use the public masthead, not a personal name.");
+  for (const file of ["app/(site)/kids/browse.tsx", "app/(site)/kindness-challenge/page.tsx", "app/(site)/calendar/page.tsx", "components/kindness-links.tsx", "scripts/indexnow.ts"]) {
+    const source = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!source.includes("ADVENT_PATH") && !source.includes("adventIndexablePaths")) {
+      throw new Error(`${file} should link the advent calendar.`);
+    }
+  }
+  const guide = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!guide.includes("## December Advent of Good News") || !guide.includes("data/advent-2026.json") || !guide.includes("npm run advent-gaps")) {
+    throw new Error("ADDING_STORIES.md should explain how to pin an advent day.");
+  }
+  const redirect = fs.readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
+  if (!redirect.includes('source: "/advent"') || !redirect.includes('destination: "/advent/2026"')) {
+    throw new Error("The /advent redirect should point at /advent/2026.");
+  }
+  const unpinned = adventUnpinnedDays(live);
+  console.log(`Advent ${live.year}: 24 doors, ${unpinned.length} without an editor pin.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4598,6 +4851,7 @@ async function main() {
   assertGivingTuesday(stories);
   assertFirstRespondersDay();
   assertWorldKindnessDay();
+  assertAdvent();
   assertKindnessChallenges();
   assertKindnessAmbassadors();
   assertSpanishEditions();

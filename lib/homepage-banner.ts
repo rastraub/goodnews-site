@@ -16,6 +16,10 @@ import { calendarDay, isNewsBreakBannerActive } from "./news-break-banner";
  * - Nov 24–Dec 2: Giving Tuesday (Table Talk stays eligible through Nov 27 and does not stack)
  * A banner that is the only one in season still shows, including Veterans Day
  * on a year when the others are off.
+ *
+ * The December Advent line is not in this list. From November 30 through
+ * December 24, 2026 it can sit under whichever banner this function picks,
+ * including Giving Tuesday on December 1 and 2.
  */
 export const HOMEPAGE_BANNER_IDS = [
   "news-break",

@@ -164,7 +164,7 @@ export const OBSERVANCES: ObservanceRecord[] = [
     ],
     infoUrl: "https://www.givingtuesday.org/",
     infoLabel: "GivingTuesday",
-    hubs: ["giving"],
+    hubs: ["giving", "advent"],
   },
   {
     slug: "international-day-of-persons-with-disabilities",
@@ -201,6 +201,7 @@ export const OBSERVANCES: ObservanceRecord[] = [
     ],
     infoUrl: UN_LIST,
     infoLabel: UN_LABEL,
+    hubs: ["advent"],
   },
   {
     slug: "international-mountain-day",
