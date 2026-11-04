@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.worldwildlife.org/species/tiger"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "On October 31, 2026, specialists in Kazakhstan opened a pen and a male Amur tiger named Amur walked into Ile-Balkhash State Nature Reserve. The Astana Times reported it on November 2. He had passed health checks and shown he could hunt without being fed. A collar sends his location so people can follow him. A female named Umit was released on July 31 and is already hunting on her own. Two younger tigers are still in care. Tigers had been gone from this region for about 70 years. The news is two adult tigers in the reserve, not a new population yet."
 kidQuestions:
