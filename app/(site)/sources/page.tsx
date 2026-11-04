@@ -81,7 +81,7 @@ export default function SourcesPage() {
         <p className="kicker">Sources</p>
         <h1>The newsrooms behind the good news.</h1>
         <p className="lede">
-          The outlets below did the reporting. We read it, write a short summary, and link the original article. This is a thank-you to those local newsrooms, and to the other desks we cite, sorted by how many stories we have credited. {placeSummary}
+          The outlets below did the reporting. We read it, write a short summary, and link the original article. This is a thank-you to those local newsrooms, and to the other desks we cite, sorted by how many stories we have credited. {placeSummary} Other publishers can run those summaries, free, through the <Link href="/wire">Good News Wire</Link>. The original article stays with the newsroom.
         </p>
         <SourceInvite />
       </div>

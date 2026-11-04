@@ -178,6 +178,20 @@ For a newsroom, nonprofit, school, or reporter named in a story:
 - `https://www.tazzora.com/featured/{story-slug}` fills that kit in for one story. Those pages are noindex and are not in the sitemap.
 - `https://www.tazzora.com/widgets` has a headline widget for each state and a latest widget. `/embed/latest` and `/embed/{state-slug}` are the frames. They do not use cookies.
 
+## Good News Wire
+
+`/wire` lets a local paper, school newsletter, library, church, HOA, or other small publisher republish Tazzora's headlines and summaries for free. Commercial and non-commercial uses are both allowed. Each use needs a credit link to the Tazzora story and a credit link to the original newsroom. Web republishers should put `rel="canonical"` on the link to the story. Do not paste the original article. Photos stay off the wire unless a story's image credit or license names Tazzora or SBBnet, Inc. Creative Commons and public-domain photos are not included.
+
+Feeds are built with the site from the story files. The RSS channel helper in `lib/feed.ts` is shared with the other feeds.
+
+- `https://www.tazzora.com/wire`
+- `https://www.tazzora.com/wire/feed.xml` (RSS 2.0, full summary and credit)
+- `https://www.tazzora.com/wire/feed.json` (JSON Feed 1.1)
+- `https://www.tazzora.com/wire/kids/feed.xml` and `/wire/kids/feed.json` (stories with `kidFriendly: true`, using the classroom summary)
+- `https://www.tazzora.com/wire/colorado/feed.xml` (same pattern for every state slug; `/wire/co/feed.xml` redirects)
+
+The page also has a copy block for this week's five summaries, in HTML and plain text, and a small bulletin for print. Removal and corrections go through `/contact`, `/submit`, or cheers@tazzora.com. The page is in the sitemap as a WebPage. `/feeds`, the footer, `/featured`, and `/sources` link to it.
+
 English stays at the site root. Spanish is a weekly Top 5 at `/es/buenas-noticias/{monday}`, not a copy of every URL. `lib/i18n.ts` pairs each edition with that week's English roundup. Do not add a blanket `/es` prefix there. Current English URLs do not move. See [ADDING_STORIES.md](ADDING_STORIES.md) for how a week gets a Spanish file.
 
 State-and-category pages (`/state/colorado/animals`) and topic pages are added to the sitemap only after at least three stories support them. A city page (`/state/colorado/city/denver`) exists for every city in the archive. It enters the sitemap at two stories. A one-story city page stays linked from its state or country page and is marked noindex. Country pages with fewer than three stories stay on `/world` and are left out of the sitemap.
