@@ -24,8 +24,7 @@ howToHelp:
   - label: "Colorado Parks and Wildlife"
     url: "https://cpw.state.co.us/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

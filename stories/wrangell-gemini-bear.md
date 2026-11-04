@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.fs.usda.gov/tongass"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

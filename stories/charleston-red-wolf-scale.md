@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.fws.gov/species/red-wolf-canis-rufus"
     kind: learn
 featured: false
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
