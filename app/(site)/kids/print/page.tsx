@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/json-ld";
 import { StoryImage } from "@/components/story-image";
 import { editionLabel, formatStoryDate } from "@/lib/format";
 import { kidPlaceForStory, storyOfTheDay } from "@/lib/kids";
 import { latestQuiz } from "@/lib/quiz";
 import { placeLabel } from "@/lib/present";
-import { pageAlternates } from "@/lib/seo";
+import { classroomJsonLd, pageAlternates } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
@@ -14,15 +15,24 @@ import { ListenControls } from "@/components/listen-controls";
 import { kidListenSegments } from "@/lib/listen-text";
 import { PrintButton } from "../print-button";
 
+/** Meta descriptions stay in the usual snippet range. The sheet still prints the full summary. */
+function clipDescription(text: string, max = 180): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const slice = clean.slice(0, max);
+  const space = slice.lastIndexOf(" ");
+  return (space > 80 ? slice.slice(0, space) : slice).replace(/[,:;.\s]+$/, "");
+}
+
 export function generateMetadata(): Metadata {
   const story = storyOfTheDay(getPublishedStories());
   const title = story ? `Story of the Day: ${story.shortTitle ?? story.title}` : "Story of the Day for classrooms";
-  const description =
+  const full =
     story?.kidSummary ??
     "A printable good-news story for teachers, with a short summary and discussion questions. For adults to read with a class.";
   return {
     title,
-    description,
+    description: clipDescription(full),
     alternates: pageAlternates("/kids/print"),
   };
 }
@@ -32,8 +42,27 @@ export default function KidsPrintPage() {
   const placePath = story ? kidPlaceForStory(story) : undefined;
   const quiz = latestQuiz();
 
+  const title = story ? `Story of the Day: ${story.shortTitle ?? story.title}` : "Story of the Day for classrooms";
+  const description =
+    story?.kidSummary ??
+    "A printable good-news story for teachers, with a short summary and discussion questions. For adults to read with a class.";
   return (
     <div className="page-block">
+      <JsonLd
+        data={classroomJsonLd({
+          name: title,
+          description: clipDescription(description),
+          path: "/kids/print",
+          crumbs: [
+            { name: "Today", path: "/" },
+            { name: "For classrooms", path: "/kids" },
+            { name: "Story of the Day", path: "/kids/print" },
+          ],
+          resources: story ? [{ name: story.title, path: `/story/${story.slug}` }] : [],
+          learningResourceType: "lesson plan",
+          timeRequired: "PT10M",
+        })}
+      />
       <div className="wrap page-hero print-sheet">
         <p className="crumbs no-print">
           <Link href="/">Today</Link>
