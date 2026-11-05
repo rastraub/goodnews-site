@@ -28,6 +28,8 @@ import { calendarSitemapEntries } from "@/lib/good-news-calendar";
 import { getVeteransDayHub, VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { getWorldKindnessDayHub, WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { loadSpanishEditions } from "@/lib/spanish-editions";
+import { LIBRARIES_PATH } from "@/lib/libraries";
+import { digestsToPrerender, WORKPLACE_PATH } from "@/lib/workplace";
 import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
 import { newsBreakBanner } from "@/site.config";
@@ -89,6 +91,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   const weeks = weeksToPrerender();
+  const workplaceDigests = digestsToPrerender();
+  const newestWorkplace = workplaceDigests[workplaceDigests.length - 1];
   const newestWeek = weeks[weeks.length - 1];
   const indexes = indexesToPrerender();
   const newestIndex = indexes[indexes.length - 1];
@@ -190,6 +194,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.7,
     },
+    {
+      url: absoluteUrl(WORKPLACE_PATH),
+      lastModified: newestWorkplace?.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
+    {
+      url: absoluteUrl(LIBRARIES_PATH),
+      lastModified: siteLatest,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    },
+    ...workplaceDigests
+      .slice()
+      .reverse()
+      .map((digest) => ({
+        url: absoluteUrl(digest.path),
+        lastModified: digest.latest,
+        changeFrequency: (digest.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: digest.inProgress ? 0.6 : 0.5,
+      })),
     {
       url: absoluteUrl(THANKS_PATH),
       lastModified: thanksLatest ?? siteLatest,

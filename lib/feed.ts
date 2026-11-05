@@ -8,6 +8,7 @@ import { storyFeedImage } from "./feed-image";
 import { absoluteUrl, storyModifiedIso, storyPublishedIso } from "./seo";
 import { getPublishedStories, type Story } from "./stories";
 import { getStateByCode, STATES } from "./states";
+import { WORKPLACE_RSS_PATH } from "./workplace";
 import { siteConfig } from "@/site.config";
 
 export const FEED_LIMIT = 100;
@@ -47,6 +48,7 @@ export function feedCatalog(): { heading: string; feeds: FeedLink[] }[] {
         { title: "SmartNews", path: "/smartnews.xml", blurb: "SmartFormat feed for the SmartNews app." },
         { title: "World", path: "/world/rss.xml", blurb: "Stories from outside the United States." },
         { title: "For classrooms", path: "/kids/rss.xml", blurb: "Stories a teacher can read with a class." },
+        { title: "Workplace digest", path: WORKPLACE_RSS_PATH, blurb: "A weekly good-news post for a team channel. The open week is left out." },
         { title: "En español", path: "/es/rss.xml", blurb: "A weekly Top 5 in Spanish. Original sources stay in English." },
       ],
     },
