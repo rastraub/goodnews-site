@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CopyLink } from "@/components/copy-link";
 import { feedCatalog, feedlySubscribeUrl, inoreaderSubscribeUrl } from "@/lib/feed";
 import { absoluteUrl, pageAlternates } from "@/lib/seo";
@@ -17,7 +18,7 @@ export default function FeedsPage() {
         <p className="kicker">Subscribe</p>
         <h1>Feeds</h1>
         <p className="lede">
-          Copy a feed, or add it to Feedly or Inoreader. Each address stays the same when new stories publish.
+          Copy a feed, or add it to Feedly or Inoreader. Each address stays the same when new stories publish. The <Link href="/wire">Good News Wire</Link> is the set made for republishing summaries, with the credit line already in each item.
         </p>
       </div>
       <div className="wrap feed-groups">

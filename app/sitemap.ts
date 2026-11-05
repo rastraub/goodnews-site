@@ -54,6 +54,7 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/subscribe", changeFrequency: "yearly", priority: 0.4 },
   { path: "/help", changeFrequency: "weekly", priority: 0.4 },
   { path: "/feeds", changeFrequency: "monthly", priority: 0.4 },
+  { path: "/wire", changeFrequency: "daily", priority: 0.6 },
   { path: "/featured", changeFrequency: "daily", priority: 0.5 },
   { path: "/widgets", changeFrequency: "daily", priority: 0.4 },
   { path: "/membership", changeFrequency: "yearly", priority: 0.3 },

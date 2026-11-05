@@ -54,6 +54,11 @@ const nextConfig: NextConfig = {
         destination: `/state/${state.slug}`,
         permanent: true,
       })),
+      ...STATES.map((state) => ({
+        source: `/wire/${state.code.toLowerCase()}/feed.xml`,
+        destination: `/wire/${state.slug}/feed.xml`,
+        permanent: true,
+      })),
       ...COUNTRIES.map((country) => ({
         source: `/country/${country.code.toLowerCase()}`,
         destination: `/country/${country.slug}`,
@@ -80,6 +85,11 @@ const nextConfig: NextConfig = {
       cached("/state/:slug/rss.xml", FEED_CACHE_CONTROL),
       cached("/week/rss.xml", FEED_CACHE_CONTROL),
       cached("/follow-ups/rss.xml", FEED_CACHE_CONTROL),
+      cached("/wire/feed.xml", FEED_CACHE_CONTROL),
+      cached("/wire/feed.json", FEED_CACHE_CONTROL),
+      cached("/wire/kids/feed.xml", FEED_CACHE_CONTROL),
+      cached("/wire/kids/feed.json", FEED_CACHE_CONTROL),
+      cached("/wire/:state/feed.xml", FEED_CACHE_CONTROL),
       cached("/good-news-index/:month/index.csv", FEED_CACHE_CONTROL),
       cached("/es/rss.xml", FEED_CACHE_CONTROL),
       cached("/country/:slug/rss.xml", FEED_CACHE_CONTROL),

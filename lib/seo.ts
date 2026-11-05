@@ -413,6 +413,32 @@ export function classroomJsonLd(options: {
   };
 }
 
+/** A single informational page, such as the Good News Wire terms. */
+export function webPageJsonLd(options: {
+  name: string;
+  description: string;
+  path: string;
+  crumbs: Crumb[];
+}) {
+  const url = absoluteUrl(options.path);
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${url}#webpage`,
+        name: options.name,
+        description: options.description,
+        url,
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        inLanguage: "en-US",
+      },
+      breadcrumbNode(options.crumbs),
+    ],
+  };
+}
+
 export function listingJsonLd(options: {
   name: string;
   description: string;
