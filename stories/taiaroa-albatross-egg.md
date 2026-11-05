@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.doc.govt.nz/nature/native-animals/birds/birds-a-z/albatrosses/royal-albatross-toroa/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Radio New Zealand reported on November 4, 2026, that viewers of a live camera watched a royal albatross lay the first egg of the season at Taiaroa Head. The female, called L, used a nest from last season. She and her mate take turns sitting on the egg. That sitting lasts about 79 days. Rangers will check in 10 to 12 days whether the egg can grow into a chick. Four more eggs have been laid since that Sunday. Last season, 38 chicks left the colony. Thirty years ago the colony sent out about 10 chicks a year. The camera shows this nest, not every albatross in New Zealand."
 kidQuestions:
