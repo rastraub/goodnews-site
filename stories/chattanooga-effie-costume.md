@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.christopherreeve.org/"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

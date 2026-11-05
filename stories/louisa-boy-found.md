@@ -24,8 +24,7 @@ howToHelp:
   - label: "National Association for Search and Rescue"
     url: "https://www.nasar.org/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true
