@@ -106,6 +106,26 @@ import {
   sentencesOf,
   type AnnouncementCandidate,
 } from "../lib/morning-announcements";
+import {
+  ALEXA_ITEM_LIMIT,
+  ALEXA_MAIN_TEXT_LIMIT,
+  ALEXA_MAX_AGE_DAYS,
+  BRIEFING_ALEXA_PATH,
+  BRIEFING_PATH,
+  BRIEFING_RSS_PATH,
+  alexaBriefings,
+  alexaFeedItems,
+  briefingIntro,
+  briefingSignoff,
+  fitSpokenScript,
+  indexableBriefings,
+  latestBriefing,
+  loadBriefings,
+  renderAlexaFeed,
+  renderBriefingRss,
+  smartSpeakerNote,
+  speakable,
+} from "../lib/briefing";
 import { classroomJsonLd } from "../lib/seo";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
@@ -154,7 +174,8 @@ import { GOOD_NEWS_MAP_PATH, MAP_WINDOW_DAYS } from "../lib/map-path";
 import { stateContains } from "../lib/state-bounds";
 import { MAP_VIEWBOX, mapShapeCodes, projectToState } from "../lib/us-map-geometry";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
-import { getPublishedStories, getStory, loadAllStories, type Story } from "../lib/stories";
+import { getPublishedStories, getStory, getTop5, loadAllStories, type Story } from "../lib/stories";
+import { selectWebStoryStories } from "../lib/web-stories";
 import { quizShareText, quizShareUrl } from "../lib/quiz-copy";
 import {
   MAX_QUIZ_QUESTIONS,
@@ -257,7 +278,7 @@ import {
 } from "../lib/news-break";
 import { badgeEmbedHtml, embedDocumentForSlug, embedScriptSource, iframeSnippet, renderEmbedDocument, storyShareLines } from "../lib/partner-kit";
 import { newsBreakJsonLd } from "../lib/seo";
-import { newsBreakBanner, siteConfig, socialLinks } from "../site.config";
+import { alexaBriefing, newsBreakBanner, siteConfig, socialLinks } from "../site.config";
 
 const REQUIRED_SOURCES = [
   "https://www.ideastream.org/health/2026-10-06/mane-attraction-therapy-pony-brings-smiles-and-healing-to-local-hospitals",
@@ -1185,7 +1206,7 @@ function assertBrandLivesInOneFile() {
     ...Object.values(siteConfig.social),
   ].filter((value, index, all) => value && all.indexOf(value) === index);
 
-  const allow = new Set(["site.config.ts", "README.md"]);
+  const allow = new Set(["site.config.ts", "README.md", "docs/alexa-flash-briefing.md"]);
   const skip = new Set(["node_modules", ".next", ".git", "public", "assets", "data"]);
   const hits: string[] = [];
 
@@ -4563,6 +4584,183 @@ function assertTableTalk() {
   );
 }
 
+function assertBriefing() {
+  const cleaned = speakable("Read https://example.com/story today.");
+  if (cleaned !== "Read today.") throw new Error(`Spoken briefing text should drop URLs. Got: ${cleaned}`);
+  const emoji = speakable("A win 🌟 for the town.");
+  if (emoji !== "A win for the town.") throw new Error(`Spoken briefing text should drop emoji. Got: ${emoji}`);
+  const credit = speakable("Channel3000 / WTMJ (CNN Newsource)");
+  if (credit !== "Channel3000 and WTMJ, CNN Newsource") {
+    throw new Error(`Spoken outlet names should be readable. Got: ${credit}`);
+  }
+  const marked = speakable("Hello <em>there</em> & friends.");
+  if (marked !== "Hello there and friends.") throw new Error(`Spoken briefing text should drop markup. Got: ${marked}`);
+
+  const huge = `${"Neighbors shared a long happy story about the town. ".repeat(80)}`;
+  const fitted = fitSpokenScript(
+    "Here's the opening.",
+    Array.from({ length: 5 }, () => ({
+      place: "Sample Town",
+      sourceName: "Sample Paper",
+      sentences: [huge, "A second sentence that can be dropped."],
+    })),
+    "That's the close.",
+  );
+  if (fitted.mainText.length >= ALEXA_MAIN_TEXT_LIMIT) {
+    throw new Error(`A long briefing must stay under ${ALEXA_MAIN_TEXT_LIMIT} characters.`);
+  }
+  if (!fitted.mainText.startsWith("Here's the opening.") || !fitted.mainText.includes("Reported by Sample Paper.")) {
+    throw new Error("A trimmed briefing should keep the opening and the outlet credit.");
+  }
+
+  const note = smartSpeakerNote();
+  if (alexaBriefing.published || note.href || !note.text.includes("coming soon")) {
+    throw new Error("The smart-speaker note should stay generic until the skill is published.");
+  }
+
+  const today = mountainDay();
+  const published = getPublishedStories().filter((story) => story.date <= today);
+  const briefings = loadBriefings(published, today);
+  const latest = latestBriefing(briefings);
+  if (!latest) throw new Error("The archive should have a daily briefing.");
+  const homepage = getTop5(published);
+  const choir = latest.stories.find((story) => story.slug === "sheboygan-dementia-choir");
+  if (choir && !choir.blurb.includes("November 21")) {
+    throw new Error("A middle initial should not cut a spoken sentence short.");
+  }
+  if (homepage.length === 5 && homepage.every((story) => story.date <= today)) {
+    const same = latest.stories.map((story) => story.slug).join();
+    if (same !== homepage.map((story) => story.slug).join()) {
+      throw new Error("The latest briefing should use the same Top 5 as the homepage.");
+    }
+  }
+  if (latest.date !== published.map((story) => story.date).sort().at(-1)) {
+    throw new Error("The latest briefing should be the newest edition date.");
+  }
+
+  const counts = new Map<string, number>();
+  for (const story of published) counts.set(story.date, (counts.get(story.date) ?? 0) + 1);
+  const urls = new Set(sitemap().map((entry) => entry.url));
+  if (!urls.has(absoluteUrl(BRIEFING_PATH))) throw new Error("The sitemap should include /briefing.");
+
+  for (const briefing of briefings) {
+    if (briefing.stories.length !== 5) throw new Error(`${briefing.date} should brief five stories.`);
+    if (briefing.mainText.length >= ALEXA_MAIN_TEXT_LIMIT) {
+      throw new Error(`${briefing.date} is over Amazon's text limit (${briefing.mainText.length}).`);
+    }
+    if (!briefing.mainText.startsWith(briefingIntro(briefing.date))) {
+      throw new Error(`${briefing.date} should open with the spoken intro.`);
+    }
+    if (!briefing.mainText.endsWith(briefingSignoff())) {
+      throw new Error(`${briefing.date} should close by pointing at the site.`);
+    }
+    if (/https?:\/\//i.test(briefing.mainText) || /\bwww\./i.test(briefing.mainText) || briefing.mainText.includes("@")) {
+      throw new Error(`${briefing.date} should not speak a URL or an email address.`);
+    }
+    if (/<[^>]+>/.test(briefing.mainText) || /[&<>]/.test(briefing.mainText)) {
+      throw new Error(`${briefing.date} should be plain text.`);
+    }
+    if (/\p{Extended_Pictographic}/u.test(briefing.mainText)) {
+      throw new Error(`${briefing.date} should not include emoji.`);
+    }
+    for (const story of briefing.stories) {
+      if (!briefing.mainText.includes(`in ${story.place}:`)) {
+        throw new Error(`${briefing.date} should name ${story.place}.`);
+      }
+      if (!briefing.mainText.toLowerCase().includes(`reported by ${story.sourceName.toLowerCase()}`)) {
+        throw new Error(`${briefing.date} should credit ${story.sourceName}.`);
+      }
+      if (briefing.date !== latest.date && story.slug && published.find((item) => item.slug === story.slug)?.date !== briefing.date) {
+        throw new Error(`${briefing.date} should only speak stories from that date.`);
+      }
+    }
+    if (!urls.has(absoluteUrl(briefing.path))) throw new Error(`The sitemap should include ${briefing.path}.`);
+    if (!indexableBriefings(briefings).some((item) => item.date === briefing.date)) {
+      throw new Error(`${briefing.date} should be indexable.`);
+    }
+  }
+
+  for (const [date, count] of counts) {
+    if (count >= 5 || date === latest.date) continue;
+    if (briefings.some((briefing) => briefing.date === date) || urls.has(absoluteUrl(`${BRIEFING_PATH}/${date}`))) {
+      throw new Error(`${date} does not have five stories and should not be indexed.`);
+    }
+  }
+
+  const earlier = briefings.filter((briefing) => briefing.date !== latest.date);
+  const sample = earlier[earlier.length - 1];
+  if (sample) {
+    const day = published.filter((story) => story.date === sample.date);
+    const expected = selectWebStoryStories(day).map((story) => story.slug).join();
+    if (sample.stories.map((story) => story.slug).join() !== expected) {
+      throw new Error(`${sample.date} should use the daily Top 5 selector.`);
+    }
+  }
+
+  const alexaBriefingDays = alexaBriefings(briefings, today);
+  const alexa = alexaFeedItems(alexaBriefingDays);
+  if (alexa.length < 1 || alexa.length > ALEXA_ITEM_LIMIT) {
+    throw new Error(`The Alexa feed should have 1 to ${ALEXA_ITEM_LIMIT} items.`);
+  }
+  if (alexa[0]?.uid !== latest.uid) throw new Error("The Alexa feed should lead with the latest briefing.");
+  const cutoff = addDays(today, -(ALEXA_MAX_AGE_DAYS - 1));
+  const heard = new Set<string>();
+  let previousStamp = Number.POSITIVE_INFINITY;
+  for (const [index, item] of alexa.entries()) {
+    const day = alexaBriefingDays[index];
+    if (!day || day.date < cutoff) throw new Error("The Alexa feed should stay inside seven days.");
+    if (index > 0 && day.date > alexaBriefingDays[index - 1].date) {
+      throw new Error("Alexa items should run from newest to oldest.");
+    }
+    const keys = Object.keys(item).sort().join(",");
+    if (keys !== "mainText,redirectionUrl,titleText,uid,updateDate") {
+      throw new Error(`Alexa item ${item.uid} has unexpected fields: ${keys}`);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(item.updateDate)) {
+      throw new Error(`Alexa updateDate should be UTC ISO: ${item.updateDate}`);
+    }
+    const stamp = Date.parse(item.updateDate);
+    if (Number.isNaN(stamp) || stamp > Date.now() || stamp >= previousStamp) {
+      throw new Error("Alexa update dates should be in the past and newest first.");
+    }
+    previousStamp = stamp;
+    if (!item.redirectionUrl.startsWith(`${siteConfig.url}/briefing/`)) {
+      throw new Error("Alexa redirectionUrl should be the briefing page.");
+    }
+    if (item.mainText.length >= ALEXA_MAIN_TEXT_LIMIT) throw new Error("Alexa mainText is too long.");
+    for (const story of day.stories) {
+      if (heard.has(story.slug)) throw new Error(`Alexa feed repeats ${story.slug}.`);
+      heard.add(story.slug);
+    }
+  }
+
+  const parsed = JSON.parse(renderAlexaFeed(alexa)) as unknown[];
+  if (!Array.isArray(parsed) || parsed.length !== alexa.length) throw new Error("Alexa JSON should be an array of items.");
+  if (renderAlexaFeed(alexa).includes("streamUrl")) throw new Error("The Alexa feed should be text only.");
+
+  const rss = renderBriefingRss(briefings);
+  if (!rss.startsWith("<?xml") || !rss.includes("<rss version=\"2.0\">")) throw new Error("The briefing feed should be RSS.");
+  if ((rss.match(/<item>/g) ?? []).length !== briefings.length) throw new Error("The RSS feed should list every briefing day.");
+  if (!rss.includes(`<link>${absoluteUrl(latest.path)}</link>`)) throw new Error("The RSS feed should link the latest briefing.");
+  if (rss.includes("xmlns:nb") || rss.includes("xmlns:snf") || rss.includes("<enclosure")) {
+    throw new Error("The briefing RSS should stay plain.");
+  }
+
+  if (!feedCatalog().some((group) => group.feeds.some((feed) => feed.path === BRIEFING_RSS_PATH))) {
+    throw new Error("The feeds page catalog should include the briefing RSS.");
+  }
+  const feedsPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/feeds/page.tsx"), "utf8");
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!feedsPage.includes("BRIEFING_PATH")) throw new Error("The feeds page should link to /briefing.");
+  if (!footer.includes("BRIEFING_PATH")) throw new Error("The footer should link to /briefing.");
+  const cache = fs.readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
+  if (!cache.includes(BRIEFING_RSS_PATH) || !cache.includes(BRIEFING_ALEXA_PATH)) {
+    throw new Error("Feed cache headers should cover the briefing feeds.");
+  }
+
+  console.log(`Daily briefing: ${briefings.length} days, Alexa items ${alexa.length}, latest ${latest.mainText.length} characters.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4576,6 +4774,7 @@ async function main() {
   assertHubs();
   assertKidClassrooms();
   assertMorningAnnouncements();
+  assertBriefing();
   assertWeeks();
   assertGoodNewsIndex();
   assertClassroomPacks();

@@ -1,3 +1,4 @@
+import { BRIEFING_RSS_PATH } from "./briefing";
 import { SMARTNEWS_LOGO, SMARTNEWS_LOGO_DARK } from "./brand";
 import { CATEGORIES, getCategory } from "./categories";
 import { getCountry } from "./countries";
@@ -42,6 +43,7 @@ export function feedCatalog(): { heading: string; feeds: FeedLink[] }[] {
       heading: "Main",
       feeds: [
         { title: "Latest stories", path: "/rss.xml", blurb: "The main RSS feed." },
+        { title: "Daily briefing", path: BRIEFING_RSS_PATH, blurb: "A spoken script of each day's Top 5, for radio, podcasts, and announcements." },
         { title: "Follow-ups", path: FOLLOW_UPS_FEED_PATH, blurb: "Updates on stories already published. Each item links to the original story URL." },
         { title: "Atom", path: "/atom.xml", blurb: "The same latest stories, as Atom." },
         { title: "SmartNews", path: "/smartnews.xml", blurb: "SmartFormat feed for the SmartNews app." },
