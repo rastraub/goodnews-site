@@ -475,6 +475,57 @@ The banner is eligible November 6 through November 14, America/Denver, every yea
 
 A banner that is the only one in season still shows. The rules live in `lib/homepage-banner.ts`.
 
+## Good News Year in Review
+
+`/year-in-review` lists editions. `/year-in-review/2026` is the 2026 roundup. The byline is `siteConfig.editor.name`. Do not put a personal name on this page.
+
+The page is on the site now so editors can read it. Until December 15, 2026, on the America/Denver clock, it sends `noindex`, stays out of the sitemap, and is not linked from the header, footer, or homepage. On that date it becomes indexable. The sitemap entry is added on the next build. The header link, footer link, and homepage banner show from December 15 through January 10, and they sit beside any other seasonal banner instead of replacing it. The banner rules for the other hubs still live in `lib/homepage-banner.ts`.
+
+Open `/year-in-review/2026` or `/year-in-review/2026?preview=1` to read it early. The query does not change robots. `YEAR_IN_REVIEW_PREVIEW` in `lib/year-in-review.ts` forces the published chrome for a local look at the nav and banner. Leave it `false`. `npm run validate-stories` fails while it is `true`.
+
+### How a story is picked
+
+Picks come from published stories dated in that year. A month with no qualifying story is left off the page. A state with none keeps an open card that links to `/state/{slug}`. Nothing is invented.
+
+The automatic score, highest first:
+
+1. Story of the Day (`featured: true`).
+2. Today's Top 5. Rank 1 outranks rank 5.
+3. The world pick (`worldPick: true`), a smaller bonus.
+4. A credited image. Published stories already have one, so this is a small bonus on every normal story.
+5. Recency within the month. A story later in the month gets a few points. That bonus cannot pass a story of the day from earlier in the same month.
+6. Cheers, a few points at most.
+
+The classroom, first responder, and animal sections add points for a matching tag after that base score. The weights live in `YEAR_IN_REVIEW_SCORE` in `lib/year-in-review.ts`.
+
+A story stays off the whole page when the news-break heavy-news filter matches. That list covers politics, shootings, and use of force, and it leaves "Library of Congress" and "Democratic Republic" alone. The roundup also rejects violence wording that list does not already name, including assault, murder, and guns. A pin cannot put a blocked story back.
+
+The classroom section is stricter. The story has to be `kidFriendly`, with a read-aloud summary and discussion questions, and it has to clear the morning-announcement kid-safe check.
+
+### Pins
+
+Editor pins live in `data/year-in-review-2026.json`. The committed file is empty:
+
+```json
+{
+  "exclude": [],
+  "months": {},
+  "states": {},
+  "world": [],
+  "kids": [],
+  "firstResponders": [],
+  "animals": []
+}
+```
+
+`exclude` drops a slug even when it would qualify. `months` pins one story to a month key from `01` to `12`. The story's date has to fall in that month of 2026. `states` pins one story to a USPS code, including `DC`. The story has to be filed in that state and dated in 2026. `world` pins stories filed outside the United States. `kids` pins classroom stories. `firstResponders` pins stories that already qualify as first responder stories. `animals` pins stories in the animals category or with an animal or nature tag.
+
+A bad pin, a duplicate slug, or an unknown slug fails `npm run validate-stories` and the build. The card says "Pinned" when a pin is in use.
+
+`npm run year-in-review-gaps` prints the months and states that still have no qualifying story, plus whether the classroom, first responder, animal, and world sections are empty. The same list is logged by `npm run validate-stories`. Open gaps do not fail the build. The daily run can use that list to fill holes before December 15.
+
+The printable classroom sheet is the kids section. Printing hides the rest of the page. The newsletter block is the usual signup component.
+
 ## Weekly Kindness Challenge
 
 One page per Monday, at `/kindness-challenge` and `/kindness-challenge/YYYY-MM-DD`. The date is the Monday of that week, from the same helper as `/week`: `weekStart()` in `lib/weeks.ts`. The first page is the Monday of the launch week.

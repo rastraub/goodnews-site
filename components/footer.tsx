@@ -13,11 +13,13 @@ import { newsBreakBanner, siteConfig, socialLinks } from "@/site.config";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
+import { yearInReviewPromo } from "@/lib/year-in-review";
 
 export function Footer() {
   const year = editionYear();
   const socials = socialLinks();
   const quiz = latestQuiz();
+  const yearInReview = yearInReviewPromo();
   return (
     <footer>
       <div className="wrap">
@@ -39,6 +41,11 @@ export function Footer() {
             <p className="flabel">Read</p>
             <ul>
               <li><Link href="/">Today</Link></li>
+              {yearInReview ? (
+                <li>
+                  <Link href={yearInReview.href}>{yearInReview.label}</Link>
+                </li>
+              ) : null}
               <li><Link href={newsBreakBanner.path}>A news break</Link></li>
               <li><Link href="/local">Local</Link></li>
               <li><Link href="/world">World</Link></li>
