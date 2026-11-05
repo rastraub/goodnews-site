@@ -19,6 +19,7 @@ import {
 import { listingMeta, pageAlternates } from "@/lib/seo";
 import { formatLongDate, parseIsoDate } from "@/lib/weeks";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 import { siteConfig } from "@/site.config";
 import { TeacherAnnouncementSignup } from "../teacher-signup";
 
@@ -94,6 +95,7 @@ export default async function MorningAnnouncementPage({ params }: Props) {
         {day.kind === "script" ? <Script day={day} /> : <Thin day={day} nearest={nearest} />}
         <p className="link-pills no-print">
           <Link href="/kids">Classroom stories</Link>
+          <Link href={LARGE_PRINT_PATH}>Large-print edition</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
         </p>
         <nav className="pager no-print" aria-label="School days">

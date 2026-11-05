@@ -13,6 +13,7 @@ import { KindnessLinks } from "@/components/kindness-links";
 import { ListenControls } from "@/components/listen-controls";
 import { kidListenSegments } from "@/lib/listen-text";
 import { PrintButton } from "../print-button";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 
 export function generateMetadata(): Metadata {
   const story = storyOfTheDay(getPublishedStories());
@@ -85,6 +86,7 @@ export default function KidsPrintPage() {
               <Link href={`/story/${story.slug}`}>Read the full story</Link>
               {placePath ? <Link href={placePath}>More classroom stories from this place</Link> : null}
               <Link href="/kids">All classroom stories</Link>
+              <Link href={LARGE_PRINT_PATH}>Large-print edition</Link>
               <Link href="/classroom">Good News Friday packs</Link>
               <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
             </div>

@@ -6,6 +6,13 @@ import { kidPlaces } from "@/lib/kids";
 import { GIVING_TUESDAY_PATH, getGivingGuide } from "@/lib/giving-tuesday";
 import { getHubIndex, indexableHubs } from "@/lib/hubs";
 import { indexableAnnouncementDays, loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "@/lib/morning-announcements";
+import {
+  LARGE_PRINT_ABOUT_PATH,
+  LARGE_PRINT_PATH,
+  indexableLargePrintEditions,
+  listLargePrintEditions,
+  pickFeaturedLargePrint,
+} from "@/lib/large-print";
 import { absoluteUrl } from "@/lib/seo";
 import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
 import { FIRST_RESPONDERS_DAY_PATH, getFirstRespondersDayHub } from "@/lib/first-responders-day";
@@ -328,6 +335,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: (day.date === mountainDay() ? "daily" : "weekly") as "daily" | "weekly",
       priority: day.date === mountainDay() ? 0.6 : 0.5,
     })),
+    ...largePrintSitemapEntries(stories, siteLatest),
     ...indexableHubs(hubs).map((hub) => ({
       url: absoluteUrl(hub.path),
       lastModified: hub.latest,
@@ -383,6 +391,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: seeded ? 0.6 : 0.4,
       };
     }),
+  ];
+}
+
+function largePrintSitemapEntries(stories: ReturnType<typeof getPublishedStories>, siteLatest: string | undefined): MetadataRoute.Sitemap {
+  const editions = listLargePrintEditions(stories);
+  const today = mountainDay();
+  const featured = pickFeaturedLargePrint(editions, today);
+  return [
+    {
+      url: absoluteUrl(LARGE_PRINT_PATH),
+      lastModified: featured?.date ?? siteLatest,
+      changeFrequency: "daily",
+      priority: 0.6,
+    },
+    {
+      url: absoluteUrl(LARGE_PRINT_ABOUT_PATH),
+      lastModified: featured?.date ?? siteLatest,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    ...indexableLargePrintEditions(editions).map((edition) => ({
+      url: absoluteUrl(edition.path),
+      lastModified: edition.date,
+      changeFrequency: (edition.date === today ? "daily" : "weekly") as "daily" | "weekly",
+      priority: edition.date === today ? 0.6 : 0.5,
+    })),
   ];
 }
 
