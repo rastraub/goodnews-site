@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.nhaudubon.org/"
     kind: learn
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true
