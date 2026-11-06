@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmailSignup } from "@/components/email-signup";
 import { JsonLd } from "@/components/json-ld";
+import { ADVENT_PATH } from "@/lib/advent";
 import { CALENDAR_ICS_PATH, CALENDAR_PATH } from "@/lib/calendar-path";
 import {
   CALENDAR_INDEX_DESCRIPTION,
@@ -72,6 +73,7 @@ export default function CalendarPage() {
           <a href={CALENDAR_ICS_PATH}>Subscribe in a calendar app</a>
           <Link href="/kids">For classrooms</Link>
           <Link href="/kindness-challenge">Kindness Challenge</Link>
+          <Link href={ADVENT_PATH}>Advent of Good News</Link>
         </p>
         <p className="cal-fine">
           The download is an .ics file from this site. Paste the same link into a calendar app to subscribe. No account

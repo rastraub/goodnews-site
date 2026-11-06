@@ -22,11 +22,12 @@ import { AMBASSADOR_CERTIFICATE_PATH, AMBASSADORS_PATH, shoutoutsPath } from "..
 import { indexableShoutoutMonths } from "../lib/kindness-ambassadors";
 import { getKindnessChallenges } from "../lib/kindness";
 import { loadSpanishEditions } from "../lib/spanish-editions";
+import { adventIndexablePaths, getAdventCalendar } from "../lib/advent";
 import { CALENDAR_PATH } from "../lib/calendar-path";
 import { indexableCalendarPaths } from "../lib/good-news-calendar";
 import { VETERANS_DAY_PATH } from "../lib/veterans-day";
 import { WORLD_KINDNESS_PATH } from "../lib/world-kindness-day";
-import { weeksToPrerender } from "../lib/weeks";
+import { mountainDay, weeksToPrerender } from "../lib/weeks";
 import { listWebStories } from "../lib/web-stories";
 import { newsBreakBanner, siteConfig } from "../site.config";
 import { GOOD_NEWS_MAP_PATH } from "../lib/map-path";
@@ -47,6 +48,7 @@ async function main() {
   for (const quiz of quizzesToPrerender()) urls.add(`${siteConfig.url}${quiz.path}`);
   for (const path of allOnThisDayPaths()) urls.add(`${siteConfig.url}${path}`);
   for (const path of indexableCalendarPaths()) urls.add(`${siteConfig.url}${path}`);
+  for (const path of adventIndexablePaths(getAdventCalendar(mountainDay()))) urls.add(`${siteConfig.url}${path}`);
   for (const month of ballotMonths()) urls.add(`${siteConfig.url}${goodNeighborPath(month)}`);
   for (const challenge of getKindnessChallenges()) urls.add(`${siteConfig.url}${challenge.path}`);
   for (const month of indexableShoutoutMonths()) urls.add(`${siteConfig.url}${shoutoutsPath(month)}`);
