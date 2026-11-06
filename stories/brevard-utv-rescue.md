@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.fox35orlando.com/news/redneck-rescue-unit-brevard-co-volunteers-rescue-stranded-neighbors-lifted-utvs"
     kind: learn
 featured: false
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
