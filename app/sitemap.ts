@@ -14,6 +14,7 @@ import { FOLLOW_UPS_PATH, followUpEntries, storyContentDate } from "@/lib/follow
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { parseMonthDaySlug } from "@/lib/calendar-day";
+import { CAREGIVERS_PATH, editionsToPrerender } from "@/lib/caregivers";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
 import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
@@ -30,6 +31,7 @@ import { getWorldKindnessDayHub, WORLD_KINDNESS_PATH } from "@/lib/world-kindnes
 import { loadSpanishEditions } from "@/lib/spanish-editions";
 import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
+import { PRESS_PATH } from "@/lib/press";
 import { newsBreakBanner } from "@/site.config";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
@@ -47,6 +49,7 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: "/sources", changeFrequency: "daily", priority: 0.6 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
+  { path: PRESS_PATH, changeFrequency: "monthly", priority: 0.5 },
   { path: "/editorial-standards", changeFrequency: "monthly", priority: 0.6 },
   { path: "/corrections", changeFrequency: "weekly", priority: 0.5 },
   { path: "/contact", changeFrequency: "yearly", priority: 0.5 },
@@ -94,6 +97,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const newestIndex = indexes[indexes.length - 1];
   const packs = packsToPrerender();
   const newestPack = packs[packs.length - 1];
+  const caregiverEditions = editionsToPrerender();
+  const newestCaregiver = caregiverEditions[caregiverEditions.length - 1];
   const thanks = thanksBoard(stories);
   const tableTalk = tableTalkDeck(stories);
   const tableTalkLatest = tableTalk.cards.reduce<string | undefined>((latest, card) => {
@@ -267,6 +272,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: pack.latest,
         changeFrequency: (pack.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: pack.inProgress ? 0.6 : 0.5,
+      })),
+    {
+      url: absoluteUrl(CAREGIVERS_PATH),
+      lastModified: newestCaregiver?.latest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
+    ...caregiverEditions
+      .slice()
+      .reverse()
+      .map((edition) => ({
+        url: absoluteUrl(edition.path),
+        lastModified: edition.latest,
+        changeFrequency: (edition.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: edition.inProgress ? 0.6 : 0.5,
       })),
     {
       url: absoluteUrl("/quiz"),

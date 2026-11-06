@@ -281,6 +281,47 @@ The content filter rejects politics, crime, violence, use of force, shootings, d
 
 The homepage banner is eligible November 16 through November 27, America/Denver, every year. It uses the single banner slot. Giving Tuesday still leads on November 24 through December 2. The page, the footer, the sitemap, and the IndexNow ping stay up after the banner comes down.
 
+## Good news for caregivers
+
+`/caregivers` is a weekly list for family caregivers, activity directors, senior centers, and waiting rooms. Each edition is `/caregivers/{YYYY-MM-DD}` where the date is the Monday of that week, the same Monday key as `/week`, the quiz, classroom packs, and the kindness challenge. America/Denver decides which week is open.
+
+An edition holds five gentle stories from that week. If the week is thin, the list fills from stories in the previous 28 days that were not already used in an earlier edition. Stories do not repeat inside one week.
+
+The content filter is the table-talk harm list (politics, crime, violence, use of force, shootings) plus the World Kindness Day block (heavy news, extra harm, tragedy in the headline or deck). A pin cannot put a rejected story back. Health stories are allowed. Kid-only classroom stories stay off unless they are also tagged or categorized as broadly gentle (seniors, neighbors, animals, community, health, and the other broad tags in `lib/caregivers.ts`), or an editor includes them.
+
+Prefer stories tagged `seniors` when they pass the filter, then community, animals, and health.
+
+Editor lists live in `data/caregivers-pins.json`:
+
+```json
+{
+  "weeks": {
+    "2026-11-02": {
+      "include": ["story-slug"],
+      "exclude": ["other-slug"]
+    }
+  }
+}
+```
+
+The week key has to be a Monday. `include` forces that published slug into the edition when it passes the content filter. `exclude` drops a slug for that week. A bad slug, a duplicate, or a slug on both lists fails `npm run validate-stories` and the build. Leave `weeks` as `{}` when there are no pins.
+
+November is National Family Caregivers Month in the United States. That sentence is shown on this page only, and only while the Denver calendar month is November. Do not add a homepage banner for it. World Kindness Day and Veterans Day already own the November homepage slot.
+
+The page links to `/large-print`, `/large-print/{Monday}`, and `/libraries`. Those paths are the planned URLs even if the modules land in a later merge.
+
+The byline is `siteConfig.editor.name`. Do not put a personal name on this page.
+
+To see which weeks are short:
+
+```bash
+npm run caregivers-gaps
+```
+
+## Press kit
+
+`/press` is the media kit: boilerplate, facts, logos, sample stories, editorial links, and social accounts that are actually filled in. Copy comes from `site.config`. Do not add a personal name, a second contact address, or a second NewsMediaOrganization graph. The layout already emits the organization schema. Logos are the existing brand routes, not new files.
+
 ## Good News Index
 
 The monthly index is built from published story files. Do not hand-edit ranks or totals.
