@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.zoo.org.au/fighting-extinction/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The Guardian reported that 53 southern giant burrowing frogs went back to the wild in East Gippsland, Victoria. They started as tadpoles collected from puddles after bushfires in 2019 and 2020. Keepers at Melbourne Zoo raised them, and the frogs bred in human care for the first time last year. The 53 animals released now are males about five years old. They went out after big rains. Each frog has a tag, and recorders will listen for their calls. These frogs spend much of their lives underground and come up to breed when the weather is right. Victoria has only five known places where this kind of frog breeds."
 kidQuestions:
