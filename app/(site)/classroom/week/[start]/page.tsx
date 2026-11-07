@@ -19,6 +19,8 @@ import { openGraphImage } from "@/lib/feed-image";
 import { classroomJsonLd, listingMeta } from "@/lib/seo";
 import type { Story } from "@/lib/stories";
 import { ambassadorReportHref, AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { homeschoolByStart } from "@/lib/homeschool";
+import { wordSearchByStart } from "@/lib/word-search";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -97,6 +99,11 @@ export default async function ClassroomPackPage({ params }: Props) {
           Week of {pack.rangeLabel}
           {" · "}
           For Friday, {pack.fridayLabel}
+        </p>
+        <p className="link-pills no-print">
+          {homeschoolByStart(pack.start) ? <Link href={`/homeschool/week/${pack.start}`}>Homeschool pack for this week</Link> : null}
+          {wordSearchByStart(pack.start) ? <Link href={`/word-search/${pack.start}`}>Word search for this week</Link> : null}
+          <Link href="/kids">Classroom stories</Link>
         </p>
         <div className="pack-actions no-print">
           <PrintButton label="Print this pack" pdfLabel="Download PDF" />

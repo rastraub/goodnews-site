@@ -11,6 +11,8 @@ import { VETERANS_DAY_PATH } from "@/lib/veterans-day";
 import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { newsBreakBanner, siteConfig, socialLinks } from "@/site.config";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { HOMESCHOOL_INDEX_PATH } from "@/lib/homeschool";
+import { WORD_SEARCH_INDEX_PATH } from "@/lib/word-search";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
@@ -55,6 +57,8 @@ export function Footer() {
               <li><Link href="/heroes">Hometown Heroes</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
+              <li><Link href={HOMESCHOOL_INDEX_PATH}>Homeschool</Link></li>
+              <li><Link href={WORD_SEARCH_INDEX_PATH}>Word search</Link></li>
               <li><Link href="/kindness-challenge">Kindness Challenge</Link></li>
               <li><Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link></li>
               <li><Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link></li>

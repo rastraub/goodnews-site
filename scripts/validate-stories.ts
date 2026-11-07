@@ -106,7 +106,9 @@ import {
   sentencesOf,
   type AnnouncementCandidate,
 } from "../lib/morning-announcements";
+import { assertHomeschoolPacks } from "../lib/homeschool";
 import { classroomJsonLd } from "../lib/seo";
+import { assertWordSearches } from "../lib/word-search";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
   MAX_PRERENDERED_WEEKS,
@@ -4563,6 +4565,35 @@ function assertTableTalk() {
   );
 }
 
+function assertFamilyPuzzles() {
+  assertHomeschoolPacks();
+  assertWordSearches();
+  const sitemapSource = fs.readFileSync(path.join(process.cwd(), "app/sitemap.ts"), "utf8");
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  const kids = fs.readFileSync(path.join(process.cwd(), "app/(site)/kids/browse.tsx"), "utf8");
+  const classroom = fs.readFileSync(path.join(process.cwd(), "app/(site)/classroom/page.tsx"), "utf8");
+  const classroomWeek = fs.readFileSync(path.join(process.cwd(), "app/(site)/classroom/week/[start]/page.tsx"), "utf8");
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  for (const file of [sitemapSource, footer, indexNow]) {
+    if (!file.includes("HOMESCHOOL_INDEX_PATH") || !file.includes("WORD_SEARCH_INDEX_PATH")) {
+      throw new Error("Homeschool and word search should be in the sitemap, footer, and IndexNow list.");
+    }
+  }
+  if (!kids.includes("HOMESCHOOL_INDEX_PATH") || !kids.includes("WORD_SEARCH_INDEX_PATH")) {
+    throw new Error("The kids page should link to homeschool and the word search.");
+  }
+  if (!classroom.includes("HOMESCHOOL_INDEX_PATH") || !classroom.includes("WORD_SEARCH_INDEX_PATH")) {
+    throw new Error("The classroom index should link to homeschool and the word search.");
+  }
+  if (!classroomWeek.includes("/homeschool/week/") || !classroomWeek.includes("/word-search/")) {
+    throw new Error("A classroom week should link to that week's homeschool pack and word search.");
+  }
+  if (home.includes("/homeschool") || home.includes("/word-search")) {
+    throw new Error("The homepage should not grow a new banner for homeschool or word search.");
+  }
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4579,6 +4610,7 @@ async function main() {
   assertWeeks();
   assertGoodNewsIndex();
   assertClassroomPacks();
+  assertFamilyPuzzles();
   assertQuizzes();
   assertOnThisDay();
   assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);
