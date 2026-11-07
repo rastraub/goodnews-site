@@ -705,6 +705,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .vocab{margin:8px 0 16px}
 .vocab p{font-size:18px;line-height:1.5}
 .pack .caption{margin-top:8px}
+.word-sheet h2{font-family:var(--font-serif);font-size:28px;margin:22px 0 8px;font-weight:600}
+.word-grid-wrap{overflow-x:auto;max-width:100%}
+.word-grid{border-collapse:collapse;margin:8px 0 18px;background:#fff}
+.word-grid td{width:1.7rem;height:1.7rem;text-align:center;vertical-align:middle;font-weight:700;font-size:15px;line-height:1;border:1px solid var(--line);padding:0}
+.word-grid td.is-answer{box-shadow:inset 0 0 0 2px var(--ink);background:#F8E7C0}
+.word-list{margin:8px 0 18px 1.2rem;padding:0;columns:2;column-gap:28px}
+.word-list li{font-weight:700;letter-spacing:.04em;padding:3px 0;break-inside:avoid}
+.word-key-list{margin:8px 0 0 1.2rem;display:grid;gap:6px}
+.word-key-print{display:none}
+.word-note{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-top:18px}
+.word-note p{margin:0;font-size:17px;line-height:1.6}
+.word-note a{font-weight:700}
 @page {
   size: auto;
   margin: 0.6in;
@@ -877,6 +889,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   a { color: #000 !important; text-decoration: underline; }
   .print-source a[href]::after { content: " (" attr(href) ")"; font-weight: 400; font-size: 9pt; word-break: break-all; }
   .is-speaking { background: transparent !important; box-shadow: none !important; outline: none !important; }
+  .word-sheet h1 { font-size: 22pt; color: #000; }
+  .word-sheet h2 { font-size: 16pt; color: #000; }
+  .word-sheet, .word-sheet p, .word-sheet li, .word-sheet h2 { color: #000 !important; }
+  .word-grid-wrap { overflow: visible; }
+  .word-grid { break-inside: avoid; page-break-inside: avoid; }
+  .word-grid td { width: 0.34in; height: 0.34in; font-size: 11pt; border: 0.6pt solid #000; color: #000; }
+  .word-grid td.is-answer { background: #e6e6e6 !important; box-shadow: inset 0 0 0 1.5pt #000; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .word-key-print { display: block !important; break-before: page; page-break-before: always; }
+  .word-note { border: 1pt solid #000; border-radius: 0; background: #fff; }
   .quiz-sheet-standard { display: block !important; }
   .quiz-sheet-kid { display: none !important; }
   body.quiz-print-kid .quiz-sheet-standard { display: none !important; }

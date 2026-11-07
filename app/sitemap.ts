@@ -15,6 +15,8 @@ import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { parseMonthDaySlug } from "@/lib/calendar-day";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
+import { HOMESCHOOL_INDEX_PATH, homeschoolToPrerender } from "@/lib/homeschool";
+import { WORD_SEARCH_INDEX_PATH, wordSearchesToPrerender } from "@/lib/word-search";
 import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
 import { quizzesToPrerender } from "@/lib/quiz";
@@ -267,6 +269,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: pack.latest,
         changeFrequency: (pack.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: pack.inProgress ? 0.6 : 0.5,
+      })),
+    {
+      url: absoluteUrl(HOMESCHOOL_INDEX_PATH),
+      lastModified: homeschoolToPrerender().at(-1)?.latest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
+    ...homeschoolToPrerender()
+      .slice()
+      .reverse()
+      .map((pack) => ({
+        url: absoluteUrl(pack.path),
+        lastModified: pack.latest,
+        changeFrequency: (pack.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: pack.inProgress ? 0.6 : 0.5,
+      })),
+    {
+      url: absoluteUrl(WORD_SEARCH_INDEX_PATH),
+      lastModified: wordSearchesToPrerender().at(-1)?.latest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
+    ...wordSearchesToPrerender()
+      .slice()
+      .reverse()
+      .map((puzzle) => ({
+        url: absoluteUrl(puzzle.path),
+        lastModified: puzzle.latest,
+        changeFrequency: (puzzle.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: puzzle.inProgress ? 0.6 : 0.5,
       })),
     {
       url: absoluteUrl("/quiz"),
