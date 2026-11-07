@@ -25,7 +25,6 @@ howToHelp:
     url: "https://whc.unesco.org/en/tentativelists/5070/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Tuoi Tre reported that six hog deer went back into Cat Tien National Park in southern Vietnam. A zoo in Ho Chi Minh City raised them and drove them about 150 kilometers at night. Four are females and two are males. Each deer got a health check and a tiny chip so people can tell the animals apart later. Hog deer are listed as critically endangered in Vietnam, and the paper said they are no longer recorded in the wild there. This is the first group in a plan to return 30 deer. Keepers will watch whether these six can live in the forest before more go out. The news is these six deer, not a full wild herd."
 kidQuestions:
