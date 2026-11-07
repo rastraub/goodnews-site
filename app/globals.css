@@ -112,6 +112,18 @@ header.nav{background:rgba(255,251,244,.96);border-bottom:1px solid var(--line);
 .week-row{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:12px;box-shadow:var(--shadow);color:inherit}
 .week-row h2{font-family:var(--font-serif);font-weight:600;font-size:28px;letter-spacing:-.02em;line-height:1.15;margin:4px 0 8px}
 .week-row p{color:var(--ink2);font-size:15.5px;line-height:1.5}
+.caregiver-list{list-style:none;margin:18px 0 0;padding:0}
+.caregiver-list li{padding:18px 0;border-top:1px solid var(--line)}
+.caregiver-list h2{font-family:var(--font-serif);font-weight:600;font-size:28px;letter-spacing:-.02em;line-height:1.2;margin:4px 0 8px}
+.caregiver-list p{color:var(--ink2);font-size:17px;line-height:1.6;margin:0 0 8px}
+.press-facts{margin:8px 0 0;display:grid;gap:10px}
+.press-facts div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.press-facts dt{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.press-facts dd{margin:4px 0 0;font-size:17px;line-height:1.5}
+.press-logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:12px 0 8px}
+.press-logos figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.press-logos img{display:block;width:100%;height:auto;max-height:160px;object-fit:contain}
+.press-logos figcaption{margin-top:8px;font-size:14px;line-height:1.45}
 .otd-promo{position:relative;z-index:1;margin-top:16px}
 .otd-promo-card{display:block;background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px 22px;box-shadow:var(--shadow);color:inherit}
 .otd-promo h2{font-family:var(--font-serif);font-weight:600;font-size:26px;letter-spacing:-.02em;line-height:1.15;margin:4px 0 6px}
@@ -875,7 +887,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .print-figure { margin: 8pt 0; }
   .print-figure img { max-height: 2.1in; width: 100%; object-fit: cover; border-radius: 0; filter: grayscale(1) !important; }
   a { color: #000 !important; text-decoration: underline; }
-  .print-source a[href]::after { content: " (" attr(href) ")"; font-weight: 400; font-size: 9pt; word-break: break-all; }
+  .print-source a[href]::after, .caregiver-list a[href]::after { content: " (" attr(href) ")"; font-weight: 400; font-size: 9pt; word-break: break-all; }
+  .caregiver-list, .caregiver-list p, .caregiver-list h2, .caregiver-list a { color: #000 !important; }
+  .caregiver-list li { break-inside: avoid; page-break-inside: avoid; }
   .is-speaking { background: transparent !important; box-shadow: none !important; outline: none !important; }
   .quiz-sheet-standard { display: block !important; }
   .quiz-sheet-kid { display: none !important; }

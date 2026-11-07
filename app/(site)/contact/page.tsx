@@ -29,7 +29,7 @@ export default function ContactPage() {
         </p>
         <h2>Press and partnerships</h2>
         <p>
-          Press questions come to the same address. Partnership ideas start at <Link href="/partner">partner with us</Link>. Sponsors do not pick the stories. The rules are on <Link href="/editorial-standards">editorial standards</Link>.
+          Press questions come to the same address. The <Link href="/press">press kit</Link> has the boilerplate, logos, and sample stories. Partnership ideas start at <Link href="/partner">partner with us</Link>. Sponsors do not pick the stories. The rules are on <Link href="/editorial-standards">editorial standards</Link>.
         </p>
         <h2>Privacy</h2>
         <p>

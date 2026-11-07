@@ -42,6 +42,7 @@ import {
   tableTalkBannerVisible,
   tableTalkBlockReason,
   tableTalkDeck,
+  tableTalkHarmReason,
   splitTableTalkSentences,
   tableTalkExcerpt,
   tableTalkQuestions,
@@ -82,6 +83,39 @@ import {
   whereInTheWorld,
   type PackCandidate,
 } from "../lib/classroom-pack";
+import {
+  CAREGIVER_ACTIVITY_NOTE,
+  CAREGIVERS_DESCRIPTION,
+  CAREGIVERS_EDITION_SIZE,
+  CAREGIVERS_PATH,
+  LARGE_PRINT_PATH,
+  LIBRARIES_PATH,
+  awkwardForCaregivers,
+  buildCaregiverEditions,
+  caregiverBlockReason,
+  caregiverEditionPath,
+  caregiverEditionText,
+  caregiverHarmReason,
+  caregiverPreferenceScore,
+  editionsToPrerender,
+  familyCaregiversMonthNote,
+  getCaregiverBuild,
+  largePrintEditionPath,
+  loadCaregiverPins,
+  parseCaregiverPins,
+  type CaregiverCandidate,
+} from "../lib/caregivers";
+import {
+  PRESS_EDITORIAL_LINKS,
+  PRESS_PATH,
+  PRESS_SAMPLE_LIMIT,
+  getPressSamples,
+  pressBoilerplate,
+  pressFacts,
+  pressJsonLd,
+  pressLogos,
+  pressSamples,
+} from "../lib/press";
 import { buildHubs, getHubIndex, indexableHubs, MAX_PRERENDERED_HUBS, MIN_CITY_INDEX_STORIES, MIN_HUB_STORIES, slugify, type HubStory } from "../lib/hubs";
 import { getStateByCode } from "../lib/states";
 import { assertKindnessHelpers, getKindnessChallenges, KINDNESS_INDEX_PATH } from "../lib/kindness";
@@ -4563,6 +4597,315 @@ function assertTableTalk() {
   );
 }
 
+function sampleCaregiver(extra: Partial<CaregiverCandidate> & { slug: string; date: string }): CaregiverCandidate {
+  const { tags, ...rest } = extra;
+  return {
+    title: "Neighbors opened a garden the block can share",
+    dek: "The beds are in, and anyone on the block can pick what is ripe.",
+    body: "Neighbors spent a morning putting in beds and a hose. The garden is open to the block.",
+    city: "Denver",
+    country: "US",
+    state: "CO",
+    category: "community",
+    tags: tags ?? ["neighbors"],
+    sourceName: "Local paper",
+    image: "/images/stories/example.webp",
+    imageAlt: "A garden bed on a city block",
+    ...rest,
+  };
+}
+
+function assertCaregiversAndPress() {
+  const launch = launchWeekStart();
+  const sunday = addDays(launch, 6);
+  const gentle = sampleCaregiver({ slug: "garden", date: launch });
+  if (caregiverBlockReason(gentle)) throw new Error("A neighbor garden should stay on the caregiver list.");
+  if (caregiverHarmReason(gentle)) throw new Error("A neighbor garden should pass the harm filter.");
+
+  const health = sampleCaregiver({
+    slug: "clinic",
+    date: launch,
+    category: "health-tech",
+    tags: ["public-health"],
+    title: "A clinic opened a Saturday screening",
+    dek: "Neighbors came for a check that the clinic already offers.",
+    body: "The clinic opened its doors on a Saturday. Nurses answered questions and sent people home with a plan.",
+  });
+  if (caregiverBlockReason(health)) throw new Error("A health story should stay available for caregivers.");
+  if (!tableTalkBlockReason(health as unknown as TableTalkStory)) throw new Error("Table talk still treats health-tech as illness. The caregiver list should not copy that rule.");
+
+  const politics = sampleCaregiver({
+    slug: "election",
+    date: launch,
+    body: "The garden opened after election night, which this list does not need.",
+  });
+  if (caregiverHarmReason(politics) !== "politics" && !caregiverHarmReason(politics)) {
+    throw new Error("An election story should fail the caregiver filter.");
+  }
+  if (!tableTalkHarmReason(politics as unknown as TableTalkStory) || !caregiverBlockReason(politics)) {
+    throw new Error("The caregiver filter should be at least as strict as the table-talk harm list.");
+  }
+
+  const senate = sampleCaregiver({
+    slug: "senate",
+    date: launch,
+    body: "A senate hearing was not part of the afternoon.",
+  });
+  if (!kindnessBlockReason({ ...senate, alsoStates: [], body: senate.body, tags: [...senate.tags], draft: false }) || !caregiverHarmReason(senate)) {
+    throw new Error("The caregiver filter should keep the World Kindness heavy-news words, including senate.");
+  }
+
+  const guns = sampleCaregiver({ slug: "guns", date: launch, body: "No guns were part of the afternoon." });
+  if (tableTalkHarmReason(guns as unknown as TableTalkStory) !== "violence" || !caregiverHarmReason(guns)) {
+    throw new Error("A gun story should fail the same violence rule as table talk.");
+  }
+
+  const strike = sampleCaregiver({ slug: "strike", date: launch, body: "An airstrike was not the event." });
+  if (!caregiverHarmReason(strike)) throw new Error("Extra harm words from World Kindness Day should stay off the caregiver list.");
+
+  const republic = sampleCaregiver({
+    slug: "republic",
+    date: launch,
+    title: "A park opened in the Democratic Republic of the Congo",
+    city: "Kinshasa",
+    country: "CD",
+    state: undefined,
+    tags: ["parks"],
+    category: "community",
+  });
+  if (caregiverHarmReason(republic)) throw new Error("Democratic Republic should not be read as politics.");
+
+  const playground = sampleCaregiver({
+    slug: "playground",
+    date: launch,
+    category: "heroes",
+    tags: ["playgrounds"],
+    kidFriendly: true,
+    title: "A class built a playground the school can use",
+  });
+  if (!awkwardForCaregivers(playground) || caregiverBlockReason(playground) !== "kid-only") {
+    throw new Error("A kid-only playground story should stay off the caregiver list.");
+  }
+  const dogs = sampleCaregiver({
+    slug: "dogs",
+    date: launch,
+    category: "animals",
+    tags: ["kids", "dogs"],
+    kidFriendly: true,
+  });
+  if (awkwardForCaregivers(dogs) || caregiverBlockReason(dogs)) {
+    throw new Error("A gentle animal story that also mentions kids should stay.");
+  }
+
+  const senior = sampleCaregiver({
+    slug: "senior",
+    date: addDays(launch, 1),
+    category: "heroes",
+    tags: ["seniors"],
+    title: "Neighbors brought groceries to older residents",
+  });
+  const community = sampleCaregiver({ slug: "newer", date: addDays(launch, 2) });
+  if (caregiverPreferenceScore(senior) <= caregiverPreferenceScore(community)) {
+    throw new Error("A seniors story should outrank a newer community story.");
+  }
+  const ranked = buildCaregiverEditions([community, senior], { weeks: {} }, sunday);
+  if (ranked.editions.length !== 1 || ranked.editions[0].stories[0]?.slug !== "senior") {
+    throw new Error("Seniors stories should lead the week when they pass the filter.");
+  }
+
+  const home = sampleCaregiver({ slug: "home", date: launch });
+  const older = [1, 2, 3, 4].map((days) => sampleCaregiver({ slug: `old-${days}`, date: addDays(launch, -days) }));
+  const thin = buildCaregiverEditions([home, ...older], { weeks: {} }, sunday);
+  if (thin.editions.length !== 1 || thin.editions[0].stories.length !== CAREGIVERS_EDITION_SIZE || !thin.editions[0].usedBacklog) {
+    throw new Error("A thin week should fill five stories from the recent backlog.");
+  }
+  const thinSlugs = thin.editions[0].stories.map((story) => story.slug);
+  if (new Set(thinSlugs).size !== thinSlugs.length || thinSlugs[0] !== "home") {
+    throw new Error("A week should keep its own story first and should not repeat a slug.");
+  }
+
+  const blockedPin = buildCaregiverEditions([politics], { weeks: { [launch]: { include: ["election"], exclude: [] } } }, sunday);
+  if (!blockedPin.pinErrors.length || blockedPin.editions.some((edition) => edition.stories.some((story) => story.slug === "election"))) {
+    throw new Error("A pin cannot put a politics or violence story back on the list.");
+  }
+
+  const forced = buildCaregiverEditions([senior, community], { weeks: { [launch]: { include: ["newer"], exclude: ["senior"] } } }, sunday);
+  const forcedSlugs = forced.editions[0]?.stories.map((story) => story.slug) ?? [];
+  if (forced.pinErrors.length || !forcedSlugs.includes("newer") || forcedSlugs.includes("senior") || forcedSlugs[0] !== "newer") {
+    throw new Error("An include should force a story in, and an exclude should keep it out.");
+  }
+
+  const kidPin = buildCaregiverEditions([playground, gentle], { weeks: { [launch]: { include: ["playground"], exclude: [] } } }, sunday);
+  if (!kidPin.editions[0]?.stories.some((story) => story.slug === "playground") || !kidPin.editions[0].pinned.includes("playground")) {
+    throw new Error("An editor include may keep a kid-only story. The harm filter still applies.");
+  }
+
+  if (buildCaregiverEditions([sampleCaregiver({ slug: "future", date: addDays(launch, 10) })], { weeks: {} }, sunday).editions.length) {
+    throw new Error("A week that has not started should not be a caregiver edition.");
+  }
+  if (buildCaregiverEditions([gentle], { weeks: {} }, addDays(launch, -10)).editions.length) {
+    throw new Error("A week before launch should not be a caregiver edition.");
+  }
+
+  const tuesday = addDays(launch, 1);
+  for (const value of [
+    { weeks: { [tuesday]: { include: [], exclude: [] } } },
+    { weeks: { [launch]: { include: ["garden", "garden"], exclude: [] } } },
+    { weeks: { [launch]: { include: ["garden"], exclude: ["garden"] } } },
+  ]) {
+    let threw = false;
+    try {
+      parseCaregiverPins(value);
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`Caregiver pins should reject ${JSON.stringify(value)}`);
+  }
+  if (Object.keys(parseCaregiverPins({ weeks: {} }).weeks).length !== 0) {
+    throw new Error("An empty caregiver pin file should mean no pins.");
+  }
+  loadCaregiverPins();
+
+  if (familyCaregiversMonthNote("2026-11-06")?.includes("National Family Caregivers Month") !== true) {
+    throw new Error("November should mention National Family Caregivers Month.");
+  }
+  if (familyCaregiversMonthNote("2026-10-06") || familyCaregiversMonthNote("2026-12-01")) {
+    throw new Error("The caregivers month line should stay off outside November.");
+  }
+  if (!CAREGIVERS_DESCRIPTION.toLowerCase().includes("group reading") || !CAREGIVER_ACTIVITY_NOTE.toLowerCase().includes("large-print")) {
+    throw new Error("The caregiver copy should explain group reading and the large-print pairing.");
+  }
+
+  const text = caregiverEditionText(thin.editions[0]);
+  if (!text.includes(home.title) || !text.includes(`/story/${home.slug}`) || !text.includes(LARGE_PRINT_PATH) || !text.includes(LIBRARIES_PATH)) {
+    throw new Error("The copy-list text should include the stories and the large-print and libraries links.");
+  }
+  if (!text.includes(largePrintEditionPath(thin.editions[0].start))) {
+    throw new Error("The copy-list text should include the weekly large-print path.");
+  }
+
+  const live = getCaregiverBuild();
+  if (live.pinErrors.length) throw new Error(`Caregiver pins: ${live.pinErrors.join("; ")}`);
+  if (!live.editions.length) throw new Error("The archive should produce at least one caregiver edition.");
+  const prerender = editionsToPrerender();
+  for (const edition of prerender) {
+    if (edition.stories.length < 1 || edition.stories.length > Math.max(CAREGIVERS_EDITION_SIZE, edition.pinned.length)) {
+      throw new Error(`${edition.path} has the wrong number of stories.`);
+    }
+    const slugs = edition.stories.map((story) => story.slug);
+    if (new Set(slugs).size !== slugs.length) throw new Error(`${edition.path} repeats a story.`);
+    if (edition.start !== weekStart(edition.start) || edition.path !== caregiverEditionPath(edition.start)) {
+      throw new Error(`${edition.path} should be keyed to Monday.`);
+    }
+    if (!edition.lede.toLowerCase().includes("group reading")) throw new Error(`${edition.path} should say it is for group reading.`);
+    for (const story of edition.stories) {
+      if (caregiverHarmReason(story)) throw new Error(`${story.slug} failed the politics and violence filter.`);
+      if (caregiverBlockReason(story) === "kid-only" && !edition.pinned.includes(story.slug)) {
+        throw new Error(`${story.slug} is kid-only and was not pinned.`);
+      }
+    }
+  }
+
+  const homePage = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  const banner = fs.readFileSync(path.join(process.cwd(), "lib/homepage-banner.ts"), "utf8");
+  if (homePage.toLowerCase().includes("caregiver") || banner.toLowerCase().includes("caregiver") || homePage.includes("Family Caregivers")) {
+    throw new Error("Family Caregivers Month stays on /caregivers. Do not add a homepage banner.");
+  }
+
+  const indexPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/caregivers/page.tsx"), "utf8");
+  const editionPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/caregivers/[start]/page.tsx"), "utf8");
+  for (const page of [indexPage, editionPage]) {
+    if (!page.includes("familyCaregiversMonthNote")) throw new Error("The caregivers pages should mention November only through the Denver month check.");
+    if (!page.includes("LARGE_PRINT_PATH") || !page.includes("LIBRARIES_PATH")) throw new Error("Caregiver pages should link large print and libraries.");
+    if (!page.includes("EmailSignup")) throw new Error("Caregiver pages should use the existing email signup.");
+    if (!page.includes("siteConfig.editor.name")) throw new Error("The caregiver byline should use the public masthead.");
+    if (page.includes("Jane ") || page.includes("By John")) throw new Error("Caregiver pages should not use a personal name.");
+  }
+  if (!editionPage.includes("CopyLink") || !editionPage.includes("PrintButton")) {
+    throw new Error("A caregiver edition should be copyable and printable.");
+  }
+
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("CAREGIVERS_PATH")) throw new Error("The footer should link to caregivers.");
+  if (!footer.includes("PRESS_PATH")) throw new Error("The footer should link to the press kit.");
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("CAREGIVERS_PATH") || !indexNow.includes("PRESS_PATH") || !indexNow.includes("editionsToPrerender")) {
+    throw new Error("IndexNow should ping the caregivers hub, its weeks, and the press kit.");
+  }
+  const guide = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!guide.includes("data/caregivers-pins.json") || !guide.includes("npm run caregivers-gaps")) {
+    throw new Error("ADDING_STORIES.md should explain caregiver pins.");
+  }
+  if (!fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8").includes("caregivers-gaps")) {
+    throw new Error("package.json should expose caregivers-gaps.");
+  }
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl(CAREGIVERS_PATH))) throw new Error("The sitemap should include /caregivers.");
+  if (!urls.includes(absoluteUrl(PRESS_PATH))) throw new Error("The sitemap should include /press.");
+  for (const edition of prerender) {
+    if (!urls.includes(absoluteUrl(edition.path))) throw new Error(`${edition.path} should be in the sitemap.`);
+  }
+
+  const samples = getPressSamples();
+  if (samples.length < 1 || samples.length > PRESS_SAMPLE_LIMIT) throw new Error("The press kit should list at most five sample stories.");
+  let seenPlain = false;
+  for (const story of samples) {
+    if (!story.featured) seenPlain = true;
+    else if (seenPlain) throw new Error("Featured press samples should come before other stories.");
+  }
+  const ordered = pressSamples([
+    { slug: "plain", title: "Plain", date: "2026-11-01", featured: false },
+    { slug: "old-feature", title: "Old", date: "2026-10-01", featured: true },
+    { slug: "new-feature", title: "New", date: "2026-11-02", featured: true },
+    { slug: "top", title: "Top", date: "2026-11-03", top5: 1 },
+  ]);
+  if (ordered.map((story) => story.slug).join(",") !== "new-feature,old-feature,top,plain") {
+    throw new Error("Press samples should be newest featured stories, then Top 5, then the rest.");
+  }
+
+  const boilerplate = pressBoilerplate();
+  for (const piece of [siteConfig.description, siteConfig.verification, siteConfig.editor.blurb, siteConfig.editor.name, siteConfig.owner.name, siteConfig.contactEmail, siteConfig.tagline]) {
+    if (!boilerplate.includes(piece)) throw new Error("Press boilerplate should come from site config.");
+  }
+  if (/Jane |John Smith|founder/i.test(boilerplate)) throw new Error("Press boilerplate should not invent a person.");
+  const facts = pressFacts();
+  if (!facts.some((fact) => fact.detail === siteConfig.contactEmail)) throw new Error("Press facts should use the contact email.");
+  if (!facts.some((fact) => fact.detail === siteConfig.owner.name)) throw new Error("Press facts should use the owner name.");
+  if (!facts.some((fact) => fact.detail.includes("50 states") && fact.detail.includes("D.C."))) {
+    throw new Error("Press facts should name all 50 states and Washington, D.C.");
+  }
+  if (!facts.some((fact) => /no politics/i.test(fact.detail))) throw new Error("Press facts should state the no-politics rule.");
+  if (!facts.some((fact) => /original report/i.test(fact.detail))) throw new Error("Press facts should say every story links its source.");
+  const labels: readonly string[] = PRESS_EDITORIAL_LINKS.map((link) => link.href);
+  for (const href of ["/about", "/editorial-standards", "/corrections", "/feeds", "/sources"]) {
+    if (!labels.includes(href)) throw new Error(`The press kit should link ${href}.`);
+  }
+  for (const logo of pressLogos()) {
+    if (!logo.href.startsWith("/") || !logo.label) throw new Error("Every press logo needs a public path and a label.");
+  }
+  const markup = JSON.stringify(pressJsonLd(samples));
+  if (markup.includes("NewsMediaOrganization")) {
+    throw new Error("Press JSON-LD should point at the existing organization, not declare another one.");
+  }
+  if (!markup.includes(`${siteConfig.url}/#organization`) || !markup.includes("ItemList")) {
+    throw new Error("Press JSON-LD should reference the organization and list sample stories.");
+  }
+  const pressPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/press/page.tsx"), "utf8");
+  if (!pressPage.includes("socialLinks()")) throw new Error("The press page should list only filled-in social accounts.");
+  if (!pressPage.includes("pressBoilerplate") || !pressPage.includes("siteConfig.editor.name") || !pressPage.includes("siteConfig.owner.name")) {
+    throw new Error("The press page should use the public masthead and owner.");
+  }
+  if (pressPage.includes("Jane ") || pressPage.includes("By John") || /founder/i.test(pressPage)) {
+    throw new Error("The press page should not name a person.");
+  }
+  const contact = fs.readFileSync(path.join(process.cwd(), "app/(site)/contact/page.tsx"), "utf8");
+  if (!contact.includes('href="/press"')) throw new Error("The contact page should point journalists to the press kit.");
+
+  const short = prerender.filter((edition) => edition.stories.length < CAREGIVERS_EDITION_SIZE).map((edition) => edition.start);
+  console.log(`Caregivers: ${prerender.length} editions. Shorter than five: ${short.join(", ") || "none"}. Press samples: ${samples.length}.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4603,6 +4946,7 @@ async function main() {
   assertSpanishEditions();
   assertNewsBreak();
   assertGoodNewsCalendar();
+  assertCaregiversAndPress();
   await assertGoodNeighbor();
   const published = stories.filter((story) => !story.draft);
   const images = feedImageReport(published.map((story) => story.image));

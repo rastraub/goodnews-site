@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
+import { CAREGIVERS_PATH } from "@/lib/caregivers";
 import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
+import { PRESS_PATH } from "@/lib/press";
 import { editionYear } from "@/lib/format";
 import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { latestQuiz } from "@/lib/quiz";
@@ -54,6 +56,7 @@ export function Footer() {
               <li><Link href={CALENDAR_PATH}>Good News Calendar</Link></li>
               <li><Link href="/heroes">Hometown Heroes</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
+              <li><Link href={CAREGIVERS_PATH}>For caregivers</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href="/kindness-challenge">Kindness Challenge</Link></li>
               <li><Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link></li>
@@ -77,6 +80,7 @@ export function Footer() {
             <p className="flabel">Our promise</p>
             <ul>
               <li><Link href="/about">About</Link></li>
+              <li><Link href={PRESS_PATH}>Press</Link></li>
               <li><Link href="/about#how-we-verify">How we verify</Link></li>
               <li><Link href="/editorial-standards">Editorial standards</Link></li>
               <li><Link href="/sources">Newsrooms we credit</Link></li>
@@ -102,7 +106,7 @@ export function Footer() {
         <div className="fbottom">
           <span>© {year} {siteConfig.name} · {siteConfig.domain}</span>
           <span>
-            <Link href="/es">En español</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link> · <Link href="/contact">Contact</Link>
+            <Link href="/es">En español</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link> · <Link href={PRESS_PATH}>Press</Link> · <Link href="/contact">Contact</Link>
           </span>
         </div>
       </div>
