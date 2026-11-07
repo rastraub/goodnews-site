@@ -25,7 +25,6 @@ howToHelp:
     url: "https://lynnfieldweeklynews.com/2026/11/03/off-duty-firefighter-saves-truck-driver/"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
