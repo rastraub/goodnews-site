@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.firstalert4.com/2026/11/06/good-samaritan-breaks-car-window-free-3-year-old-girl-st-peters-pond/"
     kind: learn
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

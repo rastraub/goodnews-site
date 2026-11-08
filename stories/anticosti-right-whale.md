@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.fisheries.noaa.gov/species/north-atlantic-right-whale"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "On September 25, 2026, researchers photographed a North Atlantic right whale mother and calf near Anticosti Island in Quebec. NOAA Fisheries said the mother is Silt, a whale at least 38 years old, and the calf had missed the winter surveys. Silt was seen briefly in the southeastern United States in February, so she may have had the calf there and left before teams found them together. The exact birthday is unknown. This calf brings the season's count to 24, the most since 2009. Right whales are still very rare."
 kidQuestions:

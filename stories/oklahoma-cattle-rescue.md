@@ -27,7 +27,6 @@ howToHelp:
     url: "https://www.news9.com/oklahoma-city-news/oklahoma-firefighters-help-new-mexico-flood-victims"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

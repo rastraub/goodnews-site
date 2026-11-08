@@ -24,8 +24,7 @@ howToHelp:
   - label: "American Red Cross Blood Services"
     url: "https://www.redcrossblood.org/"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

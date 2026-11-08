@@ -25,7 +25,6 @@ howToHelp:
     url: "https://wlos.com/community/carolina-moment/pisgah-climbing-school-peta-award-rescuing-dog-stranded-days-200-foot-cliff-animal-rescue-team-western-north-carolina"
     kind: learn
 featured: false
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
