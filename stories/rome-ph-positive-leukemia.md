@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.lls.org/"
     kind: learn
 featured: false
-worldPick: true
 cheers: 0
 draft: false
 editorApproved: true
