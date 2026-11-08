@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CopyBlock } from "@/components/copy-block";
 import { iframeSnippet, scriptSnippet, WIDGET_STORY_COUNT, widgetTitle } from "@/lib/partner-kit";
+import { FAITH_INDEX_PATH } from "@/lib/faith";
+import { CLASSROOM_INDEX_PATH } from "@/lib/classroom-pack";
+import { GIFT_PATH } from "@/lib/gift";
 import { pageAlternates } from "@/lib/seo";
 import { stateCounts } from "@/lib/stories";
 import { STATES } from "@/lib/states";
@@ -26,7 +29,7 @@ export default function WidgetsPage() {
           A short list of headlines a local outlet or a community site can drop onto a page. Each headline links back to {siteConfig.name}. The widget does not use cookies, analytics, or an account.
         </p>
         <p>
-          The iframe is a small HTML page, up to {WIDGET_STORY_COUNT} stories, with no scripts inside it. The script option only inserts that same iframe. Paste either one where the list should appear. The frame is 340 pixels tall. Change the height if you want a shorter box. Part of the <Link href="/featured">featured kit</Link>.
+          The iframe is a small HTML page, up to {WIDGET_STORY_COUNT} stories, with no scripts inside it. The script option only inserts that same iframe. Paste either one where the list should appear. The frame is 340 pixels tall. Change the height if you want a shorter box. Part of the <Link href="/featured">featured kit</Link>. More free kits: <Link href={FAITH_INDEX_PATH}>faith community bulletins</Link>, <Link href={CLASSROOM_INDEX_PATH}>Good News Friday</Link>, and <Link href={GIFT_PATH}>gift the daily email</Link>.
         </p>
 
         <section id="latest">

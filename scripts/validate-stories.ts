@@ -82,6 +82,29 @@ import {
   whereInTheWorld,
   type PackCandidate,
 } from "../lib/classroom-pack";
+import {
+  FAITH_FEED_PATH,
+  FAITH_INDEX_DESCRIPTION,
+  FAITH_INDEX_PATH,
+  FAITH_INDEX_TITLE,
+  FAITH_STORY_MIN,
+  FAITH_STORY_TARGET,
+  buildFaithBulletins,
+  faithGratitudeSeason,
+  faithHtml,
+  faithPrompts,
+  faithSeasonLinks,
+  faithServiceIdea,
+  faithTextBlocked,
+  getFaithBulletins,
+  isFaithStory,
+  renderFaithRss,
+  selectFaithStories,
+  type FaithCandidate,
+} from "../lib/faith";
+import { GIFT_PATH, giftMailto, giftMessages, giftSeason, giftSignupUrl, giftSms } from "../lib/gift";
+import { qrMatrix, reedSolomonGenerator } from "../lib/qr";
+import { faithJsonLd, giftJsonLd } from "../lib/seo";
 import { buildHubs, getHubIndex, indexableHubs, MAX_PRERENDERED_HUBS, MIN_CITY_INDEX_STORIES, MIN_HUB_STORIES, slugify, type HubStory } from "../lib/hubs";
 import { getStateByCode } from "../lib/states";
 import { assertKindnessHelpers, getKindnessChallenges, KINDNESS_INDEX_PATH } from "../lib/kindness";
@@ -4563,6 +4586,262 @@ function assertTableTalk() {
   );
 }
 
+function faithFixture(partial: Partial<FaithCandidate> & Pick<FaithCandidate, "slug" | "date">): FaithCandidate {
+  return {
+    title: `Neighbors helped in ${partial.slug}`,
+    dek: "A short deck about neighbors who showed up with a free hour of help.",
+    city: "Denver",
+    country: "US",
+    state: "CO",
+    category: "community",
+    tags: ["kindness", "neighbors"],
+    sourceName: "The Denver Post",
+    sourceUrl: "https://www.denverpost.com/example",
+    image: "/images/stories/example.webp",
+    imageAlt: "Neighbors outside a community hall",
+    kidFriendly: true,
+    kidSummary: "Neighbors in Denver spent a morning planting flowers for a block that asked for help. The work was free.",
+    howToHelp: [{ label: "Volunteer with the neighborhood group", url: "https://example.org/volunteer", kind: "volunteer" }],
+    ...partial,
+  };
+}
+
+function assertFaithAndGift() {
+  if (FAITH_INDEX_PATH !== "/faith") throw new Error("Faith bulletins should live at /faith.");
+  if (!FAITH_INDEX_TITLE.toLowerCase().includes("faith communities")) {
+    throw new Error("The faith index title should name faith communities.");
+  }
+  if (!FAITH_INDEX_DESCRIPTION.toLowerCase().includes("non-sectarian") || !FAITH_INDEX_DESCRIPTION.toLowerCase().includes("no scripture")) {
+    throw new Error("The faith index description should stay non-sectarian.");
+  }
+  if (reedSolomonGenerator(7).join(",") !== "1,127,122,154,164,11,68,117") {
+    throw new Error("QR error-correction generator for degree 7 drifted.");
+  }
+  const matrix = qrMatrix(giftSignupUrl());
+  if (matrix.length < 21 || matrix.length % 4 !== 1) throw new Error("QR matrix size is not a QR version size.");
+  if (!matrix[0][0] || matrix[1][1] || !matrix[3][3]) throw new Error("QR finder pattern is missing.");
+  if (matrix.some((row) => row.length !== matrix.length)) throw new Error("QR matrix should be square.");
+
+  const crime = faithFixture({
+    slug: "crime",
+    date: "2026-10-07",
+    kidSummary: "A neighbor reported a robbery and the police arrested someone the same day on that block.",
+  });
+  const sermon = faithFixture({
+    slug: "sermon",
+    date: "2026-10-07",
+    title: "A sermon lifted the congregation",
+    kidSummary: "The sermon quoted scripture and asked the room to pray before the weekly meal for neighbors.",
+  });
+  const science = faithFixture({
+    slug: "lab",
+    date: "2026-10-07",
+    category: "science",
+    tags: ["farming", "students"],
+    kidSummary: "Students in a lab finished a small satellite test and wrote down what the sensor measured.",
+  });
+  const mealDrive = faithFixture({
+    slug: "meals",
+    date: "2026-10-07",
+    category: "heroes",
+    tags: ["food-banks", "kindness"],
+    kidSummary: "Neighbors packed holiday meals for families who had asked for a box. The local paper reported the count.",
+  });
+  const illness = faithFixture({
+    slug: "illness",
+    date: "2026-10-07",
+    tags: ["cancer-support"],
+    kidSummary: "Neighbors brought meals to a family after a cancer diagnosis and stayed for the afternoon.",
+  });
+  if (isFaithStory(crime) || isFaithStory(sermon) || isFaithStory(science) || isFaithStory(illness)) {
+    throw new Error("Faith bulletins should refuse crime, scripture, off-topic science, and illness stories.");
+  }
+  if (!isFaithStory(mealDrive)) throw new Error("A meal drive tagged as kindness should qualify even outside Community.");
+  if (!faithTextBlocked("A wildfire evacuation followed the flood.")) {
+    throw new Error("Disaster wording should stay out of a faith bulletin.");
+  }
+  const gentle = faithFixture({ slug: "gentle", date: "2026-10-07" });
+  if (!isFaithStory(gentle)) throw new Error("A kid-friendly kindness story should qualify.");
+  const donateOnly = faithFixture({
+    slug: "donate-only",
+    date: "2026-10-08",
+    howToHelp: [{ label: "Give to the food pantry", url: "https://example.org/donate", kind: "donate" }],
+    tags: ["food-banks"],
+    category: "community",
+  });
+  const picked = selectFaithStories([
+    gentle,
+    donateOnly,
+    faithFixture({ slug: "short", date: "2026-10-07", kidFriendly: false, kidSummary: undefined }),
+  ]);
+  if (picked.some((story) => story.slug === "short")) throw new Error("Stories that fail the filter should not fill a pack.");
+  if (picked.length > FAITH_STORY_TARGET) throw new Error("A faith pack should stop at five stories.");
+  const service = faithServiceIdea([donateOnly]);
+  if (service.href.includes("example.org/donate") || !service.text.toLowerCase().includes(`donation to ${siteConfig.name.toLowerCase()}`)) {
+    throw new Error("A donate-only story should become a free act and should say it does not ask this publication for money.");
+  }
+  if (service.text.toLowerCase().includes("send money")) throw new Error("The service idea should not solicit money.");
+  const volunteer = faithServiceIdea([gentle, donateOnly]);
+  if (volunteer.href !== "https://example.org/volunteer") throw new Error("A volunteer link should win over a donate link.");
+
+  const early = buildFaithBulletins([faithFixture({ slug: "early", date: "2026-09-30" })], "2026-10-20");
+  if (early.length) throw new Error("A week before launch should not be a faith bulletin.");
+  const thin = buildFaithBulletins(
+    [
+      faithFixture({ slug: "one", date: "2026-10-05" }),
+      faithFixture({ slug: "two", date: "2026-10-06", state: "UT", city: "Moab" }),
+    ],
+    "2026-10-20",
+  );
+  if (thin.length) throw new Error("Fewer than three gentle stories should not publish a bulletin page.");
+  const week = buildFaithBulletins(
+    [
+      faithFixture({ slug: "mon", date: "2026-10-05", category: "animals", tags: ["dogs"], state: "UT", city: "Moab" }),
+      faithFixture({ slug: "tue", date: "2026-10-06", category: "community", tags: ["libraries"], state: "NM", city: "Santa Fe" }),
+      faithFixture({ slug: "wed", date: "2026-10-07", category: "community", tags: ["volunteers"], state: "CO", city: "Boulder" }),
+      sermon,
+    ],
+    "2026-10-20",
+  );
+  if (week.length !== 1 || week[0].path !== "/faith/2026-10-05" || week[0].stories.some((story) => story.slug === "sermon")) {
+    throw new Error("Faith weeks should use the Monday key and drop a story that mentions scripture.");
+  }
+  if (week[0].stories.length < FAITH_STORY_MIN) throw new Error("A qualifying week should keep at least three stories.");
+  if (!week[0].plainText.includes("The Denver Post") || !week[0].plainText.includes(siteConfig.name) || !week[0].html.includes("https://www.denverpost.com/example")) {
+    throw new Error("Bulletin copy should credit the publication and the original outlet.");
+  }
+  if (week[0].html.includes("<script") || faithHtml(week[0]).includes("<script")) {
+    throw new Error("Bulletin HTML should stay free of scripts.");
+  }
+  const nasty = faithFixture({
+    slug: "markup",
+    date: "2026-10-07",
+    sourceName: "A & B <News>",
+    kidSummary: "Neighbors fixed a ramp and the summary itself stays plain.",
+  });
+  const escaped = buildFaithBulletins([nasty, gentle, donateOnly], "2026-10-20")[0];
+  if (!escaped || escaped.html.includes("<News>") || !escaped.html.includes("&lt;News&gt;")) {
+    throw new Error("Bulletin HTML should escape outlet names.");
+  }
+  const prompts = faithPrompts("2026-10-05");
+  if (prompts.length < 2 || prompts.length > 3 || prompts[0] !== "Who is a quiet helper in our community?") {
+    throw new Error("Each bulletin should offer the shared quiet-helper prompt plus one or two more.");
+  }
+  if (prompts.some((prompt) => faithTextBlocked(prompt))) throw new Error("Discussion prompts should stay free of religious language.");
+  if (faithGratitudeSeason("2026-11-25") || !faithGratitudeSeason("2026-11-26") || !faithGratitudeSeason("2026-12-31") || faithGratitudeSeason("2027-01-01")) {
+    throw new Error("The gratitude note should run from Thanksgiving through December 31.");
+  }
+  const links = faithSeasonLinks();
+  if (!links.some((link) => link.href === THANKS_PATH) || !links.some((link) => link.href === GIVING_TUESDAY_PATH)) {
+    throw new Error("The seasonal note should link the thanks hub and Giving Tuesday.");
+  }
+  if (links.some((link) => link.href === "/advent" || link.href === "/thanks")) {
+    throw new Error("The seasonal note should not link a route this repo does not serve.");
+  }
+  const markup = JSON.stringify(
+    faithJsonLd({
+      name: week[0].title,
+      description: week[0].description,
+      path: week[0].path,
+      crumbs: [{ name: "Faith communities", path: FAITH_INDEX_PATH }],
+      items: week[0].stories.map((story) => ({ name: story.title, path: `/story/${story.slug}` })),
+    }),
+  );
+  if (!markup.includes("CollectionPage") || !markup.includes(siteConfig.editor.name) || markup.includes(siteConfig.owner.name)) {
+    throw new Error("Faith schema should use the public masthead and a collection page.");
+  }
+
+  const live = getFaithBulletins();
+  const today = mountainDay();
+  const current = weekStart(today);
+  const previous = addDays(current, -7);
+  const currentPack = live.find((bulletin) => bulletin.start === current);
+  const previousPack = live.find((bulletin) => bulletin.start === previous);
+  if (!currentPack || currentPack.stories.length < FAITH_STORY_MIN) {
+    throw new Error(`The current faith week ${current} should render with at least three archive stories.`);
+  }
+  if (!previousPack || previousPack.stories.length < FAITH_STORY_MIN) {
+    throw new Error(`The previous faith week ${previous} should render with at least three archive stories.`);
+  }
+  for (const bulletin of live) {
+    if (bulletin.prompts.some((prompt) => faithTextBlocked(prompt))) {
+      throw new Error(`${bulletin.path} has a prompt that fails the faith filter.`);
+    }
+    if (bulletin.service.text.includes(`donation to ${siteConfig.name}`) === false) {
+      throw new Error(`${bulletin.path} should say the service idea is not a donation to the publication.`);
+    }
+    if (bulletin.stories.some((story) => !isFaithStory(story))) {
+      throw new Error(`${bulletin.path} includes a story that failed the filter.`);
+    }
+  }
+  const rss = renderFaithRss(live);
+  if (!rss.includes(FAITH_FEED_PATH) || !rss.includes("<item>") || rss.includes(`<link>${absoluteUrl(currentPack.path)}</link>`)) {
+    throw new Error("The faith feed should list finished weeks and leave the open week out.");
+  }
+  if (!feedCatalog().some((group) => group.feeds.some((feed) => feed.path === FAITH_FEED_PATH))) {
+    throw new Error("The feeds page should list the faith bulletin feed.");
+  }
+
+  if (GIFT_PATH !== "/gift") throw new Error("The gift page should live at /gift.");
+  if (giftSeason("2026-11-19") || !giftSeason("2026-11-20") || !giftSeason("2026-12-31") || giftSeason("2027-01-01")) {
+    throw new Error("Gift season copy should run from November 20 through December 31.");
+  }
+  const signup = giftSignupUrl();
+  if (signup.includes("?") || signup.includes("utm_") || !signup.endsWith("/subscribe")) {
+    throw new Error("The gift signup link should be the plain subscribe URL.");
+  }
+  const messages = giftMessages();
+  if (messages.length < 3) throw new Error("The gift page should offer several notes.");
+  for (const message of messages) {
+    if (!message.body.includes(signup)) throw new Error(`${message.id} should include the signup URL.`);
+    const mailto = giftMailto(message);
+    const sms = giftSms(message);
+    if (!mailto.startsWith("mailto:?subject=") || mailto.includes("mailto:?to") || /mailto:[^?]/.test(mailto)) {
+      throw new Error(`${message.id} should open the reader's email app with no recipient.`);
+    }
+    if (!sms.startsWith("sms:?&body=") || /sms:\+?\d/.test(sms)) {
+      throw new Error(`${message.id} should open a text with no phone number.`);
+    }
+    if (/\b(?:scriptures?|theolog|sermons?|bibles?|qurans?|torah|gospels?|worship|pray(?:ers?|ing|ed)?|jesus|allah|buddha|christs?)\b/i.test(message.body)) {
+      throw new Error(`${message.id} should stay free of religious language.`);
+    }
+  }
+  const giftMarkup = JSON.stringify(giftJsonLd({ name: "Gift the Good News", description: "A free gift.", path: GIFT_PATH }));
+  if (!giftMarkup.includes("WebPage") || !giftMarkup.includes(siteConfig.editor.name)) {
+    throw new Error("The gift page should publish WebPage schema with the public masthead.");
+  }
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl(FAITH_INDEX_PATH)) || !urls.includes(absoluteUrl(currentPack.path)) || !urls.includes(absoluteUrl(previousPack.path))) {
+    throw new Error("The sitemap should include /faith and the current and previous bulletins.");
+  }
+  if (!urls.includes(absoluteUrl(GIFT_PATH))) throw new Error("The sitemap should include /gift.");
+  if (urls.some((url) => url.endsWith(FAITH_FEED_PATH))) throw new Error("The sitemap should not include the faith feed.");
+
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("FAITH_INDEX_PATH") || !footer.includes("GIFT_PATH")) {
+    throw new Error("The footer should link the faith bulletins and the gift page.");
+  }
+  const signupForm = fs.readFileSync(path.join(process.cwd(), "components/email-signup.tsx"), "utf8");
+  if (!signupForm.includes("GIFT_PATH") || !signupForm.includes("Gift it to someone")) {
+    throw new Error("The newsletter signup should link to the gift page.");
+  }
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  if (home.includes("FAITH_INDEX_PATH") || home.includes("GIFT_PATH") || home.includes("faith-season") || home.includes("gift-sheet")) {
+    throw new Error("The homepage should not gain a banner for these pages.");
+  }
+  const faithPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/faith/[start]/page.tsx"), "utf8");
+  const giftPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/gift/page.tsx"), "utf8");
+  for (const file of [faithPage, giftPage]) {
+    if (!file.includes("siteConfig.editor.name")) throw new Error("New pages should use the public masthead.");
+    if (file.includes("Jane ") || file.includes("By John")) throw new Error("New pages should not use a personal name.");
+  }
+  if (!faithPage.includes("CopyBlock") || !faithPage.includes("PrintButton") || !giftPage.includes("giftMailto") || !giftPage.includes("QrCode")) {
+    throw new Error("The weekly bulletin and the gift page should keep their copy, print, and share tools.");
+  }
+  console.log(`Faith bulletins: ${live.length}. Current ${currentPack.path} (${currentPack.stories.length}). Previous ${previousPack.path} (${previousPack.stories.length}).`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4579,6 +4858,7 @@ async function main() {
   assertWeeks();
   assertGoodNewsIndex();
   assertClassroomPacks();
+  assertFaithAndGift();
   assertQuizzes();
   assertOnThisDay();
   assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);

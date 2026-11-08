@@ -576,7 +576,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .badge-actions{display:flex;flex-wrap:wrap;gap:8px;margin:0}
 .badge-actions .btn{height:36px;padding:0 14px;font-size:14px}
 .copy-block{display:grid;gap:8px;margin:8px 0 4px;min-width:0}
-.copy-block pre{margin:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;overflow:auto;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.copy-block pre{margin:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;overflow:auto;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .copy-block pre:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .copy-block .btn{justify-self:start;height:36px;padding:0 14px;font-size:14px}
 .share-lines{list-style:none;display:grid;gap:12px;margin:12px 0 0;padding:0}
@@ -1158,4 +1158,48 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .tt-kicker span:last-child{color:#000;font-size:8pt}
   .tt-url{display:block;word-break:break-all}
   .tt-foot a{color:#000}
+}
+
+.faith-season{margin-top:22px;background:var(--gold-l);border:1px solid #F0E0B8;border-radius:18px;padding:16px 18px}
+.faith-season p{margin:0 0 8px}
+.faith-insert{margin-top:28px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 22px 16px;max-width:8.5in}
+.faith-insert h2{font-family:var(--font-serif);font-size:28px;line-height:1.15;margin:0 0 12px}
+.faith-range{display:block;margin-top:4px;font-family:var(--font-sans, inherit);font-size:15px;font-weight:600;letter-spacing:0;color:var(--ink2)}
+.faith-lines{margin:0;padding-left:1.2em;display:grid;gap:8px}
+.faith-lines li{line-height:1.45}
+.faith-prompts{margin:0;padding-left:1.2em;display:grid;gap:6px}
+.faith-insert h3{font-size:16px;margin:14px 0 6px}
+.faith-insert-foot{margin:14px 0 0;font-size:13px;color:var(--ink2)}
+.faith-story-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.faith-story-list a{font-weight:700}
+.faith-story-list span{display:block;color:var(--ink2);font-size:14px;margin-top:2px}
+.gift-messages{display:grid;gap:28px;margin-top:28px}
+.gift-note{margin:8px 0 12px;padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:16px}
+.gift-note p{margin:0 0 8px}
+.gift-note p:last-child{margin:0}
+.gift-subject{font-weight:700}
+.gift-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gift-sheet{margin-top:18px;background:#fff;border:1px dashed var(--line);border-radius:18px;max-width:8in}
+.gift-half{padding:28px 28px 22px}
+.gift-front h2,.gift-back h2{font-family:var(--font-serif);font-size:32px;margin:8px 0}
+.gift-fold{margin:0;padding:8px;text-align:center;border-top:1px dashed var(--muted);border-bottom:1px dashed var(--muted);letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:700;color:var(--ink2)}
+.gift-url{font-size:18px;font-weight:700;word-break:break-all}
+.gift-url a{color:var(--blue-d)}
+.gift-fine{color:var(--ink2);font-size:14px}
+.qr{width:168px;height:168px;display:block;margin-top:8px;shape-rendering:crispEdges}
+.gift-signup-link{margin:10px 0 0;font-weight:700}
+.gift-signup-link a{color:var(--blue-d)}
+@media print{
+  .faith-insert{max-width:7.5in;border:0;border-radius:0;padding:0}
+  .faith-insert h2{font-size:16pt;color:#000}
+  .faith-range,.faith-insert,.faith-insert p,.faith-insert li,.faith-insert h3{color:#000}
+  .faith-lines,.faith-prompts{font-size:10pt;line-height:1.3;gap:4pt}
+  .faith-insert h3{font-size:11pt;margin:8pt 0 2pt}
+  .faith-insert-foot{font-size:9pt}
+  .gift-sheet{max-width:none;border:0;border-radius:0;margin:0}
+  .gift-half{min-height:4.7in;padding:0.2in 0.15in}
+  .gift-front h2,.gift-back h2{font-size:22pt;color:#000}
+  .gift-fold{color:#000;border-color:#000}
+  .gift-url,.gift-url a,.gift-fine,.gift-half p{color:#000}
+  .qr{width:1.7in;height:1.7in}
 }

@@ -13,6 +13,7 @@ import {
 } from "@/lib/morning-announcements";
 import { formatLongDate, mountainDay } from "@/lib/weeks";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { FAITH_INDEX_PATH } from "@/lib/faith";
 import { siteConfig } from "@/site.config";
 import { TeacherAnnouncementSignup } from "./teacher-signup";
 
@@ -85,6 +86,7 @@ export default function MorningAnnouncementsIndex() {
           <Link href="/kids">Classroom stories</Link>
           <Link href="/kids/print">Story of the day</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
+          <Link href={FAITH_INDEX_PATH}>Faith community bulletins</Link>
           <a href="#how-to">How to use this</a>
         </p>
         {featured && featured.kind !== "weekend" ? (
