@@ -28,7 +28,6 @@ howToHelp:
     url: "https://www.fws.gov/species/olive-ridley-sea-turtle-lepidochelys-olivacea"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
