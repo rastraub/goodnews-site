@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.worldwildlife.org/species/javan-rhinoceros"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "A baby Javan rhino was filmed with its mother in Ujung Kulon National Park in Indonesia. Media Indonesia reported the pictures on November 3, 2026. A camera trap caught them wallowing together on the night of October 10, at 9:35 p.m. The mother is named Desy. Park staff think the calf is about one or two months old, looks healthy, and follows her. The forestry ministry lists this as Desy's fifth calf, after calves in 2013, 2015, 2018, and 2024. Javan rhinos live only in Indonesia. Rangers said they will keep watching the pair without crowding them. The news is this one calf, not a new total for every rhino in the park."
 kidQuestions:
