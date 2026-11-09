@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { SiteFrame } from "@/components/site-frame";
 import { fontClassName } from "../fonts";
 import { editionLabel } from "@/lib/format";
@@ -10,6 +10,10 @@ import { siteConfig } from "@/site.config";
 import "../globals.css";
 
 const description = spanishLandingDescription();
+
+export const viewport: Viewport = {
+  themeColor: siteConfig.theme.color,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),

@@ -86,6 +86,7 @@ const nextConfig: NextConfig = {
       cached("/brand/:path*", IMAGE_CACHE_CONTROL),
       cached("/sitemap.xml", FEED_CACHE_CONTROL),
       cached("/robots.txt", FEED_CACHE_CONTROL),
+      cached("/sw.js", "public, max-age=0, must-revalidate"),
       cached("/news-sitemap.xml", NEWS_SITEMAP_CACHE_CONTROL),
       cached("/embed/:path*", FEED_CACHE_CONTROL),
       cached("/embed.js", FEED_CACHE_CONTROL),

@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { SunMark } from "@/lib/brand";
+import { siteConfig } from "@/site.config";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -11,7 +12,7 @@ export default function AppleIcon() {
         style={{
           width: 180,
           height: 180,
-          background: "#FFFBF4",
+          background: siteConfig.theme.background,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

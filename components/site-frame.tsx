@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import { Footer } from "./footer";
 import { Header } from "./header";
+import { ReadingHabit } from "./reading-habit";
 import { IconSprite } from "./icon-sprite";
 import { JsonLd } from "./json-ld";
 import { siteGraphJsonLd } from "@/lib/seo";
@@ -41,6 +42,7 @@ export function SiteFrame({
         {lang === "es" ? <div lang="en">{header}</div> : header}
         <main id="main">{children}</main>
         {lang === "es" ? <div lang="en">{footer}</div> : footer}
+        <ReadingHabit />
       </body>
     </html>
   );

@@ -699,6 +699,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .pack-teacher p,.pack-challenge p{font-size:17px;line-height:1.6}
 .pack-contents{margin-top:22px}
 .pack-story{margin-top:36px;padding-top:8px;border-top:1px solid var(--line)}
+.huddle-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-top:22px}
+.huddle-card h2{font-family:var(--font-serif);font-size:28px;margin:0 0 8px;font-weight:600}
+.huddle-card p{font-size:16.5px;line-height:1.55;margin-top:8px}
+.streak-badge{margin-top:10px;font-size:14px;font-weight:600;color:var(--ink)}
+.streak-badge a{color:var(--blue-d);text-decoration:underline;font-weight:600}
+.install-prompt{position:fixed;right:16px;bottom:16px;z-index:40;width:min(380px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px 16px 14px}
+.install-prompt p{color:var(--ink2);font-size:14.5px;line-height:1.45;margin-top:6px}
+.install-title{font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--ink);margin:0}
+.install-actions{display:flex;gap:8px;margin-top:12px}
+.install-actions .btn{height:40px;padding:0 16px}
 .where{display:flex;align-items:flex-start;gap:8px;font-weight:600;margin:8px 0}
 .where .ico{width:18px;height:18px;flex:none;margin-top:3px;color:var(--ink)}
 .where-inline{color:var(--ink2);font-weight:500}
@@ -868,6 +878,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .read-aloud, .questions li, .pack-teacher p, .pack-challenge p, .vocab p { font-size: 12pt; line-height: 1.45; }
   .pack-teacher, .pack-challenge { background: #fff; border: 1pt solid #000; border-radius: 0; box-shadow: none; padding: 10pt 12pt; }
   .pack-story { border-top: 0; margin-top: 0; padding-top: 0; break-before: page; page-break-before: always; break-inside: avoid; page-break-inside: avoid; }
+  .coaches-pack .pack-story { break-before: auto; page-break-before: auto; }
+  .huddle-card { break-inside: avoid; page-break-inside: avoid; max-height: 5.4in; overflow: hidden; border: 1pt solid #000; border-radius: 0; box-shadow: none; }
+  body.print-huddle .coaches-pack > *:not(.huddle-card) { display: none !important; }
+  body.print-huddle .huddle-card { display: block !important; max-height: 5.4in; height: auto; }
   .pack-challenge { break-before: page; page-break-before: always; }
   .pack-teacher, .print-figure, .vocab { break-inside: avoid; page-break-inside: avoid; }
   .pack h2, .pack h3 { break-after: avoid; page-break-after: avoid; }
