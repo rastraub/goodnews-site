@@ -1,8 +1,8 @@
 ---
-title: "Two Oxford sisters held their seventh Little Friendsgiving"
-shortTitle: "A seventh Little Friendsgiving"
-emphasis: "seventh Little Friendsgiving"
-dek: "Hazel, 11, who started the drive at age 4 after seeing a man without a home, and her sister Alice collected food with Lighthouse for families across Southeast Michigan."
+title: "Two Oxford sisters held their annual Little Friendsgiving"
+shortTitle: "An annual Little Friendsgiving"
+emphasis: "annual Little Friendsgiving"
+dek: "Hazel, 11, started the annual drive seven years ago at age 4 after seeing a man without a home. She and her sister Alice collected food with Lighthouse for families across Southeast Michigan."
 date: "2026-11-10"
 city: "Oxford"
 state: "MI"
@@ -29,7 +29,7 @@ cheers: 0
 draft: false
 editorApproved: true
 kidFriendly: true
-kidSummary: "Hazel and Alice, two sisters in Oxford, Michigan, held their seventh Little Friendsgiving food drive, WXYZ reported. Hazel is 11. She started the drive when she was 4, after she saw a man who did not have a home. This year the sisters collected food with Lighthouse, a group that helps families across Southeast Michigan. Seven years means Hazel has kept the drive going from age 4 to age 11. The food is for those families, collected with Lighthouse."
+kidSummary: "Hazel and Alice, two sisters in Oxford, Michigan, held their annual Little Friendsgiving food drive, WXYZ reported. Hazel is 11. She started the drive seven years ago, when she was 4, after she saw a man who did not have a home. This year the sisters collected food with Lighthouse, a group that helps families across Southeast Michigan. The drive is the yearly collection she began then. The food is for those families."
 kidQuestions:
   - "How can a drive that started at age 4 still be going at age 11?"
   - "Why do food drives need a partner group, not only a box on a porch?"
@@ -38,4 +38,4 @@ kidWord: "food drive"
 kidDefinition: "A food drive is a collection of groceries that people give so a group can pass them on to families."
 ---
 
-Hazel, 11, and her sister Alice held their seventh Little Friendsgiving food drive in Oxford, WXYZ reported. Hazel started the collection at age 4 after she saw a man who did not have a home. This year the sisters gathered food with Lighthouse for families across Southeast Michigan. The seventh year is how long the drive has continued. The food is what they collected, and Lighthouse is the group that gets it to those families.
+Hazel, 11, and her sister Alice held their annual Little Friendsgiving food drive in Oxford, WXYZ reported. Hazel started it seven years ago, at age 4, after she saw a man who did not have a home. This year the sisters gathered food with Lighthouse for families across Southeast Michigan. The collection is the yearly drive she began then. The food is what they gathered, and Lighthouse is the group that gets it to those families.
