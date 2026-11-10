@@ -9,11 +9,15 @@ export async function POST(request: Request) {
   if (!body || typeof body !== "object") {
     return Response.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });
   }
-  const data = body as { email?: unknown; interest?: unknown; company?: unknown };
+  const data = body as { email?: unknown; interest?: unknown; company?: unknown; state?: unknown };
   if (typeof data.company === "string" && data.company.trim()) {
     return Response.json({ ok: true, mode: "logged" });
   }
   const interest = parseEmailInterest(data.interest);
-  const result = await subscribeEmail(typeof data.email === "string" ? data.email : "", interest);
+  const result = await subscribeEmail(
+    typeof data.email === "string" ? data.email : "",
+    interest,
+    "state" in data ? data.state : undefined,
+  );
   return Response.json(result, { status: result.ok ? 200 : 400 });
 }

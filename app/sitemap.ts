@@ -21,6 +21,7 @@ import { quizzesToPrerender } from "@/lib/quiz";
 import { AMBASSADOR_CERTIFICATE_PATH, AMBASSADORS_PATH, shoutoutsPath } from "@/lib/ambassador-tip";
 import { indexableShoutoutMonths } from "@/lib/kindness-ambassadors";
 import { getKindnessChallenges } from "@/lib/kindness";
+import { filterKudos, kudosExcludeErrors, KUDOS_PATH, loadKudosExclude } from "@/lib/kudos";
 import { TABLE_TALK_PATH, tableTalkDeck } from "@/lib/table-talk";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
@@ -120,6 +121,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const spanishEditions = loadSpanishEditions();
   const newestSpanish = spanishEditions[spanishEditions.length - 1];
   const newestFollowUp = followUpEntries(stories)[0]?.update.date;
+  const kudosConfig = loadKudosExclude();
+  const kudosErrors = kudosExcludeErrors(stories, kudosConfig);
+  if (kudosErrors.length) throw new Error(`Kudos exclude list:\n- ${kudosErrors.join("\n- ")}`);
+  const kudosLatest = filterKudos(stories, kudosConfig.exclude)[0]?.date;
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -128,6 +133,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: page.changeFrequency,
       priority: page.priority,
     })),
+    {
+      url: absoluteUrl(KUDOS_PATH),
+      lastModified: kudosLatest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
     {
       url: absoluteUrl(FOLLOW_UPS_PATH),
       lastModified: newestFollowUp ?? siteLatest,

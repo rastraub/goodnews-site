@@ -72,7 +72,7 @@ Copy `.env.example` to `.env.local`.
 
 With **no** email key, the signup form still succeeds and the address is written to the server log. That is the local and preview behavior.
 
-To send signups to Buttondown, set `BUTTONDOWN_API_KEY` to the newsletter API key (this is the variable on the Vercel project). The adapter posts to `https://api.buttondown.com/v1/subscribers` with `Authorization: Token <key>`, `{"email_address": "..."}`, and one tag: `daily`, `membership`, or `teachers`. The teacher tag is only for the adult educator list on `/kids`. An address that is already subscribed is treated as success. Any other failure is returned to the form as an error. The form does not show success when Buttondown rejects the request.
+To send signups to Buttondown, set `BUTTONDOWN_API_KEY` to the newsletter API key (this is the variable on the Vercel project). The adapter posts to `https://api.buttondown.com/v1/subscribers` with `Authorization: Token <key>`, `{"email_address": "..."}`, and one tag: `daily`, `membership`, or `teachers`. The teacher tag is only for the adult educator list on `/kids`. An optional state on the form is subscriber metadata on that same request, for example `{"state": "state-co"}`. It is left off when the reader does not pick a state. The site does not create or send a Buttondown email. An address that is already subscribed is treated as success. Any other failure is returned to the form as an error. The form does not show success when Buttondown rejects the request. See [docs/kudos-and-state-newsletters.md](docs/kudos-and-state-newsletters.md).
 
 `EMAIL_PROVIDER` and `EMAIL_API_KEY` still work, and they take precedence when **both** are set:
 
@@ -84,7 +84,7 @@ To send signups to Buttondown, set `BUTTONDOWN_API_KEY` to the newsletter API ke
 | `EMAIL_PUBLICATION_ID` | Beehiiv publication id |
 | `EMAIL_AUDIENCE_ID` | Resend audience id |
 
-When `EMAIL_PROVIDER` is `buttondown`, the same subscribers endpoint and `Token` header are used, including the `daily`, `membership`, or `teachers` tag. The `BUTTONDOWN_API_KEY` path sends that tag too.
+When `EMAIL_PROVIDER` is `buttondown`, the same subscribers endpoint and `Token` header are used, including the `daily`, `membership`, or `teachers` tag. The `BUTTONDOWN_API_KEY` path sends that tag too. Both paths add the state metadata only when the reader picked a state.
 
 Beehiiv uses `Authorization: Bearer` and `POST https://api.beehiiv.com/v2/publications/{EMAIL_PUBLICATION_ID}/subscriptions`.
 
