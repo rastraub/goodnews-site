@@ -24,7 +24,6 @@ howToHelp:
     url: "https://nationaltrust.org.ky/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "A very young blue iguana turned up in West Bay, on Grand Cayman, where these iguanas do not live. Cayman Compass reported on November 7, 2026, that Parker Ebanks spotted it on October 30 and called the National Trust. Joseph Jamieson said the hatchling was probably carried from the Queen Elizabeth II Botanic Park on a visitor's car. It is about two to four months old and now has its own enclosure at the park. Jamieson said it is doing well. This news is one rescued hatchling, not a new count of every blue iguana."
 kidQuestions:
