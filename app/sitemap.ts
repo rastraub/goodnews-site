@@ -21,6 +21,8 @@ import { quizzesToPrerender } from "@/lib/quiz";
 import { AMBASSADOR_CERTIFICATE_PATH, AMBASSADORS_PATH, shoutoutsPath } from "@/lib/ambassador-tip";
 import { indexableShoutoutMonths } from "@/lib/kindness-ambassadors";
 import { getKindnessChallenges } from "@/lib/kindness";
+import { STARTERS_INDEX_PATH } from "@/lib/starter-path";
+import { getStarterWeeks } from "@/lib/starters";
 import { TABLE_TALK_PATH, tableTalkDeck } from "@/lib/table-talk";
 import { THANKS_PATH, thanksBoard } from "@/lib/thanks";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
@@ -292,6 +294,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "weekly" as const,
         priority: challenge.status === "this-week" ? 0.7 : 0.6,
       })),
+    ...starterSitemapEntries(siteLatest),
     ...indexableShoutoutMonths().map((month) => ({
       url: absoluteUrl(shoutoutsPath(month)),
       lastModified: `${month}-01`,
@@ -383,6 +386,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: seeded ? 0.6 : 0.4,
       };
     }),
+  ];
+}
+
+function starterSitemapEntries(siteLatest: string | undefined): MetadataRoute.Sitemap {
+  const weeks = getStarterWeeks();
+  const newest = weeks[weeks.length - 1];
+  const indexModified = newest?.latest ?? siteLatest;
+  return [
+    {
+      url: absoluteUrl(STARTERS_INDEX_PATH),
+      ...(indexModified ? { lastModified: indexModified } : {}),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    ...weeks
+      .slice()
+      .reverse()
+      .map((week) => ({
+        url: absoluteUrl(week.path),
+        lastModified: week.latest,
+        changeFrequency: (week.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: week.inProgress ? 0.7 : 0.6,
+      })),
   ];
 }
 

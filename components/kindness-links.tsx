@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { KINDNESS_INDEX_PATH, thisWeeksChallenge } from "@/lib/kindness";
+import { STARTERS_INDEX_PATH } from "@/lib/starter-path";
 
 /** A short jump from the classroom pages to this week's challenge. */
 export function KindnessLinks() {
@@ -17,6 +18,7 @@ export function KindnessLinks() {
       <p className="link-pills">
         {current ? <Link href={current.path}>This week&apos;s challenge</Link> : null}
         <Link href={KINDNESS_INDEX_PATH}>All challenges</Link>
+        <Link href={STARTERS_INDEX_PATH}>Good News Starters</Link>
         <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
       </p>
     </div>

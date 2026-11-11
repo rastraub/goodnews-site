@@ -11,6 +11,7 @@ import {
   storiesForExplainer,
 } from "@/lib/explainers";
 import { pageAlternates } from "@/lib/seo";
+import { STARTERS_INDEX_PATH } from "@/lib/starter-path";
 
 export const metadata: Metadata = {
   title: EXPLAINER_INDEX_TITLE,
@@ -33,6 +34,9 @@ export default function ExplainersPage() {
         <p className="kicker">Evergreen</p>
         <h1>Good News Explainers.</h1>
         <p className="lede">{EXPLAINER_INDEX_DESCRIPTION}</p>
+        <p className="link-pills">
+          <Link href={STARTERS_INDEX_PATH}>Good News Starters</Link>
+        </p>
       </div>
       <div className="wrap" style={{ paddingTop: 8, paddingBottom: 56 }}>
         <div className="explainer-list">

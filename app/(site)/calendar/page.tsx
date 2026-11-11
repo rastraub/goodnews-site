@@ -72,6 +72,7 @@ export default function CalendarPage() {
           <a href={CALENDAR_ICS_PATH}>Subscribe in a calendar app</a>
           <Link href="/kids">For classrooms</Link>
           <Link href="/kindness-challenge">Kindness Challenge</Link>
+          <Link href="/starters">Good News Starters</Link>
         </p>
         <p className="cal-fine">
           The download is an .ics file from this site. Paste the same link into a calendar app to subscribe. No account
