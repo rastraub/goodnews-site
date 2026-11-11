@@ -24,8 +24,7 @@ howToHelp:
   - label: "Padre Island National Seashore"
     url: "https://www.nps.gov/pais/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

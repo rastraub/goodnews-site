@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.nps.gov/deva/"
     kind: learn
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
