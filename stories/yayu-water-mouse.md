@@ -25,7 +25,6 @@ howToHelp:
     url: "https://iucn.org/our-union/commissions/species-survival-commission"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "National Geographic reported on November 9, 2026, that researchers in Ethiopia think they found the Ethiopian water mouse. It was collected once, in 1927, and had not been seen in the wild since. Mengistu Wale found a brown rodent with white spots behind its ears in a peanut-butter trap. The team then caught two more. They were in a stream at the Yayu Coffee Forest Biosphere Reserve, beside farmland where people wash clothes. Genetic tests were still going when the magazine published, so this is a careful identification, not a finished lab result. The reserve is also one of the last places wild arabica coffee grows."
 kidQuestions:
