@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.whipsnadezoo.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Luton Today reported on November 10, 2026, that Whipsnade Zoo in England has a new southern white rhino calf. He was born on November 1 to a mother named Fahari and a father named Sizzle. Keepers think he weighed about 40 kilograms, much heavier than a human baby. They named him Mazinda, after the first southern white rhino calf born in Europe, at the same zoo in 1971. He is the 61st calf in a breeding program that started in 1970. He is staying close to his mother in the rhino barn. Wild southern white rhinos were once down to about 20 animals. There are many more now, and they still face poaching and lost habitat."
 kidQuestions:
