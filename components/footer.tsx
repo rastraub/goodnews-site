@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
 import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
+import { SERVICE_HOURS_PATH, TEENS_INDEX_PATH } from "@/lib/teens";
 import { editionYear } from "@/lib/format";
 import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { latestQuiz } from "@/lib/quiz";
@@ -54,6 +55,7 @@ export function Footer() {
               <li><Link href={CALENDAR_PATH}>Good News Calendar</Link></li>
               <li><Link href="/heroes">Hometown Heroes</Link></li>
               <li><Link href="/kids">For classrooms</Link></li>
+              <li><Link href={TEENS_INDEX_PATH}>Good News for Teens</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href="/kindness-challenge">Kindness Challenge</Link></li>
               <li><Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link></li>
@@ -91,6 +93,7 @@ export function Footer() {
               <li><Link href="/subscribe">Daily Top 5 email</Link></li>
               <li><Link href="/kids#teachers">Teacher email</Link></li>
               <li><Link href="/giving-tuesday">Giving Tuesday</Link></li>
+              <li><Link href={SERVICE_HOURS_PATH}>Service hours reflection</Link></li>
               <li><Link href="/submit">Submit a story</Link></li>
               <li><Link href="/submit">Have an update on a story we covered?</Link></li>
               <li><Link href="/membership">Membership</Link></li>
