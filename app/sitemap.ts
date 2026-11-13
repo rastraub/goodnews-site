@@ -14,6 +14,7 @@ import { FOLLOW_UPS_PATH, followUpEntries, storyContentDate } from "@/lib/follow
 import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { parseMonthDaySlug } from "@/lib/calendar-day";
+import { BINGO_PATH, BREAK_INDEX_PATH, getBreakPack, listBreakEditions } from "@/lib/break-pack";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
 import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
@@ -120,6 +121,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const spanishEditions = loadSpanishEditions();
   const newestSpanish = spanishEditions[spanishEditions.length - 1];
   const newestFollowUp = followUpEntries(stories)[0]?.update.date;
+  const breakEditions = listBreakEditions();
+  const breakPacks = breakEditions.map((edition) => getBreakPack(edition.slug));
+  const breakLatest = breakPacks.reduce<string | undefined>((latest, pack) => {
+    for (const story of pack.stories) {
+      if (!latest || story.date > latest) latest = story.date;
+    }
+    return latest;
+  }, undefined);
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -268,6 +277,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: (pack.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: pack.inProgress ? 0.6 : 0.5,
       })),
+    {
+      url: absoluteUrl(BREAK_INDEX_PATH),
+      lastModified: breakLatest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    ...breakPacks.map((pack) => ({
+      url: absoluteUrl(pack.path),
+      lastModified: pack.stories.reduce<string | undefined>((latest, story) => {
+        return !latest || story.date > latest ? story.date : latest;
+      }, undefined) ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
+    {
+      url: absoluteUrl(BINGO_PATH),
+      lastModified: breakLatest ?? siteLatest,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
     {
       url: absoluteUrl("/quiz"),
       lastModified: newestQuiz?.latest ?? siteLatest,

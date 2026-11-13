@@ -155,6 +155,19 @@ import { stateContains } from "../lib/state-bounds";
 import { MAP_VIEWBOX, mapShapeCodes, projectToState } from "../lib/us-map-geometry";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
 import { getPublishedStories, getStory, loadAllStories, type Story } from "../lib/stories";
+import { BREAK_EDITIONS } from "../data/break-editions";
+import { BREAK_PINS } from "../data/break-pins";
+import { buildBingoCard, parseCardSeed } from "../lib/bingo-card";
+import {
+  BINGO_PATH,
+  BREAK_INDEX_PATH,
+  activitiesForEdition,
+  breakBlockReason,
+  editionStatus,
+  featuredBreakEdition,
+  resolvedBingoActs,
+  selectBreakStories,
+} from "../lib/break-pack";
 import { quizShareText, quizShareUrl } from "../lib/quiz-copy";
 import {
   MAX_QUIZ_QUESTIONS,
@@ -4563,6 +4576,130 @@ function assertTableTalk() {
   );
 }
 
+function breakRouteExists(href: string): boolean {
+  if (/^\/quiz\/\d{4}-\d{2}-\d{2}$/.test(href)) {
+    return fs.existsSync(path.join(process.cwd(), "app/(site)/quiz/[start]/page.tsx"));
+  }
+  const parts = href.split("/").filter(Boolean);
+  return fs.existsSync(path.join(process.cwd(), "app/(site)", ...parts, "page.tsx"));
+}
+
+function assertBreakPack() {
+  const thanksgiving = BREAK_EDITIONS.find((edition) => edition.slug === "thanksgiving-2026");
+  const winter = BREAK_EDITIONS.find((edition) => edition.slug === "winter-2026");
+  if (!thanksgiving || thanksgiving.start !== "2026-11-21" || thanksgiving.end !== "2026-11-29") {
+    throw new Error("Thanksgiving 2026 should run Nov 21 through Nov 29.");
+  }
+  if (!winter || winter.start !== "2026-12-19" || winter.end !== "2027-01-04") {
+    throw new Error("Winter 2026 should run Dec 19 through Jan 4.");
+  }
+  if (featuredBreakEdition("2026-11-13").slug !== "thanksgiving-2026") {
+    throw new Error("On Nov 13 the break index should feature the upcoming Thanksgiving pack.");
+  }
+  if (editionStatus(thanksgiving, "2026-11-25") !== "current") throw new Error("Nov 25 should be inside Thanksgiving break.");
+  if (featuredBreakEdition("2026-12-01").slug !== "winter-2026") throw new Error("Dec 1 should look ahead to winter break.");
+  if (editionStatus(thanksgiving, "2026-12-01") !== "past") throw new Error("Thanksgiving should be past on Dec 1.");
+  if (editionStatus(winter, "2026-12-25") !== "current") throw new Error("Dec 25 should be inside winter break.");
+  if (featuredBreakEdition("2027-01-10").slug !== "winter-2026") throw new Error("After both breaks, the latest pack should stay up.");
+  if (editionStatus(winter, "2027-01-10") !== "past") throw new Error("Winter break should be past on Jan 10.");
+
+  const published = getPublishedStories();
+  for (const edition of BREAK_EDITIONS) {
+    const config = BREAK_PINS[edition.slug];
+    if (!config) throw new Error(`Add a pins entry for ${edition.slug}.`);
+    const selected = selectBreakStories(published, edition, config, "2026-11-13");
+    if (selected.errors.length) throw new Error(selected.errors.join("; "));
+    if (selected.stories.length < 5 || selected.stories.length > 7) {
+      throw new Error(`${edition.slug} should pick 5 to 7 stories, got ${selected.stories.length}.`);
+    }
+    for (const story of selected.stories) {
+      const reason = breakBlockReason(story);
+      if (reason) throw new Error(`${story.slug} is in ${edition.slug} but blocked (${reason}).`);
+      if (story.date > "2026-11-13") throw new Error(`${story.slug} is dated after the pack's as-of day.`);
+    }
+    const activities = activitiesForEdition(edition.slug);
+    const hrefs = activities.map((activity) => activity.href);
+    for (const banned of ["/word-search", "/starters", "/advent", "/homeschool"]) {
+      if (hrefs.some((href) => href === banned || href.startsWith(`${banned}/`))) {
+        throw new Error(`${edition.slug} links to ${banned}, which is not on main.`);
+      }
+    }
+    if (edition.slug === "thanksgiving-2026" && !hrefs.includes(TABLE_TALK_PATH)) {
+      throw new Error("The Thanksgiving pack should link Table Talk.");
+    }
+    if (edition.slug === "winter-2026" && hrefs.includes(TABLE_TALK_PATH)) {
+      throw new Error("The winter pack should not link Table Talk.");
+    }
+    for (const activity of activities) {
+      if (!breakRouteExists(activity.href)) throw new Error(`${activity.href} is linked from the break pack but has no page.`);
+    }
+  }
+
+  const hoist = published.find((story) => story.slug === "las-vegas-hiker-hoist");
+  if (hoist && !breakBlockReason(hoist)) throw new Error("A hiker hoist is a rescue, not a break-pack story.");
+  const sample = published.find((story) => !breakBlockReason(story));
+  if (!sample) throw new Error("Expected at least one classroom story to pass the break filter.");
+  const blocked = selectBreakStories(
+    [
+      {
+        ...sample,
+        slug: "bad-shooting",
+        title: "A shooting nearby",
+        dek: "A shooting nearby kept people home.",
+        body: "A shooting nearby kept people home while neighbors checked on one another and stayed in for the night.",
+        kidSummary: "People heard a shooting nearby and stayed home. Neighbors checked on one another and read together until morning.",
+      },
+      sample,
+    ],
+    thanksgiving,
+    { pins: ["bad-shooting"], exclude: [] },
+    "2026-11-13",
+  );
+  if (!blocked.errors.some((error) => error.includes("blocked"))) throw new Error("A pin cannot bypass the break filter.");
+  if (blocked.stories.some((story) => story.slug === "bad-shooting")) throw new Error("A blocked pin was still packed.");
+
+  const bingo = resolvedBingoActs(published);
+  if (bingo.errors.length) throw new Error(bingo.errors.join("; "));
+  if (bingo.acts.length < 40) throw new Error(`Kindness Bingo should list at least 40 acts, got ${bingo.acts.length}.`);
+  const inspired = bingo.acts.filter((act) => act.storyPath).length;
+  if (inspired < 12 || inspired > 16) throw new Error(`About a third of bingo acts should name a story, got ${inspired} of ${bingo.acts.length}.`);
+  const card = buildBingoCard(bingo.acts, 123);
+  const again = buildBingoCard(bingo.acts, 123);
+  if (JSON.stringify(card) !== JSON.stringify(again)) throw new Error("A bingo seed should rebuild the same card.");
+  if (card.length !== 25 || card[12]?.kind !== "free") throw new Error("The bingo center should be free.");
+  const actIds = card.flatMap((cell) => (cell.kind === "act" ? [cell.act.id] : []));
+  if (new Set(actIds).size !== 24) throw new Error("A bingo card should use 24 different acts.");
+  if (parseCardSeed("123") !== 123 || parseCardSeed("0") || parseCardSeed("1000000") || parseCardSeed("abc")) {
+    throw new Error("Bingo card seeds should be whole numbers from 1 to 999999.");
+  }
+
+  const urls = sitemap().map((entry) => entry.url);
+  for (const path of [BREAK_INDEX_PATH, BINGO_PATH, "/break/thanksgiving-2026", "/break/winter-2026"]) {
+    if (!urls.some((url) => url.endsWith(path))) throw new Error(`The sitemap should include ${path}.`);
+  }
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("BREAK_INDEX_PATH") || !footer.includes("BINGO_PATH")) {
+    throw new Error("The footer should link the break pack and Kindness Bingo.");
+  }
+  const kids = fs.readFileSync(path.join(process.cwd(), "app/(site)/kids/browse.tsx"), "utf8");
+  const kindness = fs.readFileSync(path.join(process.cwd(), "app/(site)/kindness-challenge/page.tsx"), "utf8");
+  if (!kids.includes("BreakPromo") || !kindness.includes("BreakPromo")) {
+    throw new Error("Kids and Kindness Challenge should show the break-pack card.");
+  }
+  for (const file of ["app/(site)/break/page.tsx", "app/(site)/break/[slug]/page.tsx", "app/(site)/kindness-bingo/page.tsx"]) {
+    const page = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!page.includes("EmailSignup")) throw new Error(`${file} should use the newsletter signup.`);
+    if (page.includes("Jane ") || page.includes("By John")) throw new Error(`${file} should use the public masthead, not a personal name.`);
+  }
+  const indexPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/break/page.tsx"), "utf8");
+  if (!indexPage.includes("Denver")) throw new Error("The break index should say it follows Denver time.");
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  if (home.includes("BreakPromo") || home.includes("BREAK_INDEX_PATH")) {
+    throw new Error("The homepage already rotates seasonal banners. Do not add a break-pack banner there.");
+  }
+  console.log(`Break packs: ${BREAK_EDITIONS.map((edition) => edition.slug).join(", ")}. Bingo acts ${bingo.acts.length}, inspired ${inspired}.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4594,6 +4731,7 @@ async function main() {
   assertPartnerKit();
   assertThanksBoard();
   assertTableTalk();
+  assertBreakPack();
   assertExplainers();
   assertGivingTuesday(stories);
   assertFirstRespondersDay();
