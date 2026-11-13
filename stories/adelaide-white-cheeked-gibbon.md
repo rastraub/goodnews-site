@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.adelaidezoo.com.au/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "InDaily reported on November 12, 2026, that a northern white-cheeked gibbon was born at Adelaide Zoo. The baby arrived on Tuesday afternoon. It is the first of this kind at the zoo in ten years, and the only one born in Australasia this year. The mother is Viet and the father is Remus. Keepers do not know the baby's sex yet. These gibbons are born golden and later turn black. They live in rainforests in Laos, Vietnam, and southern China. The family is back in the trees, and they still sleep inside while the baby is small."
 kidQuestions:
