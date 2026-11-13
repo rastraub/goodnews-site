@@ -15,5 +15,5 @@ export const PLACE_ALIASES: Record<string, Record<string, string>> = {
     astoria: "queens county",
   },
   CA: { "north hills": "los angeles" },
-  TN: { madison: "nashville" },
+  TN: { madison: "nashville", lynchburg: "lynchburg moore county" },
 };
