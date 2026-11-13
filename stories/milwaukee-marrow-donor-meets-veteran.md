@@ -25,7 +25,6 @@ howToHelp:
     url: "https://bethematch.org/"
     kind: learn
 featured: false
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true

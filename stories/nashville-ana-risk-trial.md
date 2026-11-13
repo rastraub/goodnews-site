@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.nih.gov/"
     kind: learn
 featured: false
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
