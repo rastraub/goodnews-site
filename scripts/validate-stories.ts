@@ -106,7 +106,27 @@ import {
   sentencesOf,
   type AnnouncementCandidate,
 } from "../lib/morning-announcements";
-import { classroomJsonLd } from "../lib/seo";
+import { classroomJsonLd, listingJsonLd, webPageJsonLd } from "../lib/seo";
+import {
+  SERVICE_HOURS_DESCRIPTION,
+  SERVICE_HOURS_PATH,
+  SERVICE_HOURS_TITLE,
+  TEEN_MOVES,
+  TEEN_STORY_MAX,
+  TEEN_STORY_MIN,
+  TEENS_INDEX_DESCRIPTION,
+  TEENS_INDEX_PATH,
+  TEENS_INDEX_TITLE,
+  buildTeenEditions,
+  emptyTeenEditorConfig,
+  getTeenEditions,
+  parseTeenEditorConfig,
+  teenBlockReason,
+  teenIdentity,
+  teenMoves,
+  teenPrompts,
+  type TeenCandidate,
+} from "../lib/teens";
 import { MAX_PRERENDERED_PAGES, pageCount, STATIC_STORY_CAP } from "../lib/paging";
 import {
   MAX_PRERENDERED_WEEKS,
@@ -4563,6 +4583,285 @@ function assertTableTalk() {
   );
 }
 
+function sampleTeen(partial: Partial<TeenCandidate> & Pick<TeenCandidate, "slug" | "title" | "date">): TeenCandidate {
+  return {
+    dek: "Students at a high school spent the week on a free project their club could finish.",
+    city: "Akron",
+    country: "US",
+    state: "OH",
+    category: "community",
+    tags: ["students", "kindness"],
+    sourceName: "Ideastream",
+    sourceUrl: "https://example.com/teen-story",
+    image: "/images/stories/teen.webp",
+    imageAlt: "Students carrying boxes of donations",
+    body: "The students finished the project.",
+    ...partial,
+  };
+}
+
+function assertTeenHub() {
+  if (TEENS_INDEX_PATH !== "/teens") throw new Error("The teen index should live at /teens.");
+  if (SERVICE_HOURS_PATH !== "/service-hours") throw new Error("The service hours log should live at /service-hours.");
+  if (!TEENS_INDEX_TITLE.toLowerCase().includes("good news for teens")) throw new Error("The teen index title should name teens.");
+  if (TEENS_INDEX_DESCRIPTION.length < 40 || SERVICE_HOURS_DESCRIPTION.length < 40) {
+    throw new Error("Teen and service-hours descriptions should say what the page is.");
+  }
+  if (TEEN_MOVES.length < 10 || TEEN_MOVES.length > 12) throw new Error("The club idea list should stay between 10 and 12 templates.");
+  if (new Set(TEEN_MOVES.map((move) => move.id)).size !== TEEN_MOVES.length) throw new Error("Club idea ids should be unique.");
+  for (const move of TEEN_MOVES) {
+    if (move.detail.length < 40 || move.permission.length < 20) throw new Error(`${move.id} needs a step and a permission note.`);
+  }
+
+  const coats = sampleTeen({ slug: "coats", title: "High school students collected coats for neighbors", date: "2026-11-10" });
+  const elementary = sampleTeen({
+    slug: "elementary",
+    title: "Students at an elementary school planted a garden",
+    dek: "The class planted vegetables with a teacher.",
+    date: "2026-11-10",
+  });
+  const highCountry = sampleTeen({
+    slug: "high-country",
+    title: "Alpine crayfish rescued after a High Country fire are heading home",
+    dek: "Crews carried the animals back to the creek.",
+    tags: ["wildlife-conservation"],
+    date: "2026-11-10",
+  });
+  const caldera = sampleTeen({
+    slug: "caldera",
+    title: "Caldera High students turned leftover pumpkins into compost",
+    dek: "Students spent a morning on the school field.",
+    date: "2026-11-09",
+  });
+  const shooting = sampleTeen({
+    slug: "shooting",
+    title: "High school students collected coats after a shooting",
+    date: "2026-11-10",
+  });
+  const clearInjury = sampleTeen({
+    slug: "clear-injury",
+    title: "High school students collected coats",
+    dek: "No one was injured while they worked.",
+    date: "2026-11-10",
+  });
+  if (!teenIdentity(coats) || !teenIdentity(caldera) || !teenIdentity(clearInjury)) {
+    throw new Error("A high school service story should qualify.");
+  }
+  if (teenIdentity(elementary)) throw new Error("An elementary story should stay off the teen pages.");
+  if (teenIdentity(highCountry)) throw new Error("High Country is not a high school.");
+  if (teenIdentity(shooting) || teenBlockReason(shooting) !== "violence") throw new Error("A shooting story should be blocked.");
+  for (const [slug, title, reason] of [
+    ["crime", "High school students returned a stolen bike", "crime"],
+    ["death", "High school students attended a funeral", "death"],
+    ["politics", "High school students went to an election rally", "politics"],
+    ["scandal", "High school students spoke about a scandal", "scandal"],
+    ["gambling", "High school students held a casino night", "gambling"],
+    ["substance", "High school students discussed vaping", "substance"],
+    ["self-harm", "High school students talked about suicide", "self-harm"],
+  ] as const) {
+    const story = sampleTeen({ slug, title, date: "2026-11-10" });
+    if (teenBlockReason(story) !== reason || teenIdentity(story)) {
+      throw new Error(`${slug} should be blocked as ${reason}, got ${teenBlockReason(story) ?? "nothing"}.`);
+    }
+  }
+
+  const older = sampleTeen({
+    slug: "older-coats",
+    title: "Teens in Dayton packed coats",
+    date: "2026-10-20",
+    tags: ["students", "kindness"],
+  });
+  const thin = buildTeenEditions([coats], emptyTeenEditorConfig(), "2026-11-12");
+  const thinWeek = thin.editions.find((edition) => edition.start === "2026-11-09");
+  if (!thinWeek || thinWeek.stories.some((pick) => pick.fromArchive)) {
+    throw new Error("A one-story week with no earlier match should stay short and not invent an archive story.");
+  }
+  if (!thinWeek.shortPage || thinWeek.weekCount !== 1) throw new Error("A one-story week should say it is short.");
+  const filled = buildTeenEditions([older, coats], emptyTeenEditorConfig(), "2026-11-12");
+  const filledWeek = filled.editions.find((edition) => edition.start === "2026-11-09");
+  if (!filledWeek || filledWeek.archiveCount !== 1 || filledWeek.stories.filter((pick) => pick.fromArchive)[0]?.story.slug !== "older-coats") {
+    throw new Error("A thin week should borrow one labeled story from a recent week.");
+  }
+  if (filledWeek.stories.some((pick) => pick.fromArchive && weekStart(pick.story.date) >= filledWeek.start)) {
+    throw new Error("Archive stories have to come from an earlier week.");
+  }
+  const many = Array.from({ length: 8 }, (_, index) =>
+    sampleTeen({
+      slug: `many-${index}`,
+      title: `High school students built project ${index} for neighbors`,
+      date: addDays("2026-11-09", index % 5),
+    }),
+  );
+  const capped = buildTeenEditions(many, emptyTeenEditorConfig(), "2026-11-12").editions.find((edition) => edition.start === "2026-11-09");
+  if (!capped || capped.stories.length !== TEEN_STORY_MAX || capped.archiveCount !== 0) {
+    throw new Error("A full week should stop at six stories and skip the archive.");
+  }
+  const future = buildTeenEditions(
+    [sampleTeen({ slug: "future", title: "High school students planted trees", date: "2026-11-16" })],
+    emptyTeenEditorConfig(),
+    "2026-11-12",
+  );
+  if (future.editions.some((edition) => edition.start > "2026-11-09")) throw new Error("A week that has not started should not be a teen page.");
+  const early = buildTeenEditions(
+    [sampleTeen({ slug: "early", title: "High school students planted trees", date: "2026-09-30" })],
+    emptyTeenEditorConfig(),
+    "2026-11-12",
+  );
+  if (early.editions.some((edition) => edition.stories.some((pick) => pick.story.slug === "early" && !pick.fromArchive))) {
+    throw new Error("A story before launch should not open its own week.");
+  }
+
+  const pinned = buildTeenEditions([coats, elementary], { exclude: [], weeks: { "2026-11-09": ["elementary"] } }, "2026-11-12");
+  const pinnedWeek = pinned.editions.find((edition) => edition.start === "2026-11-09");
+  if (!pinnedWeek?.stories.some((pick) => pick.story.slug === "elementary" && pick.pinned)) {
+    throw new Error("A pin should add a safe story the age filter would skip.");
+  }
+  const blockedPin = buildTeenEditions([shooting], { exclude: [], weeks: { "2026-11-09": ["shooting"] } }, "2026-11-12");
+  if (!blockedPin.pinErrors.some((error) => error.includes("shooting") && error.includes("violence"))) {
+    throw new Error("A pin that fails the safety filter should be an error.");
+  }
+  if (blockedPin.editions.some((edition) => edition.stories.some((pick) => pick.story.slug === "shooting"))) {
+    throw new Error("A rejected pin should not publish the shooting story.");
+  }
+  const hidden = buildTeenEditions([coats], { exclude: ["coats"], weeks: {} }, "2026-11-12");
+  if (hidden.editions.some((edition) => edition.stories.some((pick) => pick.story.slug === "coats"))) {
+    throw new Error("An exclude slug should remove the story.");
+  }
+  const missing = buildTeenEditions([], { exclude: ["missing-slug"], weeks: { "2026-11-09": ["missing-slug"] } }, "2026-11-12");
+  if (!missing.pinErrors.some((error) => error.includes("missing-slug"))) throw new Error("A missing pin slug should fail.");
+  if (parseTeenEditorConfig({ exclude: [], weeks: {} }).exclude.length !== 0) throw new Error("An empty teen file should mean no pins.");
+  for (const value of [{ exclude: ["Not A Slug"], weeks: {} }, { exclude: [], weeks: { "2026-11-10": ["coats"] } }, { extra: true }]) {
+    let threw = false;
+    try {
+      parseTeenEditorConfig(value);
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error("A bad teen editor file should fail.");
+  }
+
+  const moves = teenMoves([coats]);
+  if (moves.length < 2 || moves.length > 3) throw new Error("Your move should offer 2 or 3 ideas.");
+  const prompts = teenPrompts([coats]);
+  if (prompts.length < 2 || prompts.length > 3) throw new Error("Advisory should have 2 or 3 prompts.");
+  const markupWeek = filledWeek;
+  if (!markupWeek.newsletterText.includes(markupWeek.stories[0].story.sourceName) || !markupWeek.newsletterText.includes(markupWeek.stories[0].story.sourceUrl)) {
+    throw new Error("The newsletter should credit the original outlet and link to it.");
+  }
+  if (!markupWeek.newsletterText.includes(siteConfig.name) || !markupWeek.newsletterHtml.includes("/story/")) {
+    throw new Error("The newsletter should credit this site and link back.");
+  }
+  const nasty = buildTeenEditions(
+    [sampleTeen({ slug: "nasty", title: `Students <built> a "trap"`, date: "2026-11-10" })],
+    emptyTeenEditorConfig(),
+    "2026-11-12",
+  ).editions.find((edition) => edition.stories.length);
+  if (!nasty || nasty.newsletterHtml.includes("<built>") || !nasty.newsletterHtml.includes("&lt;built&gt;")) {
+    throw new Error("Newsletter HTML should escape story text.");
+  }
+  if (markupWeek.archiveCount > 0 && !markupWeek.newsletterText.includes("From the recent archive")) {
+    throw new Error("An archive story in the newsletter should be labeled.");
+  }
+  const schema = JSON.stringify(
+    listingJsonLd({
+      name: markupWeek.title,
+      description: markupWeek.description,
+      path: markupWeek.path,
+      crumbs: [
+        { name: "Today", path: "/" },
+        { name: "Good News for Teens", path: TEENS_INDEX_PATH },
+      ],
+      stories: markupWeek.stories.map((pick) => pick.story),
+    }),
+  );
+  if (!schema.includes("CollectionPage") || !schema.includes("ItemList") || !schema.includes("BreadcrumbList")) {
+    throw new Error("A teen week should be a CollectionPage with an ItemList.");
+  }
+  const hoursSchema = JSON.stringify(
+    webPageJsonLd({
+      name: SERVICE_HOURS_TITLE,
+      description: SERVICE_HOURS_DESCRIPTION,
+      path: SERVICE_HOURS_PATH,
+      crumbs: [
+        { name: "Today", path: "/" },
+        { name: "Service hours", path: SERVICE_HOURS_PATH },
+      ],
+    }),
+  );
+  if (!hoursSchema.includes("WebPage") || !hoursSchema.includes("BreadcrumbList")) {
+    throw new Error("The service hours page should be a WebPage with breadcrumbs.");
+  }
+
+  const editions = getTeenEditions();
+  const published = getPublishedStories();
+  const bySlug = new Map(published.map((story) => [story.slug, story]));
+  if (!editions.length) throw new Error("Launch week should have a teen page.");
+  for (const edition of editions) {
+    if (edition.start !== weekStart(edition.start) || edition.path !== `/teens/${edition.start}`) {
+      throw new Error(`${edition.path} should be keyed to Monday.`);
+    }
+    if (edition.stories.length > TEEN_STORY_MAX) throw new Error(`${edition.path} has more than ${TEEN_STORY_MAX} stories.`);
+    if (edition.moves.length < 2 || edition.moves.length > 3) throw new Error(`${edition.path} should have 2 or 3 club ideas.`);
+    if (edition.prompts.length < 2 || edition.prompts.length > 3) throw new Error(`${edition.path} should have 2 or 3 prompts.`);
+    if (edition.weekCount >= TEEN_STORY_MIN && edition.archiveCount !== 0) {
+      throw new Error(`${edition.path} filled from the archive even though the week had enough stories.`);
+    }
+    for (const pick of edition.stories) {
+      if (teenBlockReason(pick.story)) throw new Error(`${pick.story.slug} is blocked and still on ${edition.path}.`);
+      if (!pick.pinned && !teenIdentity(pick.story)) throw new Error(`${pick.story.slug} is on ${edition.path} without a teen match.`);
+      const live = bySlug.get(pick.story.slug);
+      if (!live) throw new Error(`${pick.story.slug} on ${edition.path} is not published.`);
+      if (pick.fromArchive && weekStart(live.date) >= edition.start) throw new Error(`${pick.story.slug} is labeled archive inside its own week.`);
+      if (!pick.fromArchive && weekStart(live.date) !== edition.start) throw new Error(`${pick.story.slug} is not from ${edition.start}.`);
+    }
+    if (!edition.newsletterHtml.includes("&") && edition.stories.some((pick) => /[&<>"]/.test(pick.story.title + pick.story.dek))) {
+      throw new Error(`${edition.path} newsletter should escape HTML.`);
+    }
+  }
+  const urls = new Set(sitemap().map((entry) => entry.url));
+  if (!urls.has(absoluteUrl(TEENS_INDEX_PATH)) || !urls.has(absoluteUrl(SERVICE_HOURS_PATH))) {
+    throw new Error("The sitemap should include /teens and /service-hours.");
+  }
+  for (const edition of editions) {
+    if (!urls.has(absoluteUrl(edition.path))) throw new Error(`The sitemap should include ${edition.path}.`);
+  }
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  const kids = fs.readFileSync(path.join(process.cwd(), "app/(site)/kids/browse.tsx"), "utf8");
+  const classroom = fs.readFileSync(path.join(process.cwd(), "app/(site)/classroom/page.tsx"), "utf8");
+  const kindness = fs.readFileSync(path.join(process.cwd(), "app/(site)/kindness-challenge/page.tsx"), "utf8");
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  const hours = fs.readFileSync(path.join(process.cwd(), "app/(site)/service-hours/log.tsx"), "utf8");
+  const hoursPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/service-hours/page.tsx"), "utf8");
+  if (!footer.includes("TEENS_INDEX_PATH") || !footer.includes("SERVICE_HOURS_PATH")) {
+    throw new Error("The footer should link the teen hub and the service hours log.");
+  }
+  if (!kids.includes('href="/teens"') || !classroom.includes('href="/teens"')) {
+    throw new Error("Kids and classroom pages should link to Good News for Teens.");
+  }
+  if (!kindness.includes('href="/teens"') || !kindness.includes('href="/service-hours"')) {
+    throw new Error("The kindness challenge should link to teens and service hours.");
+  }
+  if (!indexNow.includes("TEENS_INDEX_PATH") || !indexNow.includes("teensToPrerender")) {
+    throw new Error("IndexNow should ping the teen pages.");
+  }
+  if (/type="email"|fetch\s*\(/.test(hours) || /type="email"|fetch\s*\(/.test(hoursPage)) {
+    throw new Error("The service hours log should not collect email or send the form.");
+  }
+  if (!hours.includes("Clear my data") || !hours.includes("localStorage")) {
+    throw new Error("The service hours log should stay in localStorage and offer a clear button.");
+  }
+  if (!hoursPage.includes("does not certify")) throw new Error("The service hours page should say this site does not certify hours.");
+  const docs = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!docs.includes("## Good News for Teens") || !docs.includes("data/teens.json") || !docs.includes("exclude")) {
+    throw new Error("ADDING_STORIES.md should explain how teen stories are picked and how to pin or exclude them.");
+  }
+  const current = editions[editions.length - 1];
+  const previous = editions[editions.length - 2];
+  console.log(
+    `Teen weeks: ${editions.length}. Current ${current?.start ?? "none"} has ${current?.weekCount ?? 0} this week and ${current?.archiveCount ?? 0} from the archive. Previous ${previous?.start ?? "none"} has ${previous?.weekCount ?? 0} this week and ${previous?.archiveCount ?? 0} from the archive.`,
+  );
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4579,6 +4878,7 @@ async function main() {
   assertWeeks();
   assertGoodNewsIndex();
   assertClassroomPacks();
+  assertTeenHub();
   assertQuizzes();
   assertOnThisDay();
   assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);

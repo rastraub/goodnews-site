@@ -27,6 +27,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
     { href: "/kindness-challenge", label: "Kindness" },
     { href: "/morning-announcements", label: "Announcements" },
     { href: "/kids", label: "Kids" },
+    { href: "/teens", label: "Teens" },
     { href: "/topics", label: "Topics" },
     { href: "/explainers", label: "Explainers" },
     { href: "/on-this-day", label: "On this day" },

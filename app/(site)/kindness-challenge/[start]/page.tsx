@@ -80,6 +80,8 @@ export default async function KindnessChallengePage({ params }: Props) {
           <Link href={KINDNESS_INDEX_PATH}>All challenges</Link>
           {next ? <Link href={next.path}>Next week</Link> : null}
           <Link href="/kids">Classroom stories</Link>
+          <Link href="/teens">Good News for Teens</Link>
+          <Link href="/service-hours">Service hours reflection</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
         </p>
       </div>

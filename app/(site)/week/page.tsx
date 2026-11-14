@@ -75,6 +75,7 @@ export default function WeekIndexPage() {
           <Link href="/stories">All stories</Link>
           <Link href="/kids">For classrooms</Link>
           <Link href="/classroom">Good News Friday</Link>
+          <Link href="/teens">Good News for Teens</Link>
           <Link href="/es/buenas-noticias" hrefLang="es" lang="es">
             En español
           </Link>
