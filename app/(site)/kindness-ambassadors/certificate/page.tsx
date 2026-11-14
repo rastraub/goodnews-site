@@ -5,6 +5,7 @@ import { AMBASSADOR_CERTIFICATE_PATH, AMBASSADORS_PATH, ambassadorSignupHref } f
 import { certificateJsonLd } from "@/lib/kindness-ambassadors";
 import { listingMeta } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 import { CertificateSheet } from "./certificate-sheet";
 
 export const dynamic = "force-static";
@@ -43,6 +44,7 @@ export default function CertificatePage() {
         <p className="link-pills no-print">
           <Link href={AMBASSADORS_PATH}>About the program</Link>
           <Link href={ambassadorSignupHref()}>Kindness Ambassadors class signup</Link>
+          <Link href={LARGE_PRINT_PATH}>Large-print edition</Link>
         </p>
         <CertificateSheet />
       </div>

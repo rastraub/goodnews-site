@@ -1,0 +1,147 @@
+@page lp-letter {
+  size: letter portrait;
+  margin: 0.6in 0.65in 0.65in;
+}
+
+@media print {
+  .lp-sheet {
+    page: lp-letter;
+    border: 0;
+    padding: 0;
+    background: #fff;
+    max-width: none;
+  }
+
+  .lp-frame {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .lp-repeat-head {
+    display: table-header-group !important;
+  }
+
+  .lp-repeat-foot {
+    display: table-footer-group !important;
+  }
+
+  .lp-frame td {
+    padding: 0;
+    border: 0;
+    background: #fff;
+  }
+
+  .lp-run-head,
+  .lp-run-foot {
+    position: static;
+    display: block;
+    margin: 0;
+    color: #000;
+    background: #fff;
+    font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18pt;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .lp-run-head {
+    padding-bottom: 8pt;
+  }
+
+  .lp-run-foot {
+    padding-top: 8pt;
+  }
+
+  .page-hero.lp-page h1,
+  .lp-sheet h1 {
+    font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 26pt;
+    line-height: 1.15;
+    color: #000;
+    margin: 0 0 8pt;
+  }
+
+  .lp-mast,
+  .lp-date,
+  .lp-lead,
+  .lp-colophon,
+  .lp-place,
+  .lp-summary,
+  .lp-source,
+  .lp-sheet h2 {
+    color: #000;
+    font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  .lp-mast,
+  .lp-date,
+  .lp-lead,
+  .lp-colophon,
+  .lp-place,
+  .lp-summary,
+  .lp-source {
+    font-size: 18pt;
+    line-height: 1.3;
+  }
+
+  .lp-date {
+    font-size: 20pt;
+    margin: 0 0 8pt;
+  }
+
+  .lp-sheet h2 {
+    font-size: 22pt;
+    line-height: 1.2;
+    margin: 0 0 2pt;
+  }
+
+  .lp-lead {
+    margin: 0 0 8pt;
+  }
+
+  .lp-stories {
+    margin-top: 4pt;
+  }
+
+  .lp-stories > li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding-top: 8pt;
+  }
+
+  .lp-stories > li + li {
+    border-top: 0;
+    margin-top: 12pt;
+  }
+
+  .lp-stories > li::marker {
+    font-size: 18pt;
+    color: #000;
+  }
+
+  .lp-sheet h1,
+  .lp-sheet h2,
+  .lp-mast {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .lp-summary,
+  .lp-place {
+    margin: 2pt 0;
+  }
+
+  .lp-source {
+    margin: 2pt 0 0;
+  }
+
+  .lp-colophon {
+    margin-top: 10pt;
+  }
+
+  .lp-sheet a {
+    color: #000;
+    text-decoration: underline;
+  }
+}
