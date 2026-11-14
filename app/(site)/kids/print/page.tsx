@@ -86,6 +86,8 @@ export default function KidsPrintPage() {
               {placePath ? <Link href={placePath}>More classroom stories from this place</Link> : null}
               <Link href="/kids">All classroom stories</Link>
               <Link href="/classroom">Good News Friday packs</Link>
+              <Link href="/homeschool">Homeschool packs</Link>
+              <Link href="/word-search">Word search</Link>
               <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
             </div>
           </>
