@@ -62,7 +62,23 @@ import { loadGoodNeighborOverrides } from "../lib/good-neighbor-data";
 import { castFileVote, countsFromRedis, requestIpHash, voteMode } from "../lib/good-neighbor-store";
 import { parseEmailInterest } from "../lib/email";
 import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
-import { SMARTNEWS_DESCRIPTION, feedCatalog, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
+import { FEED_LIMIT, SMARTNEWS_DESCRIPTION, feedCatalog, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
+import {
+  WIRE_FEED_PATH,
+  WIRE_JSON_PATH,
+  WIRE_KIDS_FEED_PATH,
+  WIRE_KIDS_JSON_PATH,
+  WIRE_PATH,
+  renderKidsWireJson,
+  renderKidsWireRss,
+  renderNationalWireJson,
+  renderNationalWireRss,
+  renderStateWireRss,
+  renderWireJson,
+  renderWireRss,
+  wireMayIncludeImage,
+  wireNewsletter,
+} from "../lib/wire";
 import { currentHelp, followUpEntries, FOLLOW_UPS_PATH, renderFollowUpsRss, storyContentDate } from "../lib/follow-ups";
 import { feedImageReport } from "../lib/feed-image";
 import { largeJpegPath, storyThumbPath } from "../lib/images";
@@ -141,7 +157,7 @@ import {
 } from "../lib/good-news-index";
 import { renderIndexMap } from "../components/index-map";
 import { POPULATION_US_TOTAL, populationOf, populationTotal } from "../lib/population";
-import { absoluteUrl, storyJsonLd, storyModifiedIso, storyPublishedIso } from "../lib/seo";
+import { absoluteUrl, storyJsonLd, storyModifiedIso, storyPublishedIso, webPageJsonLd } from "../lib/seo";
 import { STATES } from "../lib/states";
 import { buildOutlets, formatOutletCsv, getOutletForStory, getOutlets, outletNameKey, type OutletCredit } from "../lib/outlets";
 import { monthDayFromIso, onThisDayPath, parseMonthDaySlug } from "../lib/calendar-day";
@@ -1472,6 +1488,254 @@ function assertFollowUps() {
   }
   const config = fs.readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
   if (!config.includes('"/follow-ups/rss.xml"')) throw new Error("Follow-ups RSS should use the feed cache header.");
+}
+
+function assertWellFormedXml(xml: string, label: string) {
+  if (!xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')) {
+    throw new Error(`${label} should start with an XML declaration.`);
+  }
+  const withoutCdata = xml.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, "");
+  if (/&(?!(?:amp|lt|gt|quot|apos);)/.test(withoutCdata)) {
+    throw new Error(`${label} has an unescaped ampersand.`);
+  }
+  const stripped = withoutCdata.replace(/<\?xml[^?]*\?>/, "").replace(/<!--[\s\S]*?-->/g, "");
+  const tags: string[] = [];
+  const re = /<\/?([A-Za-z0-9:_-]+)(?:\s[^<>]*?)?\/?>/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(stripped))) {
+    const full = match[0];
+    const name = match[1];
+    if (!name) throw new Error(`${label} has a tag the checker could not read.`);
+    if (full.startsWith("</")) {
+      const open = tags.pop();
+      if (open !== name) throw new Error(`${label} closes ${name} but ${open ?? "nothing"} was open.`);
+    } else if (!full.endsWith("/>")) {
+      tags.push(name);
+    }
+  }
+  if (tags.length) throw new Error(`${label} left tags open: ${tags.join(", ")}`);
+}
+
+type WireJsonItem = {
+  id: string;
+  url: string;
+  external_url?: string;
+  title?: string;
+  content_html?: string;
+  content_text?: string;
+  summary?: string;
+  date_published?: string;
+  image?: string;
+};
+
+function assertJsonFeed(raw: string, label: string) {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`${label} is not valid JSON.`);
+  }
+  if (!parsed || typeof parsed !== "object") throw new Error(`${label} should be a JSON object.`);
+  const feed = parsed as { version?: string; title?: string; home_page_url?: string; feed_url?: string; items?: WireJsonItem[] };
+  if (feed.version !== "https://jsonfeed.org/version/1.1") throw new Error(`${label} is not JSON Feed 1.1.`);
+  if (!feed.title || !feed.home_page_url?.startsWith("https://") || !feed.feed_url?.startsWith("https://")) {
+    throw new Error(`${label} is missing title, home_page_url, or feed_url.`);
+  }
+  if (!Array.isArray(feed.items)) throw new Error(`${label} items should be an array.`);
+  return feed;
+}
+
+function assertWireItem(item: WireJsonItem, label: string) {
+  if (!item.id || item.id !== item.url) throw new Error(`${label} item id should be the canonical story URL.`);
+  if (!item.external_url?.startsWith("https://")) throw new Error(`${label} item is missing the original-source link.`);
+  if (!item.content_text?.includes("Original reporting by") || !item.summary?.includes("Original reporting by")) {
+    throw new Error(`${label} item dropped the credit line.`);
+  }
+  if (!item.content_html?.includes('rel="canonical"')) throw new Error(`${label} item is missing rel=canonical.`);
+  if (!item.date_published) throw new Error(`${label} item is missing date_published.`);
+  const slug = item.url.split("/").pop() ?? "";
+  const story = getStory(slug);
+  if (!story) throw new Error(`${label} item ${slug} is not a published story.`);
+  if (Boolean(item.image) !== wireMayIncludeImage(story)) {
+    throw new Error(`${label} image flag does not match the owned-photo rule for ${slug}.`);
+  }
+  if (!item.content_text.includes(story.sourceName) && !item.content_text.includes(story.sourceUrl)) {
+    throw new Error(`${label} item ${slug} should name the original newsroom.`);
+  }
+}
+
+function assertWire() {
+  const published = getPublishedStories();
+  const sample = published.find((story) => !/[&<>"]/.test(`${story.title}${story.sourceName}${story.dek}`)) ?? published[0];
+  if (!sample) throw new Error("The wire needs a published story.");
+
+  const national = renderNationalWireRss();
+  assertWellFormedXml(national, "National wire RSS");
+  const nationalItems = national.match(/<item>/g)?.length ?? 0;
+  if (nationalItems !== Math.min(published.length, FEED_LIMIT)) {
+    throw new Error(`National wire should list ${Math.min(published.length, FEED_LIMIT)} items, found ${nationalItems}.`);
+  }
+  if (!national.includes(`/story/${sample.slug}`)) throw new Error("National wire should link the canonical story.");
+  if (!national.includes('rel="canonical"') || !national.includes('rel="via"')) {
+    throw new Error("National wire items need a canonical link and an original-source link.");
+  }
+  if (!national.includes(sample.sourceUrl)) throw new Error("National wire should include the original report URL.");
+  if (national.includes("xmlns:nb") || national.includes("xmlns:snf") || national.includes("<snf:")) {
+    throw new Error("The wire must not use the NewsBreak or SmartNews namespaces.");
+  }
+  if (published.some((story) => wireMayIncludeImage(story))) {
+    if (!national.includes("xmlns:media")) throw new Error("An owned photo should declare the Media RSS namespace.");
+  } else if (national.includes("<enclosure ") || national.includes("xmlns:media") || national.includes("<media:")) {
+    throw new Error("The wire should omit photos unless the publication owns them.");
+  }
+
+  const owned = {
+    ...sample,
+    imageCredit: `${siteConfig.name} staff photo`,
+    imageLicense: `Owned by ${siteConfig.owner.name}`,
+  };
+  if (!wireMayIncludeImage(owned)) throw new Error("A photo credited to the publication should be allowed on the wire.");
+  const commons = { ...sample, imageCredit: "Someone / Wikimedia Commons", imageLicense: "CC BY 4.0" };
+  if (wireMayIncludeImage(commons)) throw new Error("A Creative Commons photo should stay off the wire.");
+  const publicDomain = { ...sample, imageCredit: "National Park Service", imageLicense: "Public domain" };
+  if (wireMayIncludeImage(publicDomain)) throw new Error("A public-domain photo should stay off the wire until the owner says otherwise.");
+  const ownedRss = renderWireRss({
+    stories: [owned],
+    selfPath: WIRE_FEED_PATH,
+    title: "Owned photo",
+    description: "Owned photo check.",
+    link: WIRE_PATH,
+  });
+  assertWellFormedXml(ownedRss, "Owned-photo wire");
+  if (!ownedRss.includes("<enclosure ") || !ownedRss.includes("xmlns:media")) {
+    throw new Error("An owned photo should be attached to that wire item.");
+  }
+
+  const emptyRss = renderWireRss({
+    stories: [],
+    selfPath: WIRE_FEED_PATH,
+    title: "Empty wire",
+    description: "No stories.",
+    link: WIRE_PATH,
+  });
+  assertWellFormedXml(emptyRss, "Empty wire");
+  const emptyJson = assertJsonFeed(
+    renderWireJson({
+      stories: [],
+      selfPath: WIRE_JSON_PATH,
+      title: "Empty wire",
+      description: "No stories.",
+      link: WIRE_PATH,
+    }),
+    "Empty wire JSON",
+  );
+  if (emptyJson.items?.length) throw new Error("An empty wire should have no items.");
+
+  const nationalJson = assertJsonFeed(renderNationalWireJson(), "National wire JSON");
+  if (nationalJson.items?.length !== nationalItems) throw new Error("National JSON and RSS should list the same stories.");
+  if (!nationalJson.feed_url?.endsWith(WIRE_JSON_PATH)) throw new Error("National JSON feed_url should be the wire JSON file.");
+  for (const item of nationalJson.items ?? []) assertWireItem(item, "National wire JSON");
+
+  const kidsRss = renderKidsWireRss();
+  assertWellFormedXml(kidsRss, "Classroom wire RSS");
+  const kidStories = getKidStories();
+  const kidItems = kidsRss.match(/<item>/g)?.length ?? 0;
+  if (kidItems !== Math.min(kidStories.length, FEED_LIMIT)) {
+    throw new Error("The classroom wire should list kid-friendly stories only, up to the feed limit.");
+  }
+  if (!kidsRss.includes(WIRE_KIDS_FEED_PATH)) throw new Error("The classroom wire should point at its own URL.");
+  const adult = published.find((story) => !story.kidFriendly);
+  if (adult && kidsRss.includes(`/story/${adult.slug}`)) {
+    throw new Error("The classroom wire should leave out stories that are not marked kid-friendly.");
+  }
+  const kidsJson = assertJsonFeed(renderKidsWireJson(), "Classroom wire JSON");
+  if (!kidsJson.feed_url?.endsWith(WIRE_KIDS_JSON_PATH)) throw new Error("Classroom JSON feed_url should be the kids JSON file.");
+  let checkedKidSplit = false;
+  for (const story of kidStories) {
+    const body = story.body.replace(/\s+/g, " ").trim();
+    const kid = (story.kidSummary ?? "").replace(/\s+/g, " ");
+    const probe = body.slice(40, 110);
+    if (probe.length < 30 || kid.includes(probe)) continue;
+    const item = kidsJson.items?.find((entry) => entry.url.endsWith(`/story/${story.slug}`));
+    if (!item) continue;
+    if (item.content_text?.includes(probe)) {
+      throw new Error("The classroom wire should use the classroom summary, not the adult body.");
+    }
+    const lead = (story.kidSummary ?? "").slice(0, 40);
+    if (lead && !item.content_text?.includes(lead)) {
+      throw new Error("The classroom wire should include the classroom summary.");
+    }
+    checkedKidSplit = true;
+    break;
+  }
+  if (kidStories.length && !checkedKidSplit) {
+    throw new Error("Expected a classroom story whose summary differs from the adult body.");
+  }
+
+  const colorado = renderStateWireRss({ code: "CO", slug: "colorado", name: "Colorado" });
+  assertWellFormedXml(colorado, "Colorado wire");
+  if (!colorado.includes("/wire/colorado/feed.xml") || !colorado.includes("/state/colorado")) {
+    throw new Error("A state wire should point at itself and at the state page.");
+  }
+  const coStory = published.find((story) => story.state === "CO");
+  if (coStory && !colorado.includes(`/story/${coStory.slug}`)) {
+    throw new Error("The Colorado wire should include a Colorado story.");
+  }
+
+  const week = wireNewsletter(published, "2026-10-16");
+  if (week.stories.length < 1 || week.stories.length > 5) {
+    throw new Error("This week's 5 should contain one to five stories.");
+  }
+  if (week.earlierWeek) throw new Error("October 16, 2026 should use that week's own stories.");
+  if (!week.html.includes('rel="canonical"') || !week.html.includes("Original reporting by")) {
+    throw new Error("The newsletter HTML should keep the canonical link and the credit.");
+  }
+  if (!week.text.includes("This week's 5 for your newsletter") || !week.text.includes("Original reporting by")) {
+    throw new Error("The plain-text newsletter should keep the credit line.");
+  }
+  if (!week.text.includes(`/story/${week.stories[0]?.slug}`)) {
+    throw new Error("The plain-text newsletter should include the story URL.");
+  }
+  const none = wireNewsletter([], "2026-10-16");
+  if (none.stories.length !== 0 || !none.text.includes("No summary is ready")) {
+    throw new Error("An empty week should say that no summary is ready.");
+  }
+
+  const schema = webPageJsonLd({
+    name: "Good News Wire",
+    description: "Republish short summaries.",
+    path: WIRE_PATH,
+    crumbs: [
+      { name: "Today", path: "/" },
+      { name: "Good News Wire", path: WIRE_PATH },
+    ],
+  });
+  const graph = schema["@graph"] as { "@type"?: string }[];
+  if (!graph.some((node) => node["@type"] === "WebPage")) throw new Error("The wire schema should be a WebPage.");
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl(WIRE_PATH))) throw new Error("The sitemap should include /wire.");
+
+  const catalog = feedCatalog().flatMap((group) => group.feeds.map((feed) => feed.path));
+  for (const path of [WIRE_FEED_PATH, WIRE_JSON_PATH, WIRE_KIDS_FEED_PATH, WIRE_KIDS_JSON_PATH, "/wire/colorado/feed.xml"]) {
+    if (!catalog.includes(path)) throw new Error(`The feeds page should list ${path}.`);
+  }
+
+  const read = (file: string) => fs.readFileSync(path.join(process.cwd(), file), "utf8");
+  if (!read("components/footer.tsx").includes('href="/wire"')) throw new Error("The footer should link to /wire.");
+  if (!read("app/(site)/feeds/page.tsx").includes('href="/wire"')) throw new Error("The feeds page should link to /wire.");
+  if (!read("app/(site)/featured/page.tsx").includes('href="/wire"')) throw new Error("The partner kit should link to /wire.");
+  if (!read("app/(site)/sources/page.tsx").includes('href="/wire"')) throw new Error("The sources page should link to /wire.");
+  if (!read("app/(site)/terms/page.tsx").includes('href="/wire"')) throw new Error("The terms page should point publishers at /wire.");
+  if (!read("app/(site)/wire/page.tsx").includes("webPageJsonLd")) throw new Error("The wire page should emit WebPage schema.");
+  const indexNow = read("scripts/indexnow.ts");
+  if (!indexNow.includes('"/wire"') || !indexNow.includes('"/wire/feed.xml"') || !indexNow.includes('"/wire/feed.json"')) {
+    throw new Error("IndexNow should ping the wire page and its feeds.");
+  }
+  const config = read("next.config.ts");
+  if (!config.includes('"/wire/feed.xml"') || !config.includes('"/wire/feed.json"') || !config.includes('"/wire/:state/feed.xml"')) {
+    throw new Error("Wire feeds should use the feed cache header.");
+  }
 }
 
 function assertFeeds() {
@@ -4591,6 +4855,7 @@ async function main() {
   assertOutlets();
   assertFollowUps();
   assertFeeds();
+  assertWire();
   assertPartnerKit();
   assertThanksBoard();
   assertTableTalk();

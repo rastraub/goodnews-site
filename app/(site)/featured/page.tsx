@@ -52,6 +52,7 @@ export default function FeaturedPage() {
           <a href="#embed">Embed</a>
           <a href="#share">Share text</a>
           <a href="#widget">Widget</a>
+          <a href="#wire">Republish a summary</a>
           <a href="#contact">Contact</a>
         </nav>
 
@@ -122,6 +123,13 @@ export default function FeaturedPage() {
           <iframe className="widget-preview" src="/embed/latest" title={widgetTitle()} loading="lazy" />
           <CopyBlock value={iframeSnippet({ place: "latest", title: widgetTitle() })} label="Copy iframe" />
           <CopyBlock value={scriptSnippet({ place: "latest", title: widgetTitle() })} label="Copy script" />
+        </section>
+
+        <section id="wire">
+          <h2>Republish a summary</h2>
+          <p>
+            The badge is for a newsroom or a group named in a story. The <Link href="/wire">Good News Wire</Link> is for a school newsletter, a library, a church, an HOA, or another publisher that wants to run the summaries. It is free. The credit line links back to the story and to the original newsroom. Photos are not included.
+          </p>
         </section>
 
         <section id="contact">

@@ -730,3 +730,9 @@ Each class has `group`, `city`, `region`, and `act`. Publish the group name, the
 ```
 
 The signup and the weekly note both use `/submit`. `type=kindness-ambassadors` is the class signup. `type=kindness-ambassadors-report` is the note about what the class did. Both are emailed to the same mailbox as every other tip.
+
+## Good News Wire
+
+`/wire` republishes the headline, deck, and summary you write in the story file. It does not republish the source article or the photo. A story with `kidFriendly: true` is also in `/wire/kids/feed.xml`, using `kidSummary` rather than the adult body. State feeds live at `/wire/{state-slug}/feed.xml`.
+
+A follow-up in `updates`, and a `correction`, is appended to the wire item so a publisher does not keep a stale summary. The photo is included only when `imageCredit` or `imageLicense` names the publication or its owner. Otherwise leave the picture off the wire. The credit line is generated. Do not add a person's name to it.
