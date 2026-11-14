@@ -31,6 +31,14 @@ import { loadSpanishEditions } from "@/lib/spanish-editions";
 import { mountainDay, weeksToPrerender } from "@/lib/weeks";
 import { listWebStories } from "@/lib/web-stories";
 import { newsBreakBanner } from "@/site.config";
+import {
+  getYearInReview,
+  YEAR_IN_REVIEW_EDITIONS,
+  YEAR_IN_REVIEW_INDEX_PATH,
+  yearInReviewIndexable,
+  yearInReviewIndexPublic,
+  yearInReviewPath,
+} from "@/lib/year-in-review";
 
 const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
@@ -120,6 +128,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const spanishEditions = loadSpanishEditions();
   const newestSpanish = spanishEditions[spanishEditions.length - 1];
   const newestFollowUp = followUpEntries(stories)[0]?.update.date;
+  const yearReviews = YEAR_IN_REVIEW_EDITIONS.filter((edition) => yearInReviewIndexable(edition.year)).map((edition) =>
+    getYearInReview(edition.year),
+  );
 
   return [
     ...STATIC_PAGES.map((page) => ({
@@ -158,6 +169,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     },
+    ...(yearInReviewIndexPublic()
+      ? [
+          {
+            url: absoluteUrl(YEAR_IN_REVIEW_INDEX_PATH),
+            lastModified: yearReviews.reduce<string | undefined>((latest, review) => {
+              if (!review.latest) return latest;
+              return !latest || review.latest > latest ? review.latest : latest;
+            }, siteLatest),
+            changeFrequency: "yearly" as const,
+            priority: 0.5,
+          },
+        ]
+      : []),
+    ...yearReviews.map((review) => ({
+      url: absoluteUrl(yearInReviewPath(review.year)),
+      lastModified: review.latest ?? siteLatest,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
     {
       url: absoluteUrl("/world"),
       ...(worldLatest ? { lastModified: worldLatest } : {}),

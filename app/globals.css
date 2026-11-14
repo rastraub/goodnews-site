@@ -1159,3 +1159,20 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .tt-url{display:block;word-break:break-all}
   .tt-foot a{color:#000}
 }
+.yir-numbers{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:8px 0 18px}
+.yir-numbers div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.yir-numbers dt{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);font-weight:700}
+.yir-numbers dd{font-family:var(--font-serif);font-size:32px;font-weight:600;margin:4px 0 0;letter-spacing:-.02em}
+.yir-note{background:#fff;border:1px dashed #E4D8C4;border-radius:16px;padding:14px 16px;color:var(--ink2);max-width:68ch}
+.yir-class-story{margin-top:22px;padding-top:8px;border-top:1px solid var(--line)}
+.yir-class-story h3{font-family:var(--font-serif);font-size:28px;font-weight:600;letter-spacing:-.02em;margin:8px 0}
+.yir-print .print-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+#numbers,#months,#states,#world,#classroom,#responders,#animals,#share{scroll-margin-top:24px}
+@media print {
+  .yir-screen{display:none !important}
+  .yir-print{display:block !important}
+  .yir-numbers div{break-inside:avoid;border-color:#000;border-radius:0}
+  .yir-numbers dd{color:#000}
+  .yir-class-story{break-inside:avoid;page-break-inside:avoid}
+  .yir-class-story h3,.yir-print h2{color:#000}
+}
