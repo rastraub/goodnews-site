@@ -21,8 +21,8 @@ export function faviconPath(size: (typeof FAVICON_SIZES)[number]) {
   return `/brand/favicon-${size}.png` as const;
 }
 
-const INK = "#1C2733";
-const CREAM = "#FFFBF4";
+const INK = siteConfig.theme.ink;
+const CREAM = siteConfig.theme.background;
 const PAPER = "#FFF1D2";
 const GOLD = "#F3B23C";
 
