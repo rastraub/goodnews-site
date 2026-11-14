@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
 import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
+import { KUDOS_PATH } from "@/lib/kudos";
 import { editionYear } from "@/lib/format";
 import { ON_THIS_DAY_TODAY_PATH } from "@/lib/on-this-day";
 import { latestQuiz } from "@/lib/quiz";
@@ -56,6 +57,7 @@ export function Footer() {
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href="/kindness-challenge">Kindness Challenge</Link></li>
+              <li><Link href={KUDOS_PATH}>Good News Kudos</Link></li>
               <li><Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link></li>
               <li><Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link></li>
               <li><Link href="/morning-announcements">Morning announcements</Link></li>

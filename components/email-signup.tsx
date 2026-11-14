@@ -2,18 +2,31 @@
 
 import { useState } from "react";
 import type { EmailInterest } from "@/lib/email";
+import { getStateByCode, STATES } from "@/lib/states";
 import { siteConfig } from "@/site.config";
+
+function startingState(value?: string): string {
+  if (!value) return "";
+  const code = value.trim().toUpperCase();
+  if (code === "OUT") return "OUT";
+  if (getStateByCode(code)) return code;
+  return "";
+}
 
 export function EmailSignup({
   interest = "daily",
   id = "daily-email",
   variant = "band",
+  defaultState,
 }: {
   interest?: EmailInterest;
   id?: string;
   variant?: "band" | "inline";
+  /** USPS code to preselect. Blank leaves the field empty. */
+  defaultState?: string;
 }) {
   const [email, setEmail] = useState("");
+  const [state, setState] = useState(() => startingState(defaultState));
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [company, setCompany] = useState("");
@@ -26,7 +39,7 @@ export function EmailSignup({
       const response = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, interest, company }),
+        body: JSON.stringify({ email, interest, company, ...(state ? { state } : {}) }),
       });
       const data = (await response.json()) as { ok?: boolean; error?: string };
       if (!response.ok || !data.ok) {
@@ -49,42 +62,78 @@ export function EmailSignup({
     }
   }
 
+  const submitLabel =
+    status === "loading"
+      ? "Sending…"
+      : interest === "membership"
+        ? "Join the waitlist"
+        : interest === "teachers"
+          ? "Join the teacher list"
+          : "Get the Top 5";
+
+  const stateField = (
+    <label className="state-pref">
+      <span>Your state (optional)</span>
+      <select name="state" value={state} onChange={(event) => setState(event.target.value)}>
+        <option value="">Your state (optional)</option>
+        {STATES.map((item) => (
+          <option key={item.code} value={item.code}>
+            {item.name}
+          </option>
+        ))}
+        <option value="OUT">Outside the US</option>
+      </select>
+    </label>
+  );
+
+  const emailField = (
+    <label className={variant === "band" ? "in" : "field"}>
+      {variant === "band" ? (
+        <svg className="ico" aria-hidden="true">
+          <use href="#i-mail" />
+        </svg>
+      ) : (
+        <span>Email address</span>
+      )}
+      <input
+        type="email"
+        required
+        name="email"
+        autoComplete="email"
+        placeholder="Your email address"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        aria-label="Email address"
+      />
+    </label>
+  );
+
+  const submitButton = (
+    <button className="btn btn-ink" type="submit" disabled={status === "loading"}>
+      {submitLabel}
+    </button>
+  );
+
   const form = (
-    <form className={variant === "band" ? "form" : "stack-form"} onSubmit={onSubmit}>
+    <form className={variant === "band" ? undefined : "stack-form"} onSubmit={onSubmit}>
       <div className="hp" aria-hidden="true">
         <label>
           Company
           <input tabIndex={-1} autoComplete="off" value={company} onChange={(event) => setCompany(event.target.value)} />
         </label>
       </div>
-      <label className={variant === "band" ? "in" : "field"}>
-        {variant === "band" ? (
-          <svg className="ico" aria-hidden="true">
-            <use href="#i-mail" />
-          </svg>
-        ) : (
-          <span>Email address</span>
-        )}
-        <input
-          type="email"
-          required
-          name="email"
-          autoComplete="email"
-          placeholder="Your email address"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          aria-label="Email address"
-        />
-      </label>
-      <button className="btn btn-ink" type="submit" disabled={status === "loading"}>
-        {status === "loading"
-          ? "Sending…"
-          : interest === "membership"
-            ? "Join the waitlist"
-            : interest === "teachers"
-              ? "Join the teacher list"
-              : "Get the Top 5"}
-      </button>
+      {variant === "band" ? (
+        <div className="form">
+          {emailField}
+          {submitButton}
+        </div>
+      ) : (
+        <>
+          {emailField}
+          {submitButton}
+        </>
+      )}
+      {stateField}
     </form>
   );
 

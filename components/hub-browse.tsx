@@ -9,6 +9,7 @@ import { helpMentions } from "@/lib/cities";
 import { explainerPath, explainersForTag } from "@/lib/explainers";
 import { HELP_KIND_LABEL } from "@/lib/help";
 import { getHubByPath, getHubIndex, storiesForHub, type Hub } from "@/lib/hubs";
+import { getStateBySlug } from "@/lib/states";
 import { pageCount, pagePath, pageSlice } from "@/lib/paging";
 import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
 import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
@@ -99,6 +100,7 @@ export function HubBrowse({ path, page }: { path: string; page: number }) {
   const links = cityPage ? [] : relatedLinks(hub);
   const topicExplainers = hub.kind === "topic" ? explainersForTag(hub.params.slug) : [];
   const current = pagePath(hub.path, page);
+  const stateCode = hub.stateSlug ? getStateBySlug(hub.stateSlug)?.code : undefined;
 
   return (
     <>
@@ -215,7 +217,7 @@ export function HubBrowse({ path, page }: { path: string; page: number }) {
           </div>
         ) : null}
       </div>
-      {cityPage && page === 1 ? <EmailSignup /> : null}
+      {cityPage && page === 1 ? <EmailSignup defaultState={stateCode} /> : null}
     </>
   );
 }

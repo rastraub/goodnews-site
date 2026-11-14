@@ -60,7 +60,21 @@ import {
 } from "../lib/good-neighbor";
 import { loadGoodNeighborOverrides } from "../lib/good-neighbor-data";
 import { castFileVote, countsFromRedis, requestIpHash, voteMode } from "../lib/good-neighbor-store";
-import { parseEmailInterest } from "../lib/email";
+import { beehiivPayload, buttondownPayload, parseEmailInterest, parseStatePreference } from "../lib/email";
+import { kudosCardText, kudosMailto, kudosSms } from "../lib/kudos-card-text";
+import {
+  KUDOS_CLASSROOM_NOTE,
+  KUDOS_FALLBACK_HONOREE,
+  KUDOS_PATH,
+  filterKudos,
+  honoreeForStory,
+  kudosBlockReason,
+  kudosExcludeErrors,
+  kudosPath,
+  loadKudosExclude,
+  parseKudosExclude,
+} from "../lib/kudos";
+import { DIGEST_MIN_STORIES, buildStateDigest, parseDigestArgs } from "../lib/state-digest";
 import { loadEnrichment, mergeStoryFields } from "../lib/enrichment";
 import { SMARTNEWS_DESCRIPTION, feedCatalog, renderRss, renderSmartNews, storyHtml } from "../lib/feed";
 import { currentHelp, followUpEntries, FOLLOW_UPS_PATH, renderFollowUpsRss, storyContentDate } from "../lib/follow-ups";
@@ -1148,7 +1162,7 @@ function assertOnlyMailbox() {
     throw new Error(`contactEmail must be the only mailbox, ${expected}.`);
   }
   const pattern = new RegExp(`[A-Za-z0-9._%+-]+@${siteConfig.domain.replaceAll(".", "\\.")}`, "gi");
-  const skip = new Set(["node_modules", ".next", ".git", "public", "assets", "data"]);
+  const skip = new Set(["node_modules", ".next", ".git", "public", "assets", "data", "output"]);
   const hits: string[] = [];
 
   function walk(dir: string) {
@@ -1186,7 +1200,7 @@ function assertBrandLivesInOneFile() {
   ].filter((value, index, all) => value && all.indexOf(value) === index);
 
   const allow = new Set(["site.config.ts", "README.md"]);
-  const skip = new Set(["node_modules", ".next", ".git", "public", "assets", "data"]);
+  const skip = new Set(["node_modules", ".next", ".git", "public", "assets", "data", "output"]);
   const hits: string[] = [];
 
   function walk(dir: string) {
@@ -4563,6 +4577,222 @@ function assertTableTalk() {
   );
 }
 
+function assertKudosAndStateDigest() {
+  const published = getPublishedStories();
+  const rescue = published.find((story) => story.slug === "bend-broken-top-rescue");
+  const teachers = published.find((story) => story.slug === "aston-teacher-thanks");
+  if (!rescue || !teachers) throw new Error("Expected the rescue and teacher stories used for kudos.");
+  if (kudosBlockReason(rescue, [])) throw new Error(`A night rescue should stay eligible (${kudosBlockReason(rescue, [])}).`);
+  if (!honoreeForStory(rescue).includes("search-and-rescue")) {
+    throw new Error(`The rescue honoree should be the crew in the headline, got ${honoreeForStory(rescue)}.`);
+  }
+  if (honoreeForStory(rescue).includes("Jason")) throw new Error("A name in the body should not become the honoree.");
+  if (!honoreeForStory(teachers).includes("teacher")) throw new Error("The teacher story should honor the teachers.");
+  const named = {
+    ...rescue,
+    title: "Deschutes County Search and Rescue climbed all night",
+    dek: "Deschutes County Search and Rescue reached the climber after 2 a.m.",
+    howToHelp: [{ label: "Deschutes County Search and Rescue", url: "https://example.com/rescue", kind: "learn" as const }],
+  };
+  if (honoreeForStory(named) !== "Deschutes County Search and Rescue") {
+    throw new Error("A group named in the headline should be the honoree.");
+  }
+  if (
+    honoreeForStory({
+      title: "A town gathered on a Saturday morning",
+      dek: "People showed up with rakes and bags.",
+      tags: [],
+      howToHelp: [],
+    }) !== KUDOS_FALLBACK_HONOREE
+  ) {
+    throw new Error("A story with no named helper should use the generic role.");
+  }
+  const safe = {
+    ...rescue,
+    title: "Firefighters saved a family and nobody was killed",
+    dek: "The crew pulled them out and nobody was killed.",
+    body: "The rescue ended before sunrise.",
+  };
+  if (kudosBlockReason(safe, [])) throw new Error("A rescue where nobody was killed should stay eligible.");
+  const blocked: [string, Story][] = [
+    ["shooting", { ...rescue, title: "Officers shot a suspect after a pursuit", dek: "Police shot and killed a suspect.", body: "The department described the use of force." }],
+    ["politics", { ...rescue, title: "A political rally for a candidate", dek: "The election night party filled a lot.", body: "Partisan signs lined the sidewalk." }],
+    ["death", { ...rescue, title: "The town mourned after a neighbor died", dek: "A funeral is planned for Friday.", body: "Friends gathered to remember him." }],
+    ["crime victim", { ...rescue, title: "Neighbors helped a crime victim rebuild", dek: "The crew replaced a door.", body: "The crime victim is safe now." }],
+  ];
+  for (const [label, story] of blocked) {
+    if (!kudosBlockReason(story, [])) throw new Error(`A ${label} story should not get a kudos card.`);
+  }
+  if (kudosBlockReason(rescue, [rescue.slug]) !== "editor-exclude") throw new Error("An editor exclude should remove a rescue.");
+  if (kudosBlockReason({ ...rescue, draft: true }, []) !== "draft") throw new Error("A draft should not get a card.");
+  parseKudosExclude({ exclude: [] });
+  for (const value of [{ exclude: ["Not A Slug"] }, { exclude: ["dup", "dup"] }, { exclude: [], extra: true }]) {
+    let failed = false;
+    try {
+      parseKudosExclude(value);
+    } catch {
+      failed = true;
+    }
+    if (!failed) throw new Error(`Kudos exclude config should reject ${JSON.stringify(value)}.`);
+  }
+  if (!kudosExcludeErrors([{ slug: "real" }], { exclude: ["missing-slug"] }).length) {
+    throw new Error("An exclude slug that is not published should fail.");
+  }
+  const liveExclude = loadKudosExclude();
+  const liveErrors = kudosExcludeErrors(published, liveExclude);
+  if (liveErrors.length) throw new Error(`Kudos exclude list:\n- ${liveErrors.join("\n- ")}`);
+  const eligible = filterKudos(published, liveExclude.exclude);
+  if (!eligible.some((story) => story.slug === rescue.slug)) throw new Error("The rescue should be on the kudos list.");
+  if (eligible.some((story) => liveExclude.exclude.includes(story.slug))) throw new Error("An excluded slug is still eligible.");
+
+  const card = kudosCardText({
+    headline: rescue.title,
+    honoree: honoreeForStory(rescue),
+    message: "Thank you.",
+    storyUrl: absoluteUrl(`/story/${rescue.slug}`),
+    siteName: "Example",
+  });
+  if (!card.includes("From:") || !card.includes("Shared via Example") || !card.startsWith("Good news kudos")) {
+    throw new Error("The card text should include the honoree line, a blank From line, and the publication credit.");
+  }
+  const mail = kudosMailto(card, rescue.title);
+  if (!mail.startsWith("mailto:?subject=") || /mailto:[^?]/.test(mail)) {
+    throw new Error("Email share should open the reader's app with no recipient.");
+  }
+  if (!kudosSms(card).startsWith("sms:?&body=")) throw new Error("Text share should open the reader's app with no recipient.");
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl(KUDOS_PATH))) throw new Error("The sitemap should include the kudos hub.");
+  if (urls.includes(absoluteUrl(kudosPath(rescue.slug)))) throw new Error("A thin kudos card should stay out of the sitemap.");
+  const linked = [
+    "components/footer.tsx",
+    "components/kindness-links.tsx",
+    "app/(site)/classroom/page.tsx",
+    "app/(site)/classroom/week/[start]/page.tsx",
+    "app/(site)/kindness-challenge/page.tsx",
+    "app/(site)/kindness-challenge/[start]/page.tsx",
+    "scripts/indexnow.ts",
+  ];
+  for (const file of linked) {
+    const text = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!text.includes("KUDOS_PATH")) throw new Error(`${file} should link the kudos hub.`);
+  }
+  const storyPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/story/[slug]/page.tsx"), "utf8");
+  if (!storyPage.includes("Send a kudos card") || !storyPage.includes("kudosEligible")) {
+    throw new Error("Eligible story pages should link to a kudos card.");
+  }
+  const cardPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/kudos/[slug]/page.tsx"), "utf8");
+  if (!cardPage.includes("index: false") || !cardPage.includes("siteConfig.editor.name")) {
+    throw new Error("Kudos card pages should be noindex and use the editorial byline.");
+  }
+  if (cardPage.includes("Jane ") || cardPage.includes("By John")) throw new Error("A kudos page should not use a personal name.");
+  const hubPage = fs.readFileSync(path.join(process.cwd(), "app/(site)/kudos/page.tsx"), "utf8");
+  if (!hubPage.includes("KUDOS_CLASSROOM_NOTE") || !hubPage.includes("siteConfig.editor.name") || !hubPage.includes("EmailSignup")) {
+    throw new Error("The kudos hub should include the classroom note, the masthead, and the newsletter form.");
+  }
+  if (KUDOS_CLASSROOM_NOTE.length < 80) throw new Error("The classroom note should tell students how to make a card.");
+  const cardUi = fs.readFileSync(path.join(process.cwd(), "components/kudos-card.tsx"), "utf8");
+  if (/\bfetch\s*\(/.test(cardUi) || cardUi.includes('from "fs"') || cardUi.includes('from "@/lib/kudos"')) {
+    throw new Error("The kudos card should stay in the browser and not import the server module.");
+  }
+  for (const needle of ["window.print", "toBlob", "navigator.share", "kudosMailto", "kudosSms"]) {
+    if (!cardUi.includes(needle)) throw new Error(`The kudos card should include ${needle}.`);
+  }
+
+  const plain = buttondownPayload("reader@example.com", "daily");
+  if (plain.metadata || plain.tags.length !== 1 || plain.tags[0] !== "daily") {
+    throw new Error("A signup with no state should send only the interest tag.");
+  }
+  const colorado = buttondownPayload("reader@example.com", "daily", "CO");
+  if (colorado.tags.length !== 1 || colorado.tags[0] !== "daily" || colorado.metadata?.state !== "state-co") {
+    throw new Error("A state preference should be Buttondown metadata state-co, beside the existing tag.");
+  }
+  if (buttondownPayload("reader@example.com", "membership", "DC").metadata?.state !== "state-dc") {
+    throw new Error("DC should be metadata state-dc.");
+  }
+  if (buttondownPayload("reader@example.com", "teachers", "OUT").metadata?.state !== "state-outside-us") {
+    throw new Error("Outside the US should be metadata state-outside-us.");
+  }
+  if (buttondownPayload("reader@example.com", "daily", "ZZ").metadata) {
+    throw new Error("An unknown state should be dropped.");
+  }
+  if (parseStatePreference("co") !== "CO" || parseStatePreference("") !== undefined || parseStatePreference("nope") !== undefined) {
+    throw new Error("State parsing should accept a USPS code and ignore a blank or unknown value.");
+  }
+  const beehiivPlain = beehiivPayload("reader@example.com", "daily");
+  if (beehiivPlain.custom_fields.length !== 1 || beehiivPlain.custom_fields[0]?.value !== "daily") {
+    throw new Error("Beehiiv without a state should keep the single interest field.");
+  }
+  const beehiivState = beehiivPayload("reader@example.com", "daily", "co");
+  if (beehiivState.custom_fields[1]?.value !== "state-co") throw new Error("Beehiiv should add the state only when chosen.");
+  const emailSource = fs.readFileSync(path.join(process.cwd(), "lib/email.ts"), "utf8");
+  if (emailSource.includes("/v1/emails") || emailSource.includes("subscribers/{")) {
+    throw new Error("Newsletter signup must not create or send an email.");
+  }
+  const signup = fs.readFileSync(path.join(process.cwd(), "components/email-signup.tsx"), "utf8");
+  if (!signup.includes("Your state (optional)") || !signup.includes("Outside the US") || !signup.includes("...(state ? { state } : {})")) {
+    throw new Error("The newsletter form should add an optional state and omit it when blank.");
+  }
+  const statePage = fs.readFileSync(path.join(process.cwd(), "app/(site)/state/[slug]/browse.tsx"), "utf8");
+  if (!statePage.includes("defaultState={state.code}")) throw new Error("A state page should preselect that state.");
+
+  const week = "2026-10-21";
+  const sample = (partial: Partial<Story> & Pick<Story, "slug" | "title" | "date" | "state">): Story => ({
+    ...rescue,
+    country: "US",
+    draft: false,
+    alsoStates: [],
+    ...partial,
+  });
+  const weekStories = [
+    sample({ slug: "co-one", title: "Neighbors in Denver opened a pantry", date: "2026-10-19", state: "CO" }),
+    sample({ slug: "co-two", title: "Teachers in Boulder planted a garden", date: "2026-10-21", state: "CO" }),
+    sample({ slug: "wy-shared", title: "A Wyoming crew crossed the state line", date: "2026-10-20", state: "WY", alsoStates: ["CO"] }),
+    sample({ slug: "co-old", title: "An older Colorado story", date: "2026-10-12", state: "CO" }),
+    sample({ slug: "co-draft", title: "A draft that should stay out", date: "2026-10-22", state: "CO", draft: true }),
+    sample({ slug: "gb-story", title: "A story from another country", date: "2026-10-22", state: "CO", country: "GB" }),
+  ];
+  const digest = buildStateDigest(weekStories, "co", week);
+  if (digest.start !== "2026-10-19" || digest.end !== "2026-10-25") throw new Error("The digest week should be Monday through Sunday.");
+  if (digest.stories.length !== 3) throw new Error(`Colorado should have 3 stories that week, got ${digest.stories.length}.`);
+  if (!digest.markdown.includes("Good news from Colorado") || !digest.markdown.includes("was not sent")) {
+    throw new Error("The digest should name the state and say it was not sent.");
+  }
+  if (!digest.markdown.includes(absoluteUrl("/story/co-one"))) throw new Error("The digest should link back to the story.");
+  if (digest.html.includes("<script>") || !digest.html.includes("&lt;")) {
+    const tricky = buildStateDigest(
+      [sample({ slug: "co-mark", title: "Neighbors <script> fixed a roof", date: "2026-10-19", state: "CO" })],
+      "CO",
+      week,
+    );
+    if (tricky.html.includes("<script>") || !tricky.html.includes("&lt;script&gt;")) {
+      throw new Error("Digest HTML should escape story titles.");
+    }
+  }
+  const coloradoRow = digest.coverage.find((row) => row.code === "CO");
+  const wyomingRow = digest.coverage.find((row) => row.code === "WY");
+  if (!coloradoRow || coloradoRow.count !== 3 || coloradoRow.enough !== (coloradoRow.count >= DIGEST_MIN_STORIES)) {
+    throw new Error("Colorado should be marked as having enough stories.");
+  }
+  if (!wyomingRow || wyomingRow.count !== 1 || wyomingRow.enough) throw new Error("Wyoming should be listed and not enough.");
+  if (digest.coverage.length !== 51) throw new Error("Coverage should include the 50 states and DC.");
+  if (!parseDigestArgs(["--state", "co", "--week", week]).ok) throw new Error("The digest command should accept a lowercase state.");
+  if (parseDigestArgs(["--state", "ZZ", "--week", week]).ok) throw new Error("An unknown state code should fail.");
+  if (parseDigestArgs(["--state", "CO", "--week", "2026-02-31"]).ok) throw new Error("A fake date should fail.");
+  if (parseDigestArgs(["--state", "CO", "--send"]).ok) throw new Error("The digest command should refuse a send flag.");
+  for (const file of ["scripts/state-digest.ts", "lib/state-digest.ts"]) {
+    const text = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (/\bfetch\s*\(|buttondown|nodemailer|\/v1\/emails/i.test(text)) {
+      throw new Error(`${file} should only build files for a person to review.`);
+    }
+  }
+  const docs = fs.readFileSync(path.join(process.cwd(), "docs/kudos-and-state-newsletters.md"), "utf8");
+  for (const needle of ["data/kudos-exclude.json", "newsletter:state-digest", "state-co", "/kudos", "index: false"]) {
+    if (!docs.includes(needle)) throw new Error(`The docs should mention ${needle}.`);
+  }
+  console.log(`Kudos: ${eligible.length} eligible stories. State digest sample week has ${digest.stories.length} Colorado stories.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4603,6 +4833,7 @@ async function main() {
   assertSpanishEditions();
   assertNewsBreak();
   assertGoodNewsCalendar();
+  assertKudosAndStateDigest();
   await assertGoodNeighbor();
   const published = stories.filter((story) => !story.draft);
   const images = feedImageReport(published.map((story) => story.image));

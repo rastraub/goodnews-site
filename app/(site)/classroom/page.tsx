@@ -13,6 +13,7 @@ import { openGraphImage } from "@/lib/feed-image";
 import { classroomJsonLd, listingMeta } from "@/lib/seo";
 import { formatLongDate, launchWeekStart } from "@/lib/weeks";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { KUDOS_PATH } from "@/lib/kudos";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -70,6 +71,7 @@ export default function ClassroomIndexPage() {
         <p className="link-pills">
           <Link href="/kids">Classroom stories</Link>
           <Link href="/kids/print">Story of the day</Link>
+          <Link href={KUDOS_PATH}>Good News Kudos cards</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <a href="#teachers">Teacher email</a>
         </p>
