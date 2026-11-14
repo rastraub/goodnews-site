@@ -730,3 +730,39 @@ Each class has `group`, `city`, `region`, and `act`. Publish the group name, the
 ```
 
 The signup and the weekly note both use `/submit`. `type=kindness-ambassadors` is the class signup. `type=kindness-ambassadors-report` is the note about what the class did. Both are emailed to the same mailbox as every other tip.
+
+## Faith community bulletins
+
+`/faith` is a weekly pack for people who edit a congregation newsletter, and for small-group and youth leaders. The tone stays non-sectarian. Do not add scripture, theology, or an endorsement of any tradition. The pages do not mention politics, crime, violence, disasters, or an illness with a bad outcome.
+
+Weeks use the same Monday start as `/week`. A week gets a page at `/faith/{YYYY-MM-DD}` only when at least three stories pass the filter. The pack stops at five. Stories that fail the filter are not used to fill a short week.
+
+A story is eligible when all of these are true:
+
+- It is published and marked `kidFriendly`, with a read-aloud summary. That is the same gentle mark the classroom pages use.
+- It also passes the morning-announcement block on crime, violence, politics, injury, and disasters.
+- Its category is Community or Animals, or, in another category, it carries a core kindness, service, volunteer, neighbor, or animal tag from `lib/tags.ts`. A students tag or a farming tag is not enough on its own.
+- It does not carry a denied tag (medical research, cancer support, public health, or a first-responder role) and its title, deck, and summary do not match the extra faith block in `lib/faith.ts` (scripture, worship, prayer, disaster, fire, or a bad medical outcome).
+
+The weekly page builds four things from those stories. Do not hand-write them.
+
+- A plain-text block and a simple HTML block, each with copy buttons. Every line credits the publication and the original newsroom, with links. The wording follows the terms page: summaries are ours, and the reporting belongs to the newsroom.
+- A half-page insert for print.
+- One service idea tied to a real how-to-help link. Volunteer, thank-you, and learn links come before a donate link. A donate link is not used as the ask. The line never asks for money for this publication.
+- Two or three discussion prompts with no religious content. The first prompt stays "Who is a quiet helper in our community?"
+
+The index shows a gratitude note from Thanksgiving through December 31, linking 50 States of Thanks (`/50-states-of-thanks`) and Giving Tuesday. There is no `/thanks` path and no `/advent` path in this repo, so the note does not link those. Do not add a homepage banner for this pack.
+
+`/faith/rss.xml` lists finished weeks only, the same way `/week/rss.xml` leaves the open week out. The footer, the feeds page, the kids page, Good News Friday, morning announcements, and the "More free kits" list on the featured and widget pages link here.
+
+## Gift the good news
+
+`/gift` lets a reader give the free daily Top 5 to someone else. The buttons open the reader's own email app (`mailto:`) or text app (`sms:`), or copy the note. The recipient line is empty on purpose. The reader types the address in their own app. This site does not send the message, does not collect the friend's address, and does not add a paid service.
+
+The note links to the existing signup page, `/subscribe`. Public pages do not use tracking parameters, so the gift link does not add one either. Do not append `utm_` or `ref`.
+
+The printable card is one page, folded in half. The signup URL is printed as text. A QR code for that same URL is drawn at build time by `lib/qr.ts`. There is no QR package.
+
+From November 20 through December 31 the page adds a holiday line. That line is only on `/gift`. Do not add a homepage banner.
+
+The daily signup form, including the thank-you state, links to `/gift` with "Gift it to someone." The teacher list does not. The footer links here too. The byline stays the public masthead from `site.config.ts`.

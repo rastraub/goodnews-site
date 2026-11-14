@@ -1,17 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { EmailInterest } from "@/lib/email";
+import { GIFT_PATH } from "@/lib/gift-path";
 import { siteConfig } from "@/site.config";
 
 export function EmailSignup({
   interest = "daily",
   id = "daily-email",
   variant = "band",
+  showGiftLink = true,
 }: {
   interest?: EmailInterest;
   id?: string;
   variant?: "band" | "inline";
+  showGiftLink?: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -48,6 +52,12 @@ export function EmailSignup({
       setMessage("Something went wrong. Please try again.");
     }
   }
+
+  const giftLink = showGiftLink && interest === "daily" ? (
+    <p className="gift-signup-link">
+      <Link href={GIFT_PATH}>Gift it to someone</Link>
+    </p>
+  ) : null;
 
   const form = (
     <form className={variant === "band" ? "form" : "stack-form"} onSubmit={onSubmit}>
@@ -96,6 +106,7 @@ export function EmailSignup({
         ) : (
           form
         )}
+        {giftLink}
         {status === "error" ? <p className="error" role="alert">{message}</p> : null}
       </div>
     );
@@ -139,6 +150,7 @@ export function EmailSignup({
             ) : (
               form
             )}
+            {giftLink}
             {status === "error" ? <p className="error" role="alert">{message}</p> : null}
             <div className="fine">
               <span>
