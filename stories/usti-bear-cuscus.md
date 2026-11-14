@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.zoousti.cz/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Ústecký deník reported on November 13, 2026, that a bear cuscus was born at a zoo in Ústí nad Labem, in Czechia. Keepers first noticed small movements in the mother's pouch in the middle of October. Later they saw the baby while she cleaned the pouch. Bear cuscuses are marsupials, so the baby is born very small and finishes growing in that pouch. This is only the second one born in a European zoo in the past year. The zoo has the only female of this kind in Europe. The baby's sex is not known yet. Wild bear cuscuses live in forests on the island of Sulawesi."
 kidQuestions:
