@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ADVENT_PATH } from "@/lib/advent";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { KINDNESS_INDEX_PATH, thisWeeksChallenge } from "@/lib/kindness";
 
@@ -17,6 +18,7 @@ export function KindnessLinks() {
       <p className="link-pills">
         {current ? <Link href={current.path}>This week&apos;s challenge</Link> : null}
         <Link href={KINDNESS_INDEX_PATH}>All challenges</Link>
+        <Link href={ADVENT_PATH}>Advent of Good News</Link>
         <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
       </p>
     </div>

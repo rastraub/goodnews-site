@@ -13,6 +13,7 @@ import { pageCount, pageSlice } from "@/lib/paging";
 import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { ADVENT_PATH } from "@/lib/advent";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
@@ -81,6 +82,7 @@ export function KidsBrowse({ page }: { page: number }) {
           ) : null}
           <Link href="/on-this-day/today">Good news on this day</Link>
           <Link href={CALENDAR_PATH}>Good News Calendar</Link>
+          <Link href={ADVENT_PATH}>Advent of Good News</Link>
           <Link href="/morning-announcements">Morning announcements</Link>
           <a href="#teachers">Teacher email</a>
         </p>

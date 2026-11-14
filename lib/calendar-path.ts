@@ -17,6 +17,7 @@ export const CALENDAR_HUBS = {
   "world-kindness": { path: "/world-kindness-day", label: "World Kindness Day stories" },
   responders: { path: "/first-responders-day", label: "First Responders Day stories" },
   neighbor: { path: "/good-neighbor", label: "Good Neighbor vote" },
+  advent: { path: "/advent/2026", label: "Advent of Good News" },
 } as const;
 
 export type CalendarHubId = keyof typeof CALENDAR_HUBS;
