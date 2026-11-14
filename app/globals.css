@@ -667,7 +667,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .page-hero .listen-bar{margin-top:16px}
 .classroom-box .listen-bar{margin:2px 0 14px}
 .is-speaking{scroll-margin:24px}
-.story-main h1.is-speaking,.dek.is-speaking,.prose p.is-speaking,.read-aloud.is-speaking,#speak-kid.is-speaking{background:#FFF1D2;border-radius:10px}
+.story-main h1.is-speaking,.dek.is-speaking,.prose p.is-speaking,.read-aloud.is-speaking,.announce-script p.is-speaking,#speak-kid.is-speaking{background:#FFF1D2;border-radius:10px}
 .card.is-speaking{outline:3px solid var(--gold);outline-offset:3px}
 @media (max-width:700px){
   .listen-play{flex:1 1 180px;justify-content:center}

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CopyLink } from "@/components/copy-link";
+import { BRIEFING_PATH } from "@/lib/briefing";
 import { feedCatalog, feedlySubscribeUrl, inoreaderSubscribeUrl } from "@/lib/feed";
 import { absoluteUrl, pageAlternates } from "@/lib/seo";
 
@@ -17,7 +19,8 @@ export default function FeedsPage() {
         <p className="kicker">Subscribe</p>
         <h1>Feeds</h1>
         <p className="lede">
-          Copy a feed, or add it to Feedly or Inoreader. Each address stays the same when new stories publish.
+          Copy a feed, or add it to Feedly or Inoreader. Each address stays the same when new stories publish. The spoken daily briefing is on the{" "}
+          <Link href={BRIEFING_PATH}>briefing page</Link>.
         </p>
       </div>
       <div className="wrap feed-groups">

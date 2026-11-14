@@ -5,6 +5,7 @@ import { getCountry } from "../lib/countries";
 import { countryIsIndexable, hubPathsForStory } from "../lib/hubs";
 import { kidPlaceForStory } from "../lib/kids";
 import { explainerPaths } from "../lib/explainers";
+import { BRIEFING_PATH, loadBriefings } from "../lib/briefing";
 import { loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "../lib/morning-announcements";
 import { indexNowKey, indexNowKeyLocation } from "../lib/indexnow";
 import { getOutletForStory } from "../lib/outlets";
@@ -31,7 +32,7 @@ import { listWebStories } from "../lib/web-stories";
 import { newsBreakBanner, siteConfig } from "../site.config";
 import { GOOD_NEWS_MAP_PATH } from "../lib/map-path";
 
-const STATIC_PATHS = ["/", newsBreakBanner.path, "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/follow-ups", "/follow-ups/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", AMBASSADORS_PATH, AMBASSADOR_CERTIFICATE_PATH, MORNING_ANNOUNCEMENTS_PATH, "/topics", "/featured", "/widgets", "/good-news-index", GOOD_NEWS_MAP_PATH, THANKS_PATH, TABLE_TALK_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, WORLD_KINDNESS_PATH, FIRST_RESPONDERS_DAY_PATH, CALENDAR_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes", "/es", "/es/buenas-noticias", "/es/rss.xml"];
+const STATIC_PATHS = ["/", newsBreakBanner.path, "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/follow-ups", "/follow-ups/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", AMBASSADORS_PATH, AMBASSADOR_CERTIFICATE_PATH, MORNING_ANNOUNCEMENTS_PATH, BRIEFING_PATH, "/topics", "/featured", "/widgets", "/good-news-index", GOOD_NEWS_MAP_PATH, THANKS_PATH, TABLE_TALK_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, WORLD_KINDNESS_PATH, FIRST_RESPONDERS_DAY_PATH, CALENDAR_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes", "/es", "/es/buenas-noticias", "/es/rss.xml"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -54,6 +55,9 @@ async function main() {
   const recent = getPublishedStories().filter((story) => isWithinHours(story.date, 48));
   for (const edition of listWebStories()) {
     if (isWithinHours(edition.date, 48)) urls.add(`${siteConfig.url}${edition.path}`);
+  }
+  for (const briefing of loadBriefings()) {
+    if (isWithinHours(briefing.date, 48)) urls.add(`${siteConfig.url}${briefing.path}`);
   }
   for (const story of recent) {
     urls.add(`${siteConfig.url}/story/${story.slug}`);
