@@ -20,6 +20,7 @@ import { placeLabel } from "@/lib/present";
 import { listingMeta } from "@/lib/seo";
 import { addDays } from "@/lib/weeks";
 import { AMBASSADORS_PATH, ambassadorReportHref } from "@/lib/ambassador-tip";
+import { STARTERS_INDEX_PATH } from "@/lib/starter-path";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -81,6 +82,7 @@ export default async function KindnessChallengePage({ params }: Props) {
           {next ? <Link href={next.path}>Next week</Link> : null}
           <Link href="/kids">Classroom stories</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
+          <Link href={STARTERS_INDEX_PATH}>Good News Starters</Link>
         </p>
       </div>
       <div className="wrap kindness-layout">
