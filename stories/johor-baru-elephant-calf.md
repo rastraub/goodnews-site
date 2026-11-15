@@ -24,7 +24,6 @@ howToHelp:
     url: "https://www.mbjb.gov.my/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The Star reported on November 14, 2026, that Johor Zoo in Johor Bahru, Malaysia, has a female elephant calf. She was born on October 24 to elephants named Takau and Raja. Elephants are pregnant for about 22 months, close to two years. The zoo said this is the first elephant birth in its history. Johor Zoo opened in 1928, so it is nearly 100 years old and is called the oldest zoo in Malaysia. A state official said he hopes the calf grows up healthy. From January 1 to October 25 this year, the zoo counted 513,284 visitors. One birth does not change how many wild elephants there are."
 kidQuestions:
