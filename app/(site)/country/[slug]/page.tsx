@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import { CountryBrowse, countryPageMetadata } from "./browse";
 import { COUNTRIES } from "@/lib/countries";
+import { getByCountry } from "@/lib/stories";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+/**
+ * Countries with no stories still render on request. Prebuilding every empty
+ * hub was filling the deploy disk. dynamicParams stays on so those URLs work.
+ */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return COUNTRIES.map((country) => ({ slug: country.slug }));
+  return COUNTRIES.filter((country) => getByCountry(country.code).length > 0).map((country) => ({
+    slug: country.slug,
+  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

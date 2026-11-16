@@ -3,13 +3,20 @@ import { renderRss } from "@/lib/feed";
 import { getByCountry } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
 
-export const dynamic = "force-static";
-export const dynamicParams = false;
+/**
+ * Feeds for countries with no stories render on request instead of being
+ * written during the build. Known country slugs still resolve. This route
+ * is not force-static, so a country missing from generateStaticParams can
+ * still answer.
+ */
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
-  return COUNTRIES.map((country) => ({ slug: country.slug }));
+  return COUNTRIES.filter((country) => getByCountry(country.code).length > 0).map((country) => ({
+    slug: country.slug,
+  }));
 }
 
 export async function GET(_request: Request, { params }: Props) {
