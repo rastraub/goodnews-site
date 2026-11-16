@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
-    "next": "^16.4.0",
+    "next": "^16.4.6",
     "nodemailer": "^10.1.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -37,7 +37,7 @@
     "@types/react-dom": "^19.2.2",
     "amphtml-validator": "^1.0.38",
     "eslint": "^9.36.0",
-    "eslint-config-next": "^16.4.0",
+    "eslint-config-next": "^16.4.6",
     "sharp": "^0.34.4",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
