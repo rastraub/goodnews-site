@@ -24,7 +24,6 @@ howToHelp:
     url: "https://butterfly-conservation.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Mongabay reported on November 16, 2026, that thousands of yellow and white butterflies flew through Colombo, Sri Lanka, in the first week of November. People also saw them in other parts of the island. Lakshman Kumara, who keeps track of these flights, said this year's movement was bigger than usual. Most of the butterflies were lemon emigrants, with some albatross butterflies mixed in. Scientists think rain grew the plants the caterpillars eat. They are careful not to call it a finished map of a migration, because they still do not know every route. A big flight is not the same as knowing where every butterfly lands."
 kidQuestions:
