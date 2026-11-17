@@ -23,7 +23,6 @@ howToHelp:
   - label: "New York Police Department"
     url: "https://www.nyc.gov/site/nypd/index.page"
     kind: thank
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

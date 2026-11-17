@@ -24,7 +24,6 @@ howToHelp:
   - label: "Wake Forest Institute for Regenerative Medicine"
     url: "https://school.wakehealth.edu/research/institutes-and-centers/wake-forest-institute-for-regenerative-medicine"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

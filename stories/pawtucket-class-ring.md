@@ -26,7 +26,6 @@ howToHelp:
   - label: "St. Raphael Academy"
     url: "https://www.saintraphaelacademy.com/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
