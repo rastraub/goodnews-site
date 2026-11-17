@@ -1,23 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { kidPlaces, kidStoriesInState } from "@/lib/kids";
-import { listingPageParams, parsePageParam } from "@/lib/paging";
-import { getStateBySlug } from "@/lib/states";
+import { parsePageParam } from "@/lib/paging";
 import { KidPlaceBrowse, kidPlaceMetadata } from "../../../../place-browse";
 
 type Props = { params: Promise<{ slug: string; page: string }> };
 
-export const dynamicParams = false;
+/** Later classroom state pages render on request. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return listingPageParams(
-    kidPlaces()
-      .filter((place) => place.kind === "state")
-      .map((place) => {
-        const state = getStateBySlug(place.slug);
-        return { slug: place.slug, total: state ? kidStoriesInState(state.code).length : 0 };
-      }),
-  );
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

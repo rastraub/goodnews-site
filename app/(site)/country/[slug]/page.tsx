@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { CountryBrowse, countryPageMetadata } from "./browse";
-import { COUNTRIES } from "@/lib/countries";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+/** Country pages render on request, including countries that have stories. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return COUNTRIES.map((country) => ({ slug: country.slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -1,23 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { getCountryBySlug } from "@/lib/countries";
-import { kidPlaces, kidStoriesInCountry } from "@/lib/kids";
-import { listingPageParams, parsePageParam } from "@/lib/paging";
+import { parsePageParam } from "@/lib/paging";
 import { KidPlaceBrowse, kidPlaceMetadata } from "../../../../place-browse";
 
 type Props = { params: Promise<{ slug: string; page: string }> };
 
-export const dynamicParams = false;
+/** Later classroom country pages render on request. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return listingPageParams(
-    kidPlaces()
-      .filter((place) => place.kind === "country")
-      .map((place) => {
-        const country = getCountryBySlug(place.slug);
-        return { slug: place.slug, total: country ? kidStoriesInCountry(country.code).length : 0 };
-      }),
-  );
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

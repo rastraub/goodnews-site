@@ -35,6 +35,15 @@ kidDefinition: "A large protected place where an animal can live out its life. J
 cheers: 0
 draft: false
 editorApproved: true
+updates:
+  - date: "2026-11-13"
+    text: "Kariba arrived at the Alentejo sanctuary at 1 a.m. on November 11 after the trip from Belgium that an infection had delayed. Pangea said she ate and drank within minutes, spent the night in the barn, and walked into the habitat the next day. She and Julie have called to each other from a distance while keepers introduce them slowly. The sanctuary is still closed to visitors."
+    sourceName: "Pangea Trust"
+    sourceUrl: "https://www.pangeatrust.org/press-release-our-second-elephant-arrival/"
+    howToHelp:
+      - label: "Pangea Elephant Sanctuary"
+        url: "https://www.pangeatrust.org/donate"
+        kind: donate
 ---
 
 Julie, described as Portugal's last circus elephant, has gained about 100 kilograms in a little more than three months at a sanctuary in the Alentejo. Euronews reported on November 10, 2026, that she is the first resident of a 400-hectare estate, called the first elephant sanctuary of this scale in Europe. She moved there in June after a voluntary agreement with the Victor Hugo Cardinali circus. Manager Ryan Hockley said she now has access at all hours and chooses where to go, including mud pools. Keeper Johnny Nascimento said she was shy for about a week, then began using the trails.

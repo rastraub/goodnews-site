@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.hw.ac.uk/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The Guardian reported on November 15, 2026, that baby oysters are growing again in the Dornoch Firth, north of Inverness in Scotland. European flat oysters had been gone from that place for more than 100 years. The babies are about the size of a 50 pence coin. A project called Deep has put about 140,000 adult oysters into the firth. Volunteers clean the shells first. Professor Bill Sanderson said a reef can, over about 10 years, double the variety of life on the seabed. The team hopes the population can sustain itself by 2031. It is not a fishery yet."
 kidQuestions:

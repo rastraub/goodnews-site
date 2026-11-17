@@ -24,8 +24,6 @@ howToHelp:
   - label: "U.S. Department of Veterans Affairs"
     url: "https://www.va.gov/"
     kind: learn
-featured: true
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true

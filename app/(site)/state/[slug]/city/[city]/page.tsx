@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
 import { HubBrowse, hubMetadata } from "@/components/hub-browse";
-import { getHubIndex, hubsToPrerender } from "@/lib/hubs";
 
 type Props = { params: Promise<{ slug: string; city: string }> };
 
-export const dynamicParams = false;
+/** City pages render on request. The URL is unchanged. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return hubsToPrerender(getHubIndex().cities.filter((hub) => hub.stateSlug)).map((hub) => ({
-    slug: hub.params.slug,
-    city: hub.params.city,
-  }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
