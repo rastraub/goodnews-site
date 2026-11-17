@@ -1,18 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { HubBrowse, hubMetadata } from "@/components/hub-browse";
-import { getHubIndex, hubPageParams } from "@/lib/hubs";
 import { parsePageParam } from "@/lib/paging";
 
 type Props = { params: Promise<{ slug: string; page: string }> };
 
-export const dynamicParams = false;
+/** Later tag pages render on request. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return hubPageParams(getHubIndex().topics).map(({ hub, page }) => ({
-    slug: hub.params.slug,
-    page,
-  }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -1,22 +1,13 @@
 import type { Metadata } from "next";
 import { HubBrowse, hubMetadata } from "@/components/hub-browse";
-import { getHubIndex, hubsToPrerender, MIN_CITY_INDEX_STORIES } from "@/lib/hubs";
 
 type Props = { params: Promise<{ slug: string; city: string }> };
 
-/**
- * One-story city pages stay available on request. Only cities with enough
- * stories to be indexable are prebuilt.
- */
+/** City pages render on request. The URL is unchanged. */
 export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return hubsToPrerender(
-    getHubIndex().cities.filter((hub) => hub.countrySlug && hub.count >= MIN_CITY_INDEX_STORIES),
-  ).map((hub) => ({
-    slug: hub.params.slug,
-    city: hub.params.city,
-  }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

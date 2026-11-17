@@ -5,10 +5,8 @@ import { JsonLd } from "@/components/json-ld";
 import { ShareButtons } from "@/components/share-buttons";
 import { StoryCard } from "@/components/story-card";
 import {
-  allCalendarDays,
   calendarIso,
   monthDayLabel,
-  monthDaySlug,
   onThisDayPath,
   parseMonthDaySlug,
   shiftCalendarDay,
@@ -27,13 +25,13 @@ import { toCard } from "@/lib/present";
 import { listingMeta } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
-export const dynamic = "force-static";
-export const dynamicParams = false;
+/** Calendar days render on request instead of all 366 at build time. */
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ monthDay: string }> };
 
 export function generateStaticParams() {
-  return allCalendarDays().map((day) => ({ monthDay: monthDaySlug(day.month, day.day) }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

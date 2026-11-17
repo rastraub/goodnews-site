@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
-import { kidPlaces } from "@/lib/kids";
 import { KidPlaceBrowse, kidPlaceMetadata } from "../../place-browse";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+/** Classroom country pages render on request. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return kidPlaces()
-    .filter((place) => place.kind === "country")
-    .map((place) => ({ slug: place.slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

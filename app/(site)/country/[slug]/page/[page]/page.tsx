@@ -1,18 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { CountryBrowse, countryPageMetadata } from "../../browse";
-import { COUNTRIES } from "@/lib/countries";
-import { listingPageParams, parsePageParam } from "@/lib/paging";
-import { getByCountry } from "@/lib/stories";
+import { parsePageParam } from "@/lib/paging";
 
 type Props = { params: Promise<{ slug: string; page: string }> };
 
-export const dynamicParams = false;
+/** Later country pages render on request. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return listingPageParams(
-    COUNTRIES.map((country) => ({ slug: country.slug, total: getByCountry(country.code).length })),
-  );
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

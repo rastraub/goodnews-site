@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { HubBrowse, hubMetadata } from "@/components/hub-browse";
-import { getHubIndex, hubsToPrerender } from "@/lib/hubs";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+/** Tag pages render on request. The URL is unchanged. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return hubsToPrerender(getHubIndex().topics).map((hub) => ({ slug: hub.params.slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

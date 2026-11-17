@@ -8,16 +8,20 @@ import { openGraphImage } from "@/lib/feed-image";
 import { placeLabel } from "@/lib/present";
 import { storyPermalink, storyShareLines } from "@/lib/partner-kit";
 import { absoluteUrl } from "@/lib/seo";
-import { getStory, storiesToPrerender } from "@/lib/stories";
+import { getStory } from "@/lib/stories";
 import { getStateByCode } from "@/lib/states";
 import { siteConfig } from "@/site.config";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+/**
+ * Partner kits stay available at the same URL. They are noindex and are
+ * rendered on request so the build does not write a static copy of every story.
+ */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return storiesToPrerender().map((story) => ({ slug: story.slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

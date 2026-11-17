@@ -1,19 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { HubBrowse, hubMetadata } from "@/components/hub-browse";
-import { getHubIndex, hubPageParams } from "@/lib/hubs";
 import { parsePageParam } from "@/lib/paging";
 
 type Props = { params: Promise<{ slug: string; city: string; page: string }> };
 
-export const dynamicParams = false;
+/** Later city pages render on request. Page 1 lives at the city path. */
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return hubPageParams(getHubIndex().cities.filter((hub) => hub.countrySlug)).map(({ hub, page }) => ({
-    slug: hub.params.slug,
-    city: hub.params.city,
-    page,
-  }));
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
