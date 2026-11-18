@@ -74,6 +74,8 @@ export default function KindnessIndexPage() {
           <p className="link-pills">
             <Link href={current.path}>This week&apos;s challenge</Link>
             <Link href="/kids">Classroom stories</Link>
+            <Link href="/teens">Good News for Teens</Link>
+            <Link href="/service-hours">Service hours reflection</Link>
             <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
             <Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link>
             <Link href={ambassadorReportHref()}>Ambassador classes: tell us how it went</Link>

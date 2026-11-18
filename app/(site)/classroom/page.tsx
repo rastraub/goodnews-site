@@ -69,6 +69,7 @@ export default function ClassroomIndexPage() {
         </p>
         <p className="link-pills">
           <Link href="/kids">Classroom stories</Link>
+          <Link href="/teens">Good News for Teens</Link>
           <Link href="/kids/print">Story of the day</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <a href="#teachers">Teacher email</a>

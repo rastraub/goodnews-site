@@ -516,6 +516,67 @@ npm run next-kindness-challenge -- --write
 If a Monday inside the published window has no curated entry, the page still builds. `pickFallbackStory()` in `lib/kindness.ts` chooses a published `kidFriendly` story tagged `kindness`, skipping stories already used by curated weeks when another one is free. If no classroom story has that tag, it uses any `kidFriendly` story. The action on that page comes from a fixed set of safe prompts. It does not invent details from the story. The window runs from launch week through eight Mondays after the current week.
 
 Check the page before you commit. The challenge has to stay positive, and a teacher should be able to hand it to children about ages 6 to 12.
+
+## Good News for Teens
+
+`/teens` lists weeks, newest first. `/teens/YYYY-MM-DD` is one week. The date is the Monday of that week, from `weekStart()` in `lib/weeks.ts`, on the Denver edition calendar. The first page is launch week. A later Monday is not a page until that week has started.
+
+The page is for readers about 13 to 18, student councils, Key Club, NHS, and teachers of older students. It is not the kids page and not the Friday classroom pack. Summaries are the published deck. A role line such as "High school students in Bend, Oregon" is added from words already in the headline or deck. Do not add a minor's name that the public headline and deck do not already use.
+
+### How a story is picked
+
+A published story is a candidate when it is not on the exclude list and it is not blocked, and it matches a teen tag or keyword:
+
+- Tags: `students`, `youth-sports`, or `scholarships`.
+- Keywords in the headline or deck: teen, teenager, high school, middle school, youth, or student. A school written as "Caldera High" counts as a high school. "High Country" does not.
+- A `teen` or `high school` mention in the body also counts. The word "student" in the body alone does not.
+
+Stories about kindergarten, preschool, elementary school, or grades 1 through 5 stay off, including when the word "students" is in the headline. A teen or high-school actor can stay on a story that also mentions a younger child.
+
+The safety filter runs on the headline, deck, and body. A match stays off the page. Pins cannot override it.
+
+| Block | Examples |
+| --- | --- |
+| violence | shooting, assault, weapon, war, use of force |
+| crime | arrest, suspect, theft, convicted |
+| death or injury | died, killed, cancer, injured, hospitalized. "No one was injured" does not count. |
+| politics | election, party, congress, ballot |
+| scandal | scandal, lawsuit, misconduct, bribe |
+| self-harm | suicide, self-harm |
+| gambling | gambling, betting, a casino night. A person's old job at a casino company does not count by itself. |
+| substance | opioids, cannabis, vaping, drunken, overdose |
+
+Each week shows at most six stories, highest score first. The score prefers a teen or high-school actor, then a student who built, raised, collected, or volunteered. Editor pins for that Monday come first.
+
+If the week has fewer than three matches, the page fills toward three with recent matches from earlier weeks and labels them "From the recent archive." If there is still nothing, the page says so. It does not invent a story.
+
+### Pins and excludes
+
+`data/teens.json`:
+
+```json
+{
+  "exclude": [],
+  "weeks": {
+    "2026-11-09": ["bend-pumpkin-smash"]
+  }
+}
+```
+
+| Field | What to write |
+| --- | --- |
+| `exclude` | Published slugs that stay off every teen week, including the archive fill. |
+| `weeks` | Keys are Mondays on or after launch week. Each value is a list of published slugs to pin on that week, in order. |
+
+A pin can add a safe story the keyword filter missed. A pin cannot add a blocked story, a draft, a missing slug, or a story dated after that Sunday. The same slug cannot be pinned and excluded. `npm run validate-stories` fails the build on a bad file.
+
+The week page also builds "Your move" from a fixed list of free club ideas, two or three discussion prompts, and a plain-text and HTML newsletter. The newsletter credits this site and the original outlet and links back. Do not paste a source article into it.
+
+### Service hours reflection
+
+`/service-hours` is a printable log for volunteer or service-learning hours. Each teen week links to `/service-hours?week=YYYY-MM-DD`, which offers that week's stories in the dropdown. The student can also type a title.
+
+The form stays in the browser (`localStorage`). Clear my data deletes that copy. There is no account, no email field, and no server submission. The page says the school or organization decides what counts. This site does not certify hours. A blank log is on the page for photocopying.
 ## Spanish weekly Top 5
 
 8. Spanish edition. Do not translate a story inside the morning job, and do not call a translation API. Once a week, follow the next section. `npm run missing-spanish` lists weeks that do not have a Spanish file yet.

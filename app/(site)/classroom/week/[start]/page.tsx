@@ -198,6 +198,8 @@ export default async function ClassroomPackPage({ params }: Props) {
             <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
             {" · "}
             <Link href={ambassadorReportHref()}>Ambassador classes: tell us how it went</Link>
+            {" · "}
+            <Link href="/teens">Good News for Teens</Link>
           </p>
           <p className="print-source">
             {siteConfig.name} · Good News Friday · {pack.rangeLabel}
