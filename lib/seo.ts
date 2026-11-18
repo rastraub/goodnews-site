@@ -138,10 +138,15 @@ export function listingMeta(options: {
   const pagination: { previous?: string; next?: string } = {};
   if (options.page > 1) pagination.previous = pagePath(options.base, options.page - 1);
   if (options.page < pages) pagination.next = pagePath(options.base, options.page + 1);
+  // The sitemap lists page 1 of each archive. Later pages stay followable
+  // so crawlers can reach every story, and they are noindex so they are
+  // not treated as extra copies of the same collection.
+  const robots = options.page > 1 ? { index: false as const, follow: true as const } : undefined;
   return {
     title,
     description: options.description,
     alternates: pageAlternates(path, options.feedPath, options.languages),
+    ...(robots ? { robots } : {}),
     ...(pagination.previous || pagination.next ? { pagination } : {}),
     ...(options.image
       ? {

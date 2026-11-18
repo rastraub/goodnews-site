@@ -4,7 +4,7 @@ import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
   title: "Terms",
-  description: `How to use ${siteConfig.name}.`,
+  description: `How to use ${siteConfig.name}. Summaries are ours, the reporting belongs to the newsrooms we link, and photos stay with their photographers.`,
   alternates: pageAlternates("/terms"),
 };
 

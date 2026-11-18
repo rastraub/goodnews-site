@@ -14,7 +14,7 @@ import {
   type CalendarDay,
 } from "./calendar-day";
 import { auditOnThisDay, onThisDayFileSchema, type OnThisDayEntry, type OnThisDayFile, type OnThisDayRecord } from "./on-this-day-schema";
-import { absoluteUrl } from "./seo";
+import { absoluteUrl, publishedIso } from "./seo";
 import { getPublishedStories, type Story } from "./stories";
 import { siteConfig } from "@/site.config";
 
@@ -188,6 +188,10 @@ export function onThisDayJsonLd(day: CalendarDay) {
   const title = onThisDayTitle(day.month, day.day);
   const description = onThisDayDescription(day.month, day.day);
   const citations = entries.flatMap((entry) => entry.sources.map((source) => source.url));
+  const archive = storiesForMonthDay(day.month, day.day);
+  const image = archive[0] ? absoluteUrl(archive[0].image) : absoluteUrl("/opengraph-image");
+  const modified = `${onThisDayLastModified(day.month, day.day)}T09:00:00.000Z`;
+  const published = publishedIso(onThisDayUpdated());
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -196,9 +200,11 @@ export function onThisDayJsonLd(day: CalendarDay) {
         "@id": `${url}#article`,
         headline: title,
         description,
+        image,
         inLanguage: "en-US",
         isAccessibleForFree: true,
-        dateModified: `${onThisDayLastModified(day.month, day.day)}T09:00:00.000Z`,
+        datePublished: published <= modified ? published : modified,
+        dateModified: modified,
         url,
         mainEntityOfPage: { "@type": "WebPage", "@id": url },
         author: {

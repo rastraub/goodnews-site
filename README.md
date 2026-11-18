@@ -13,6 +13,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
 npm run validate-stories   # check story files and the rename rule
+npm run seo:audit          # internal links, metadata, sitemap, feeds, JSON-LD
 npm run credited-outlets-report   # CSV of newsrooms credited in published stories
 npm run giving-tuesday-coverage   # states still missing a Giving Tuesday pick
 npm run calendar-coverage   # observances in the next 60 days with fewer than 2 stories
@@ -20,6 +21,29 @@ npm run lint
 npm run build
 npm start
 ```
+
+## SEO audit
+
+`npm run seo:audit` checks the routes the build generates. It does not start a server and it does not call a paid API. The command writes `seo-audit-report.json` (gitignored) and prints a summary. Exit code 0 means no errors. Warnings do not fail the command.
+
+It checks broken internal links and missing story images, titles, meta descriptions, canonical URLs, and og:image, canonical and hreflang pairs (including `/es`), sitemap coverage against the noindex rules, JSON-LD on the page types that render it, orphan indexable pages, and RSS plus the news sitemap. The news sitemap is the last 48 hours of stories and web stories.
+
+Index rules the audit enforces, matching the site:
+
+- A city page is noindex below 2 stories. State topics, tag topics, and country pages publish at 3 stories.
+- A calendar observance is indexable only in the next 12 months and only with at least 2 matching stories.
+- A morning-announcement script is indexable only inside its word-count window. Weekend URLs redirect to the previous school day.
+- An empty shoutouts month is noindex.
+- Archive page 2 and later are noindex, follow. The sitemap lists page 1. Crawlers can still follow the pager to every story.
+
+Two warnings are expected and are not failures:
+
+- Stories in the news window without a JPEG at least 1200 pixels wide. Feeds fall back to the WebP. `npm run feed-images` writes a large JPEG when the credited photo is already big enough. It does not stretch a small photo.
+- Finished Spanish weeks share one intro sentence. That repeated meta description is the weekly template in `lib/spanish-editions.ts`, not a missing description.
+
+Title and description lengths are counted in the summary. A story headline is a full sentence, so many titles are longer than 60 characters. That count is informational. The command warns only for a title under 12 characters or over 140, or a description under 25 or over 360.
+
+GitHub Actions runs the audit as its own job with `continue-on-error`, so a new finding is a warning on the workflow and does not block the build.
 
 ## Rename the site
 
