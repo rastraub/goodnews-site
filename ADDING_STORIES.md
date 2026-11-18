@@ -730,3 +730,17 @@ Each class has `group`, `city`, `region`, and `act`. Publish the group name, the
 ```
 
 The signup and the weekly note both use `/submit`. `type=kindness-ambassadors` is the class signup. `type=kindness-ambassadors-report` is the note about what the class did. Both are emailed to the same mailbox as every other tip.
+
+## Workplace digest pins
+
+`/workplace` builds a Monday-start week from stories already in the archive. The date in the URL is that Monday, America/Denver, the same key as `/week`. About five stories are chosen. Politics, violence, use of force, shootings, and heavy crime stay off. Kindness, community, animals, kid-friendly stories, and health breakthroughs are preferred when the week has them.
+
+To force stories onto one week, edit `data/workplace-pins.json`. The key is the Monday (`YYYY-MM-DD`). The value is a list of story slugs, at most five, in the order they should lead the post. Leave a week out to keep the automatic pick. An empty object means every week is automatic.
+
+```json
+{
+  "2026-10-19": ["kaukauna-community-fridge", "bauang-olive-ridley-nest"]
+}
+```
+
+A pinned story has to be published, dated inside that Monday-Sunday week, and allowed by the workplace filter. A pin cannot put back a story the filter rejected. A bad pin fails `npm run validate-stories` and the build. The week page says "Pinned" on a story that came from the file. Automatic picks fill any open slots up to five. The lines in the Slack post are cut from each story's dek. Do not invent a sentence to fill a short week.

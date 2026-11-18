@@ -155,6 +155,16 @@ import { stateContains } from "../lib/state-bounds";
 import { MAP_VIEWBOX, mapShapeCodes, projectToState } from "../lib/us-map-geometry";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
 import { getPublishedStories, getStory, loadAllStories, type Story } from "../lib/stories";
+import { libraryBulletin, libraryTools, routePageExists } from "../lib/libraries";
+import { qrMatrix } from "../lib/qr";
+import { signatureAlt, signatureEmbedHtml, signatureSvg } from "../lib/signature-badge";
+import {
+  WORKPLACE_MAX_CHARS,
+  WORKPLACE_MIN_CHARS,
+  buildWorkplaceDigests,
+  loadWorkplacePins,
+  workplaceBlockReason,
+} from "../lib/workplace";
 import { quizShareText, quizShareUrl } from "../lib/quiz-copy";
 import {
   MAX_QUIZ_QUESTIONS,
@@ -4563,6 +4573,128 @@ function assertTableTalk() {
   );
 }
 
+function assertWorkplaceAndLibraries() {
+  const shooting = workplaceBlockReason({
+    slug: "sample-shooting",
+    title: "Officers used force during a shooting",
+    dek: "A report about a use of force and a shooting, long enough to count as a deck.",
+    date: "2026-10-07",
+    category: "heroes",
+    body: "The shooting followed a use of force.",
+  });
+  if (!shooting) throw new Error("Workplace filter should reject a shooting and a use of force.");
+
+  const honor = workplaceBlockReason({
+    slug: "sample-flight",
+    title: "Veterans came home from an Honor Flight",
+    dek: "They visited the World War II Memorial and came home to cheers from the airport.",
+    date: "2026-10-07",
+    category: "heroes",
+    body: "The day included the World War II Memorial.",
+  });
+  if (honor) throw new Error(`An honor flight should stay eligible for a workplace post (${honor}).`);
+
+  const seeds = workplaceBlockReason({
+    slug: "sample-seeds",
+    title: "A library opened with seed bombs",
+    dek: "The shelf included seed bombs for a garden, and the prairie had been a bombing range.",
+    date: "2026-10-07",
+    category: "community",
+    body: "Crews had cleared unexploded bombs before the opening.",
+  });
+  if (seeds) throw new Error(`A garden and a restored range should stay eligible (${seeds}).`);
+
+  const robbery = workplaceBlockReason({
+    slug: "sample-robbery",
+    title: "Neighbors helped after a robbery",
+    dek: "The story centers on a robbery and the arrest that followed it yesterday morning.",
+    date: "2026-10-07",
+    category: "community",
+  });
+  if (!robbery) throw new Error("Workplace filter should reject a robbery.");
+
+  const live = buildWorkplaceDigests(getPublishedStories(), loadWorkplacePins(), mountainDay());
+  if (live.pinErrors.length) throw new Error(`Workplace pins: ${live.pinErrors.join("; ")}`);
+  if (live.digests.length < 1) throw new Error("Workplace digests should include at least one week.");
+  for (const digest of live.digests) {
+    if (digest.stories.length < 3 || digest.stories.length > 5) {
+      throw new Error(`${digest.start} should list 3 to 5 stories.`);
+    }
+    if (digest.plainText.length < WORKPLACE_MIN_CHARS || digest.plainText.length > WORKPLACE_MAX_CHARS) {
+      throw new Error(`${digest.start} post is ${digest.plainText.length} characters.`);
+    }
+    if (!digest.plainText.includes(`Shared from ${siteConfig.name}`) || !digest.plainText.includes("verified good news")) {
+      throw new Error("Workplace post should name the publication and say verified good news.");
+    }
+    if (digest.html.includes("<script") || digest.plainText.includes(siteConfig.owner.name)) {
+      throw new Error("Workplace HTML should stay free of scripts, and the post should not name the owner.");
+    }
+    for (const pick of digest.stories) {
+      if (!digest.plainText.includes(pick.url)) throw new Error(`${digest.start} should link ${pick.slug}.`);
+      const story = getStory(pick.slug);
+      if (!story || workplaceBlockReason(story)) throw new Error(`${pick.slug} failed the workplace filter.`);
+    }
+  }
+
+  const missing = buildWorkplaceDigests(getPublishedStories(), { "2026-10-05": ["not-a-real-story"] }, mountainDay());
+  if (!missing.pinErrors.some((error) => error.includes("not-a-real-story"))) {
+    throw new Error("A missing workplace pin should be reported.");
+  }
+  const tree = getStory("geelong-ginkgo-tree");
+  if (!tree) throw new Error("Missing the Geelong story used to check workplace pins.");
+  const blockedPin = buildWorkplaceDigests(
+    getPublishedStories(),
+    { [weekStart(tree.date)]: [tree.slug] },
+    mountainDay(),
+  );
+  if (!blockedPin.pinErrors.some((error) => error.includes(tree.slug) && error.includes("content filter"))) {
+    throw new Error("A workplace pin cannot bypass the content filter.");
+  }
+
+  const svg = signatureSvg();
+  if (!svg.includes(siteConfig.name) || svg.includes("<script")) {
+    throw new Error("The signature badge should name the site and should not contain a script.");
+  }
+  const embed = signatureEmbedHtml("png");
+  if (!embed.startsWith("<a href=") || !embed.includes(signatureAlt()) || !embed.includes(`${siteConfig.url}/brand/signature.png`)) {
+    throw new Error("The signature snippet should be an image link to the publication home.");
+  }
+  if (embed.includes("<script")) throw new Error("The signature snippet should not be a script.");
+
+  const qr = qrMatrix("https://example.com/kids");
+  if (qr.length !== 25) throw new Error("A short https address should encode as a version 2 QR code.");
+  let dark = 0;
+  for (const row of qr) for (const cell of row) if (cell) dark += 1;
+  if (dark !== 338 || !qr[0][0] || qr[1][1]) throw new Error("The shelf QR code no longer matches the checked symbol.");
+
+  const tools = libraryTools();
+  for (const href of ["/large-print", "/kids", "/classroom", "/morning-announcements", "/kindness-challenge"]) {
+    if (!tools.ready.some((tool) => tool.href === href)) throw new Error(`Library shelf should offer ${href}.`);
+  }
+  if (tools.upcoming.some((tool) => routePageExists(tool.href))) {
+    throw new Error("A published library path should be linked, not listed as upcoming.");
+  }
+  const bulletin = libraryBulletin();
+  if (!bulletin.includes(`${siteConfig.url}/libraries`) || !bulletin.includes(`${siteConfig.url}/kids`)) {
+    throw new Error("The library bulletin should use this site's addresses.");
+  }
+  if (bulletin.includes("<script")) throw new Error("The library bulletin should be plain text.");
+
+  const urls = new Set(sitemap().map((entry) => entry.url));
+  if (!urls.has(absoluteUrl("/workplace"))) throw new Error("The sitemap should include /workplace.");
+  if (!urls.has(absoluteUrl("/libraries"))) throw new Error("The sitemap should include /libraries.");
+  if (![...urls].some((url) => url.includes("/workplace/20"))) throw new Error("The sitemap should include a workplace week.");
+
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes('href="/workplace"') || !footer.includes('href="/libraries"')) {
+    throw new Error("The footer should link the workplace digest and the library shelf.");
+  }
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("WORKPLACE_PATH") || !indexNow.includes("LIBRARIES_PATH")) {
+    throw new Error("IndexNow should hear about the workplace digest and the library shelf.");
+  }
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4594,6 +4726,7 @@ async function main() {
   assertPartnerKit();
   assertThanksBoard();
   assertTableTalk();
+  assertWorkplaceAndLibraries();
   assertExplainers();
   assertGivingTuesday(stories);
   assertFirstRespondersDay();

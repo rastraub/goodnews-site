@@ -52,6 +52,7 @@ export default function FeaturedPage() {
           <a href="#embed">Embed</a>
           <a href="#share">Share text</a>
           <a href="#widget">Widget</a>
+          <a href="#share-out">Work and libraries</a>
           <a href="#contact">Contact</a>
         </nav>
 
@@ -122,6 +123,13 @@ export default function FeaturedPage() {
           <iframe className="widget-preview" src="/embed/latest" title={widgetTitle()} loading="lazy" />
           <CopyBlock value={iframeSnippet({ place: "latest", title: widgetTitle() })} label="Copy iframe" />
           <CopyBlock value={scriptSnippet({ place: "latest", title: widgetTitle() })} label="Copy script" />
+        </section>
+
+        <section id="share-out">
+          <h2>Work and libraries</h2>
+          <p>
+            A team can post a weekly roundup from the <Link href="/workplace">workplace digest</Link>. A public library can print a shelf talker from the <Link href="/libraries">Good News Shelf</Link>. Both are free, and neither one adds an account or a tracker.
+          </p>
         </section>
 
         <section id="contact">
