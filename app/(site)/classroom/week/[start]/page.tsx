@@ -15,6 +15,7 @@ import {
   type ClassroomPack,
 } from "@/lib/classroom-pack";
 import { formatStoryDate } from "@/lib/format";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 import { openGraphImage } from "@/lib/feed-image";
 import { classroomJsonLd, listingMeta } from "@/lib/seo";
 import type { Story } from "@/lib/stories";
@@ -100,6 +101,7 @@ export default async function ClassroomPackPage({ params }: Props) {
         </p>
         <div className="pack-actions no-print">
           <PrintButton label="Print this pack" pdfLabel="Download PDF" />
+          <Link href={LARGE_PRINT_PATH}>Large-print edition</Link>
           <p className="hint" id="pdf-hint">
             Download PDF opens the print dialog. Choose Save as PDF. Nothing is sent to a print service.
           </p>

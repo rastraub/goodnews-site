@@ -154,7 +154,19 @@ import { GOOD_NEWS_MAP_PATH, MAP_WINDOW_DAYS } from "../lib/map-path";
 import { stateContains } from "../lib/state-bounds";
 import { MAP_VIEWBOX, mapShapeCodes, projectToState } from "../lib/us-map-geometry";
 import { thanksBannerVisible, thanksBoard, thanksSeason } from "../lib/thanks";
-import { getPublishedStories, getStory, loadAllStories, type Story } from "../lib/stories";
+import { compareStories, getPublishedStories, getStory, getTop5, loadAllStories, type Story } from "../lib/stories";
+import {
+  LARGE_PRINT_ABOUT_PATH,
+  LARGE_PRINT_COUNT,
+  LARGE_PRINT_INDEX_MIN,
+  LARGE_PRINT_PATH,
+  largePrintBlocked,
+  largePrintEditionTitle,
+  largePrintPlace,
+  listLargePrintEditions,
+  pickFeaturedLargePrint,
+  selectLargePrintStories,
+} from "../lib/large-print";
 import { quizShareText, quizShareUrl } from "../lib/quiz-copy";
 import {
   MAX_QUIZ_QUESTIONS,
@@ -4563,6 +4575,136 @@ function assertTableTalk() {
   );
 }
 
+function assertLargePrint() {
+  const ranked = selectLargePrintStories(
+    [
+      { slug: "b", top5: 2 },
+      { slug: "a", top5: 1 },
+      { slug: "c" },
+      { slug: "d" },
+      { slug: "e" },
+      { slug: "f" },
+    ],
+    (story) => story.slug === "c",
+  );
+  if (ranked.map((story) => story.slug).join() !== "a,b,d,e,f") {
+    throw new Error(`Large print should follow Top 5 order and skip a blocked story, got ${ranked.map((story) => story.slug).join()}.`);
+  }
+  const plain = selectLargePrintStories([{ slug: "b" }, { slug: "a" }, { slug: "draft", draft: true }, { slug: "c" }]);
+  if (plain.map((story) => story.slug).join() !== "b,a,c") {
+    throw new Error("With no Top 5 ranks, large print should keep the day's existing order.");
+  }
+  if (selectLargePrintStories(Array.from({ length: 8 }, (_, index) => ({ slug: `s${index}` }))).length !== LARGE_PRINT_COUNT) {
+    throw new Error("A large-print sheet should stop at five stories.");
+  }
+
+  const wholesome = {
+    slug: "garden",
+    title: "Neighbors planted a library garden",
+    dek: "Volunteers in Boise planted a garden beside the library and left the gate open.",
+    date: "2026-10-02",
+    city: "Boise",
+    country: "US",
+    state: "ID",
+    category: "kindness",
+    sourceName: "Example News",
+    sourceUrl: "https://example.com/garden",
+    kidFriendly: true,
+    kidSummary:
+      "Neighbors in Boise planted a garden next to the library. The gate stays open so anyone can visit. The plants are herbs and flowers.",
+  };
+  if (largePrintBlocked(wholesome)) throw new Error("A kid-friendly garden story should stay on the large-print sheet.");
+  if (!largePrintBlocked({ ...wholesome, kidFriendly: false, kidSummary: undefined })) {
+    throw new Error("A story that is not marked for classrooms should stay off the large-print sheet.");
+  }
+  if (!largePrintBlocked({ ...wholesome, title: "A senator won the election", dek: "The ballot count ended and the candidate thanked voters." })) {
+    throw new Error("A political story should stay off the large-print sheet.");
+  }
+  if (!largePrintBlocked({ ...wholesome, title: "Neighbors helped after a shooting" })) {
+    throw new Error("A violent story should stay off the large-print sheet.");
+  }
+  if (largePrintPlace({ city: "Boise", state: "ID", country: "US" }) !== "Boise, Idaho") {
+    throw new Error("A U.S. large-print line should name the city and state.");
+  }
+  if (largePrintPlace({ city: "Beijing", country: "CN", place: "Fengtai" }) !== "Beijing, China") {
+    throw new Error("A large-print line outside the U.S. should name the city and country.");
+  }
+  if (largePrintEditionTitle("2026-11-02") !== "Large-Print Good News for Seniors, November 2, 2026") {
+    throw new Error("Large-print titles should name the audience and the date.");
+  }
+
+  const published = getPublishedStories();
+  const editions = listLargePrintEditions(published);
+  if (!editions.length) throw new Error("Large print should build an edition from published stories.");
+  for (const edition of editions) {
+    const day = published.filter((story) => story.date === edition.date).sort(compareStories);
+    const eligible = day.filter((story) => !largePrintBlocked(story));
+    const picked = edition.stories.map((story) => story.slug).join();
+    const expected = getTop5(eligible).map((story) => story.slug).join();
+    if (picked !== expected) throw new Error(`${edition.date} should match the daily Top 5 on stories that pass the filter.`);
+    if (edition.stories.length > LARGE_PRINT_COUNT) throw new Error(`${edition.date} has more than five stories.`);
+    if (edition.stories.some((story) => largePrintBlocked(story))) throw new Error(`${edition.date} includes a filtered story.`);
+    if (edition.indexable !== edition.stories.length >= LARGE_PRINT_INDEX_MIN) {
+      throw new Error(`${edition.date} index flag does not match the story count.`);
+    }
+    for (const story of edition.stories) {
+      if (story.dek.trim().length < 20) throw new Error(`${story.slug} is missing its summary.`);
+      if (!largePrintPlace(story)) throw new Error(`${story.slug} is missing a place.`);
+      if (!story.sourceName) throw new Error(`${story.slug} is missing a source.`);
+    }
+  }
+  const today = mountainDay();
+  const featured = pickFeaturedLargePrint(editions, today);
+  if (!featured) throw new Error("Large print needs a landing edition.");
+  if (editions.some((edition) => edition.date === today) && featured.date !== today) {
+    throw new Error("The large-print landing page should render today's edition when that day has stories.");
+  }
+  if (!editions.some((edition) => edition.date === today) && featured.date > today) {
+    throw new Error("The landing edition should not skip to a future date.");
+  }
+  const indexable = editions.filter((edition) => edition.indexable);
+  if (!indexable.length) throw new Error("At least one large-print date should be full enough to index.");
+  const thin = editions.find((edition) => !edition.indexable);
+  if (!thin) throw new Error("The archive should keep a thin large-print date so it can stay out of the sitemap.");
+
+  const urls = new Set(sitemap().map((entry) => entry.url));
+  if (!urls.has(absoluteUrl(LARGE_PRINT_PATH))) throw new Error("The sitemap should include /large-print.");
+  if (!urls.has(absoluteUrl(LARGE_PRINT_ABOUT_PATH))) throw new Error("The sitemap should include /large-print/about.");
+  for (const edition of editions) {
+    const listed = urls.has(absoluteUrl(edition.path));
+    if (edition.indexable && !listed) throw new Error(`The sitemap should include ${edition.path}.`);
+    if (!edition.indexable && listed) throw new Error(`The sitemap should leave out thin ${edition.path}.`);
+  }
+
+  const linked = [
+    "components/footer.tsx",
+    "app/(site)/kids/print/page.tsx",
+    "app/(site)/kids/browse.tsx",
+    "app/(site)/kids/place-browse.tsx",
+    "app/(site)/classroom/page.tsx",
+    "app/(site)/classroom/week/[start]/page.tsx",
+    "app/(site)/morning-announcements/page.tsx",
+    "app/(site)/morning-announcements/[date]/page.tsx",
+    "app/(site)/kindness-ambassadors/certificate/page.tsx",
+  ];
+  for (const file of linked) {
+    const text = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!text.includes("LARGE_PRINT_PATH")) throw new Error(`${file} should link to the large-print edition.`);
+  }
+  const about = fs.readFileSync(path.join(process.cwd(), "app/(site)/large-print/about/page.tsx"), "utf8");
+  for (const needle of ["/subscribe", "/submit", "/contact", "contactEmail", "Free to print and share", "each morning"]) {
+    if (!about.includes(needle)) throw new Error(`The large-print about page is missing ${needle}.`);
+  }
+  if (about.includes("Jane ") || about.includes("By John")) throw new Error("The large-print about page should not use a personal name.");
+  const datePage = fs.readFileSync(path.join(process.cwd(), "app/(site)/large-print/[date]/page.tsx"), "utf8");
+  if (!datePage.includes("index: false")) throw new Error("Thin large-print dates should be noindex.");
+  const sheet = fs.readFileSync(path.join(process.cwd(), "components/large-print-sheet.tsx"), "utf8");
+  for (const needle of ["Print this page", "Read aloud", "largePrintListenSegments", "story.dek", "lp-run-head", "lp-run-foot"]) {
+    if (!sheet.includes(needle)) throw new Error(`The large-print sheet is missing ${needle}.`);
+  }
+  console.log(`Large print: ${editions.length} dates, ${indexable.length} indexable, landing ${featured.date}.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4576,6 +4718,7 @@ async function main() {
   assertHubs();
   assertKidClassrooms();
   assertMorningAnnouncements();
+  assertLargePrint();
   assertWeeks();
   assertGoodNewsIndex();
   assertClassroomPacks();
