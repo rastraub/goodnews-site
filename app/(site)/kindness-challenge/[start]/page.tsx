@@ -9,6 +9,7 @@ import { StoryImage } from "@/components/story-image";
 import { PrintButton } from "@/app/(site)/kids/print-button";
 import { openGraphImage } from "@/lib/feed-image";
 import { formatStoryDate } from "@/lib/format";
+import { KUDOS_PATH } from "@/lib/kudos";
 import {
   KINDNESS_DAYS,
   KINDNESS_INDEX_PATH,
@@ -80,6 +81,7 @@ export default async function KindnessChallengePage({ params }: Props) {
           <Link href={KINDNESS_INDEX_PATH}>All challenges</Link>
           {next ? <Link href={next.path}>Next week</Link> : null}
           <Link href="/kids">Classroom stories</Link>
+          <Link href={KUDOS_PATH}>Good News Kudos cards</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
         </p>
       </div>

@@ -26,6 +26,7 @@ import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
 import { explainerPath, explainersForStory } from "@/lib/explainers";
+import { kudosEligible, kudosPath } from "@/lib/kudos";
 import { challengesForStory } from "@/lib/kindness";
 import { getOutletForStory } from "@/lib/outlets";
 import { getStory, relatedStories, storiesToPrerender, type Story } from "@/lib/stories";
@@ -285,6 +286,11 @@ export default async function StoryPage({ params }: Props) {
             <p className="featured-kit-link">
               <Link href={`/featured/${story.slug}`}>Featured in this story? Get your badge</Link>
             </p>
+            {kudosEligible(story) ? (
+              <p className="featured-kit-link">
+                <Link href={kudosPath(story.slug)}>Send a kudos card</Link>
+              </p>
+            ) : null}
           </section>
         </aside>
       </div>

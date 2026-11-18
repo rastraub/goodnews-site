@@ -12,3 +12,4 @@ data/source/
 tsconfig.tsbuildinfo
 .DS_Store
 public/images/web-stories/
+output

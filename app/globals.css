@@ -1159,3 +1159,35 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .tt-url{display:block;word-break:break-all}
   .tt-foot a{color:#000}
 }
+
+.state-pref{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:14px;font-weight:600;position:relative}
+.email .state-pref{color:#5A4415}
+.state-pref select{height:44px;border-radius:14px;border:1.5px solid #E3D8C6;background:#fff;padding:0 12px;font:inherit;font-weight:500;color:var(--ink);width:100%;max-width:360px}
+.stack-form .state-pref{flex:1 1 100%}
+.kudos-layout{max-width:760px}
+.kudos-tools{display:grid;gap:14px}
+.kudos-tools fieldset{border:1px solid var(--line);border-radius:18px;padding:14px 16px 16px;background:#fff;display:grid;gap:10px}
+.kudos-tools legend{font-weight:700;padding:0 6px}
+.kudos-tools fieldset label{display:flex;gap:10px;align-items:flex-start;line-height:1.45;font-weight:500}
+.kudos-tools fieldset input{margin-top:4px}
+.kudos-note{color:var(--ink2);font-size:14.5px;line-height:1.5;margin-top:8px}
+.kudos-sheet{background:#fff;border:1px solid var(--line);border-top:8px solid var(--gold);border-radius:24px;box-shadow:var(--shadow);padding:32px 32px 24px;margin:22px 0 28px}
+.kudos-sheet h2{font-family:var(--font-serif);font-weight:600;font-size:32px;letter-spacing:-.02em;line-height:1.15;margin:8px 0 16px}
+.kudos-for{font-weight:700;color:var(--blue-d);margin:8px 0 0}
+.kudos-message{font-size:18px;line-height:1.5;margin:0 0 22px}
+.kudos-from{font-size:18px;margin:0 0 22px}
+.kudos-blank{display:inline-block;width:220px;max-width:60%;border-bottom:1.5px solid var(--ink);transform:translateY(-4px)}
+.kudos-foot{color:var(--ink2);font-size:14px;line-height:1.5}
+.kudos-foot a{color:var(--blue-d);font-weight:650;word-break:break-all}
+.kudos-fold{margin-top:22px;border-top:1px dashed #C4B59A;padding-top:8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kudos-index{list-style:none;display:grid;gap:14px;margin:8px 0 0;padding:0}
+.kudos-index li{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.kudos-index h3{font-family:var(--font-serif);font-weight:600;font-size:24px;letter-spacing:-.02em;line-height:1.2;margin:6px 0}
+.kudos-index a{color:var(--blue-d);font-weight:650}
+@page kudos-letter{size:letter portrait;margin:0.5in}
+@media print{
+  .kudos-sheet{page:kudos-letter;width:7.5in;min-height:4.9in;max-height:5in;margin:0;border-radius:0;box-shadow:none;border:1.5pt solid #000;border-top:8pt solid #000;overflow:hidden;break-inside:avoid;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .kudos-sheet h2,.kudos-message,.kudos-for,.kudos-from,.kudos-foot,.kudos-foot a{color:#000}
+  .kudos-sheet h2{font-size:22pt}
+  .kudos-message{font-size:13pt}
+}
