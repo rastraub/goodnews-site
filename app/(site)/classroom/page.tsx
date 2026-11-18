@@ -13,6 +13,8 @@ import { openGraphImage } from "@/lib/feed-image";
 import { classroomJsonLd, listingMeta } from "@/lib/seo";
 import { formatLongDate, launchWeekStart } from "@/lib/weeks";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { HOMESCHOOL_INDEX_PATH } from "@/lib/homeschool";
+import { WORD_SEARCH_INDEX_PATH } from "@/lib/word-search";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -70,6 +72,8 @@ export default function ClassroomIndexPage() {
         <p className="link-pills">
           <Link href="/kids">Classroom stories</Link>
           <Link href="/kids/print">Story of the day</Link>
+          <Link href={HOMESCHOOL_INDEX_PATH}>Homeschool packs</Link>
+          <Link href={WORD_SEARCH_INDEX_PATH}>Word search</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <a href="#teachers">Teacher email</a>
         </p>
