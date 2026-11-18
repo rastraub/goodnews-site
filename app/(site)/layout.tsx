@@ -5,6 +5,7 @@ import { latestQuiz } from "@/lib/quiz";
 import { fontClassName } from "../fonts";
 import { FAVICON_SIZES, faviconPath } from "@/lib/brand";
 import { pageAlternates, xHandle } from "@/lib/seo";
+import { yearInReviewPromo } from "@/lib/year-in-review";
 import { siteConfig } from "@/site.config";
 import "../globals.css";
 
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SiteFrame lang="en" className={fontClassName} skipLabel="Skip to stories" edition={editionLabel()} quizHref={latestQuiz()?.path}>
+    <SiteFrame lang="en" className={fontClassName} skipLabel="Skip to stories" edition={editionLabel()} quizHref={latestQuiz()?.path} yearInReviewHref={yearInReviewPromo()?.href}>
       {children}
     </SiteFrame>
   );

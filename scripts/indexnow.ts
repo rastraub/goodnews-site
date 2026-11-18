@@ -29,6 +29,7 @@ import { WORLD_KINDNESS_PATH } from "../lib/world-kindness-day";
 import { weeksToPrerender } from "../lib/weeks";
 import { listWebStories } from "../lib/web-stories";
 import { newsBreakBanner, siteConfig } from "../site.config";
+import { YEAR_IN_REVIEW_EDITIONS, YEAR_IN_REVIEW_INDEX_PATH, yearInReviewIndexable, yearInReviewIndexPublic, yearInReviewPath } from "../lib/year-in-review";
 import { GOOD_NEWS_MAP_PATH } from "../lib/map-path";
 
 const STATIC_PATHS = ["/", newsBreakBanner.path, "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/follow-ups", "/follow-ups/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", AMBASSADORS_PATH, AMBASSADOR_CERTIFICATE_PATH, MORNING_ANNOUNCEMENTS_PATH, "/topics", "/featured", "/widgets", "/good-news-index", GOOD_NEWS_MAP_PATH, THANKS_PATH, TABLE_TALK_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, WORLD_KINDNESS_PATH, FIRST_RESPONDERS_DAY_PATH, CALENDAR_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes", "/es", "/es/buenas-noticias", "/es/rss.xml"];
@@ -40,6 +41,12 @@ async function main() {
   }
 
   const urls = new Set(STATIC_PATHS.map((path) => (path === "/" ? siteConfig.url : `${siteConfig.url}${path}`)));
+  if (yearInReviewIndexPublic()) {
+    urls.add(`${siteConfig.url}${YEAR_IN_REVIEW_INDEX_PATH}`);
+    for (const edition of YEAR_IN_REVIEW_EDITIONS) {
+      if (yearInReviewIndexable(edition.year)) urls.add(`${siteConfig.url}${yearInReviewPath(edition.year)}`);
+    }
+  }
   for (const path of explainerPaths()) urls.add(`${siteConfig.url}${path}`);
   for (const week of weeksToPrerender()) urls.add(`${siteConfig.url}${week.path}`);
   for (const edition of indexesToPrerender()) urls.add(`${siteConfig.url}${edition.path}`);

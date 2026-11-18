@@ -6,6 +6,7 @@ import { FAVICON_SIZES, faviconPath } from "@/lib/brand";
 import { pageAlternates, xHandle } from "@/lib/seo";
 import { latestQuiz } from "@/lib/quiz";
 import { spanishLandingDescription } from "@/lib/spanish-editions";
+import { yearInReviewPromo } from "@/lib/year-in-review";
 import { siteConfig } from "@/site.config";
 import "../globals.css";
 
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
 
 export default function SpanishLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SiteFrame lang="es" className={fontClassName} skipLabel="Saltar a las noticias" edition={editionLabel()} quizHref={latestQuiz()?.path}>
+    <SiteFrame lang="es" className={fontClassName} skipLabel="Saltar a las noticias" edition={editionLabel()} quizHref={latestQuiz()?.path} yearInReviewHref={yearInReviewPromo()?.href}>
       {children}
     </SiteFrame>
   );

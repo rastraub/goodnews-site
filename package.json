@@ -20,6 +20,7 @@
     "world-kindness-gaps": "tsx scripts/world-kindness-day-gaps.ts",
     "calendar-coverage": "tsx scripts/calendar-coverage-report.ts",
     "first-responders-gaps": "tsx scripts/first-responders-day-gaps.ts",
+    "year-in-review-gaps": "tsx scripts/year-in-review-gaps.ts",
     "next-kindness-challenge": "tsx scripts/next-kindness-challenge.ts",
     "missing-spanish": "tsx scripts/missing-spanish-editions.ts"
   },
