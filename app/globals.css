@@ -1159,3 +1159,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .tt-url{display:block;word-break:break-all}
   .tt-foot a{color:#000}
 }
+
+.wire-preview{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:12px 0 18px}
+.wire-preview h2,.wire-bulletin h2{font-family:var(--font-serif);font-weight:600;letter-spacing:-.02em}
+.wire-preview h2{font-size:28px;margin:0 0 8px}
+.wire-preview h3{font-family:var(--font-serif);font-size:22px;margin:18px 0 6px;font-weight:600}
+.wire-preview article + article{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.wire-credit{font-size:14.5px}
+.wire-bulletin{max-width:5.5in;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:8px 0 22px}
+.wire-bulletin h2{font-size:24px;margin:0 0 6px}
+.wire-bulletin ol{margin:10px 0 12px 18px;display:grid;gap:12px}
+.wire-bulletin li{break-inside:avoid;page-break-inside:avoid}
+.wire-page blockquote{margin:12px 0;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.wire-page blockquote p{margin:0}
+@page wire-bulletin-page{size:5.5in 8.5in;margin:0.4in}
+@media print{
+  .wire-page .wire-screen{display:none !important}
+  .wire-bulletin{page:wire-bulletin-page;max-width:none;border:none;border-radius:0;padding:0;margin:0}
+  .wire-bulletin a[href]::after,.wire-credit a[href]::after{content:" (" attr(href) ")";font-weight:400;font-size:9pt;word-break:break-all}
+}

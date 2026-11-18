@@ -28,6 +28,11 @@ export type FeedOptions = {
   link?: string;
   /** Declare the NewsBreak namespace. Used by the main RSS feed only. */
   newsBreak?: boolean;
+  /**
+   * Include the Media RSS namespace. On for the story feeds.
+   * The Good News Wire turns it off unless a photo is clearly owned by this publication.
+   */
+  media?: boolean;
 };
 
 export type FeedLink = {
@@ -48,6 +53,36 @@ export function feedCatalog(): { heading: string; feeds: FeedLink[] }[] {
         { title: "World", path: "/world/rss.xml", blurb: "Stories from outside the United States." },
         { title: "For classrooms", path: "/kids/rss.xml", blurb: "Stories a teacher can read with a class." },
         { title: "En español", path: "/es/rss.xml", blurb: "A weekly Top 5 in Spanish. Original sources stay in English." },
+      ],
+    },
+    {
+      heading: "Good News Wire",
+      feeds: [
+        {
+          title: "Good News Wire",
+          path: "/wire/feed.xml",
+          blurb: `Summaries from ${siteConfig.name} that a publisher may republish with credit.`,
+        },
+        {
+          title: "Good News Wire, JSON",
+          path: "/wire/feed.json",
+          blurb: "The same wire as JSON Feed 1.1.",
+        },
+        {
+          title: "Good News Wire for classrooms",
+          path: "/wire/kids/feed.xml",
+          blurb: "Classroom summaries a school newsletter may republish with credit.",
+        },
+        {
+          title: "Good News Wire for classrooms, JSON",
+          path: "/wire/kids/feed.json",
+          blurb: "The classroom wire as JSON Feed 1.1.",
+        },
+        ...STATES.map((state) => ({
+          title: `${state.name} wire`,
+          path: `/wire/${state.slug}/feed.xml`,
+          blurb: `Summaries from ${state.name} that a local publisher may republish with credit.`,
+        })),
       ],
     },
     {
@@ -87,7 +122,7 @@ function feedView(options: FeedOptions, fallbackSelf: string) {
   };
 }
 
-function escapeXml(value: string) {
+export function escapeXml(value: string) {
   return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -99,7 +134,8 @@ function escapeHtml(value: string) {
   return escapeXml(value);
 }
 
-function inlineMarkdown(text: string) {
+/** Escape text, then turn Markdown links into anchors. Shared by the story feeds and the wire. */
+export function formatInlineHtml(text: string) {
   const escaped = escapeHtml(text);
   return escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_match, label: string, href: string) => {
     return `<a href="${href}">${label}</a>`;
@@ -147,7 +183,7 @@ export function storyHtml(story: Story): string {
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean)
-    .map((block) => `<p>${inlineMarkdown(block)}</p>`)
+    .map((block) => `<p>${formatInlineHtml(block)}</p>`)
     .join("");
   const caption = `${story.imageCaption} ${story.imageCredit}. ${story.imageLicense}.`;
   const parts = [
@@ -162,7 +198,7 @@ export function storyHtml(story: Story): string {
   return parts.join("");
 }
 
-function cdata(value: string) {
+export function xmlCdata(value: string) {
   return `<![CDATA[${value.replaceAll("]]>", "]]]]><![CDATA[>")}]]>`;
 }
 
@@ -178,45 +214,50 @@ function latestInstant(stories: Story[]): string {
   return stories.map((story) => storyModifiedIso(story)).sort().at(-1) ?? new Date().toISOString();
 }
 
+/** Media RSS plus enclosure. Story feeds always include it. The wire includes it only for an owned photo. */
+export function rssMediaXml(story: Pick<Story, "title" | "image" | "imageAlt" | "imageCredit">): string {
+  const image = storyFeedImage(story.image);
+  const imageUrl = escapeXml(absoluteUrl(image.path));
+  const length = image.bytes ? ` length="${image.bytes}"` : "";
+  const dimensions = image.width > 0 && image.height > 0 ? ` width="${image.width}" height="${image.height}"` : "";
+  return `<media:content url="${imageUrl}" medium="image" type="${image.mime}"${dimensions}>
+        <media:title>${escapeXml(story.title)}</media:title>
+        <media:description>${escapeXml(story.imageAlt)}</media:description>
+        <media:credit role="photographer">${escapeXml(story.imageCredit)}</media:credit>
+      </media:content>
+      <media:thumbnail url="${imageUrl}"${dimensions} />
+      <enclosure url="${imageUrl}" type="${image.mime}"${length} />`;
+}
+
 function rssItem(story: Story): string {
   const link = absoluteUrl(`/story/${story.slug}`);
-  const image = storyFeedImage(story.image);
-  const imageUrl = absoluteUrl(image.path);
   const category = getCategory(story.category);
   const state = getStateByCode(story.state);
   const country = story.country === "US" ? undefined : getCountry(story.country);
-  const length = image.bytes ? ` length="${image.bytes}"` : "";
-  const dimensions = image.width > 0 && image.height > 0 ? ` width="${image.width}" height="${image.height}"` : "";
   return `<item>
       <title>${escapeXml(story.title)}</title>
       <link>${link}</link>
       <guid isPermaLink="true">${link}</guid>
       <pubDate>${new Date(storyPublishedIso(story)).toUTCString()}</pubDate>
       <description>${escapeXml(storyDescription(story))}</description>
-      <content:encoded>${cdata(storyHtml(story))}</content:encoded>
+      <content:encoded>${xmlCdata(storyHtml(story))}</content:encoded>
       <dc:creator>${escapeXml(siteConfig.editor.name)}</dc:creator>
       ${category ? `<category>${escapeXml(category.label)}</category>` : ""}
       ${state ? `<category>${escapeXml(state.name)}</category>` : ""}
       ${country ? `<category>${escapeXml(country.name)}</category>` : ""}
-      <media:content url="${escapeXml(imageUrl)}" medium="image" type="${image.mime}"${dimensions}>
-        <media:title>${escapeXml(story.title)}</media:title>
-        <media:description>${escapeXml(story.imageAlt)}</media:description>
-        <media:credit role="photographer">${escapeXml(story.imageCredit)}</media:credit>
-      </media:content>
-      <media:thumbnail url="${escapeXml(imageUrl)}"${dimensions} />
-      <enclosure url="${escapeXml(imageUrl)}" type="${image.mime}"${length} />
+      ${rssMediaXml(story)}
     </item>`;
 }
 
-export function renderRss(options: FeedOptions = {}): string {
-  const { stories, self, title, description, link: channelLink } = feedView(options, "/rss.xml");
+/** RSS 2.0 channel. `items` is already escaped item XML. The wire reuses this instead of a second template. */
+export function renderRssChannel(options: FeedOptions, items: string): string {
+  const { stories, self, title, description, link: channelLink } = feedView(options, options.selfPath ?? "/rss.xml");
   const updated = new Date(latestInstant(stories)).toUTCString();
-  const items = stories.map((story) => rssItem(story)).join("\n");
   const namespaces = [
     'xmlns:atom="http://www.w3.org/2005/Atom"',
     'xmlns:content="http://purl.org/rss/1.0/modules/content/"',
     'xmlns:dc="http://purl.org/dc/elements/1.1/"',
-    'xmlns:media="http://search.yahoo.com/mrss/"',
+    options.media === false ? "" : 'xmlns:media="http://search.yahoo.com/mrss/"',
     options.newsBreak ? 'xmlns:nb="https://www.newsbreak.com/"' : "",
   ]
     .filter(Boolean)
@@ -239,6 +280,12 @@ export function renderRss(options: FeedOptions = {}): string {
 </rss>`;
 }
 
+export function renderRss(options: FeedOptions = {}): string {
+  const view = feedView(options, "/rss.xml");
+  const items = view.stories.map((story) => rssItem(story)).join("\n");
+  return renderRssChannel({ ...options, stories: view.stories }, items);
+}
+
 export function renderSmartNews(options: FeedOptions = {}): string {
   const { stories, self, title, link: channelLink } = feedView(
     { ...options, description: SMARTNEWS_DESCRIPTION },
@@ -258,7 +305,7 @@ export function renderSmartNews(options: FeedOptions = {}): string {
       <guid isPermaLink="true">${link}</guid>
       <description>${escapeXml(storyDescription(story))}</description>
       <pubDate>${new Date(storyPublishedIso(story)).toUTCString()}</pubDate>
-      <content:encoded>${cdata(storyHtml(story))}</content:encoded>
+      <content:encoded>${xmlCdata(storyHtml(story))}</content:encoded>
       ${category ? `<category>${escapeXml(category)}</category>` : ""}
       <dc:creator>${escapeXml(siteConfig.editor.name)}</dc:creator>
       <media:thumbnail url="${escapeXml(imageUrl)}"${dimensions} />
