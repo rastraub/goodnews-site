@@ -5,6 +5,7 @@ import { editionMonth } from "@/lib/good-neighbor";
 import { kidPlaces } from "@/lib/kids";
 import { GIVING_TUESDAY_PATH, getGivingGuide } from "@/lib/giving-tuesday";
 import { getHubIndex, indexableHubs } from "@/lib/hubs";
+import { BRIEFING_PATH, indexableBriefings, loadBriefings } from "@/lib/briefing";
 import { indexableAnnouncementDays, loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "@/lib/morning-announcements";
 import { absoluteUrl } from "@/lib/seo";
 import { explainerModifiedDate, explainerPath, EXPLAINER_INDEX_PATH, getPublishedExplainers } from "@/lib/explainers";
@@ -43,6 +44,7 @@ const STATIC_PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: AMBASSADOR_CERTIFICATE_PATH, changeFrequency: "yearly", priority: 0.5 },
   { path: "/kids/print", changeFrequency: "daily", priority: 0.5 },
   { path: MORNING_ANNOUNCEMENTS_PATH, changeFrequency: "daily", priority: 0.6 },
+  { path: BRIEFING_PATH, changeFrequency: "daily", priority: 0.6 },
   { path: "/topics", changeFrequency: "daily", priority: 0.6 },
   { path: "/sources", changeFrequency: "daily", priority: 0.6 },
   { path: "/stories", changeFrequency: "daily", priority: 0.7 },
@@ -327,6 +329,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: day.date,
       changeFrequency: (day.date === mountainDay() ? "daily" : "weekly") as "daily" | "weekly",
       priority: day.date === mountainDay() ? 0.6 : 0.5,
+    })),
+    ...indexableBriefings(loadBriefings()).map((briefing) => ({
+      url: absoluteUrl(briefing.path),
+      lastModified: briefing.date,
+      changeFrequency: (briefing.date === mountainDay() ? "daily" : "weekly") as "daily" | "weekly",
+      priority: briefing.date === mountainDay() ? 0.6 : 0.5,
     })),
     ...indexableHubs(hubs).map((hub) => ({
       url: absoluteUrl(hub.path),
