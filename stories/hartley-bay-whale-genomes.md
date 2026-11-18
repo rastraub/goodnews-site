@@ -25,7 +25,6 @@ howToHelp:
     url: "https://bcwhales.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "BBC News reported on November 17, 2026, that scientists flew a drone through the spray from humpback whales off northern British Columbia. The work was in Gitga'at First Nation territory. A small dish on the aircraft caught the breath. A paper used 58 samples from 26 whales. The DNA can help ask whether whales that feed together are family or long-time friends. The nuclear reading is low coverage, which means it is useful for those questions and not a full medical chart. This is not a count of every humpback in the Pacific."
 kidQuestions:
