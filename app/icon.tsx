@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { SunMark } from "@/lib/brand";
+import { siteConfig } from "@/site.config";
 
 export const size = { width: 192, height: 192 };
 export const contentType = "image/png";
@@ -11,7 +12,7 @@ export default function Icon() {
         style={{
           width: 192,
           height: 192,
-          background: "#FFFBF4",
+          background: siteConfig.theme.background,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

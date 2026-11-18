@@ -20,6 +20,7 @@ import { WorldKindnessDayBanner } from "@/components/world-kindness-day-banner";
 import { WeekPromo } from "@/components/week-promo";
 import { WorldSpotlight } from "@/components/world-spotlight";
 import { StoryImage } from "@/components/story-image";
+import { StreakBadge } from "@/components/streak-badge";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { CATEGORIES } from "@/lib/categories";
 import { getStateByCode, stateName } from "@/lib/states";
@@ -93,6 +94,7 @@ export default function HomePage() {
             <div>
               <h2>Today&apos;s Top 5</h2>
               <p>The five best things that happened in America, checked and ready.</p>
+              <StreakBadge />
               {latestWebStory ? (
                 <a className="web-story-link" href={latestWebStory.path}>
                   Today&apos;s web story

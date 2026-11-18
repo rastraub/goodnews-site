@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { SiteFrame } from "@/components/site-frame";
 import { editionLabel } from "@/lib/format";
 import { latestQuiz } from "@/lib/quiz";
@@ -7,6 +7,10 @@ import { FAVICON_SIZES, faviconPath } from "@/lib/brand";
 import { pageAlternates, xHandle } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 import "../globals.css";
+
+export const viewport: Viewport = {
+  themeColor: siteConfig.theme.color,
+};
 
 const googleVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 const bingVerification = process.env.BING_SITE_VERIFICATION?.trim();

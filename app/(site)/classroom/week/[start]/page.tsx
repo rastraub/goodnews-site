@@ -19,6 +19,7 @@ import { openGraphImage } from "@/lib/feed-image";
 import { classroomJsonLd, listingMeta } from "@/lib/seo";
 import type { Story } from "@/lib/stories";
 import { ambassadorReportHref, AMBASSADORS_PATH } from "@/lib/ambassador-tip";
+import { COACHES_INDEX_PATH } from "@/lib/coaches-pack";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -107,6 +108,9 @@ export default async function ClassroomPackPage({ params }: Props) {
         <section className="pack-teacher" aria-labelledby="teacher-note">
           <h2 id="teacher-note">Teacher note</h2>
           <p>{pack.teacherNote}</p>
+          <p className="teacher-note no-print">
+            <Link href={COACHES_INDEX_PATH}>Good news for coaches and youth sports</Link>
+          </p>
           {pack.readyCount > pack.stories.length ? (
             <p className="teacher-note no-print">
               <Link href="/kids">More classroom stories are in the kids section.</Link>
