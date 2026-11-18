@@ -473,7 +473,37 @@ The banner is eligible November 6 through November 14, America/Denver, every yea
 - November 16 through November 23: Good News Table Talk
 - November 24 through December 2: Giving Tuesday. Table Talk is still eligible through November 27 and does not stack on top of Giving Tuesday.
 
-A banner that is the only one in season still shows. The rules live in `lib/homepage-banner.ts`.
+A banner that is the only one in season still shows. The rules live in `lib/homepage-banner.ts`. From November 30 through December 24, 2026, a slim Advent of Good News line can sit under that banner. It does not take the single slot, so Giving Tuesday still leads on December 1 and 2. See the next section.
+
+## December Advent of Good News
+
+`/advent` redirects to `/advent/2026`. The calendar runs December 1 through December 24. Each door pairs one real archive story with one free kind act a family or a class can do that day. The acts are written in `lib/advent.ts`. They do not ask anyone to buy something or give money.
+
+A door stays locked until that date in America/Denver. The door pages render on request, so the lock follows the clock and does not wait for the next deploy. The homepage line is still chosen at build time, like the other seasonal banners. A locked door is a teaser: no story, no kind act, `noindex`, and left out of the sitemap. An open door is a normal page with the headline, photo, kid summary, source, and act. `/advent/2026/print` is a one-page calendar. `/advent/2026/{day}/print` is the daily card. The daily card is `noindex` because the door page is the canonical URL.
+
+The byline is `siteConfig.editor.name`. Do not put a personal name on these pages.
+
+### Pin a story for a day
+
+Edit `data/advent-2026.json`. Keys are the day numbers `"1"` through `"24"`, without a leading zero. Values are story slugs. Leave a day out to keep the automatic pick. An empty `pins` object means every day is automatic.
+
+```json
+{
+  "pins": {
+    "1": "your-story-slug"
+  }
+}
+```
+
+The story has to be published, `kidFriendly`, and clear of violence, politics, crime, and use of force. A pin cannot put a blocked story back. The same slug cannot be used on two doors. A bad pin fails `npm run validate-stories` and the build. The card says "Pinned" when a pin is in use.
+
+On a day with no pin, the site picks an unused classroom story whose tags fit that day's act. The most specific acts choose first, so a rare theme is not lost to a broad one. A new story in the archive can change an unpinned day on the next deploy. Pin a day when the pick should stay put.
+
+`npm run advent-gaps` lists every day that still has no editor pin, the act, the match score, and the story the automatic pick would use. A score of 0 is a weak match. Open days do not fail the build. The daily run can use that list to fill the gaps before December 1.
+
+On a local dev server, add `?asOf=2026-12-10` to preview that Denver date. Production ignores the query.
+
+The page is in the sitemap. A production deploy pings the open doors through IndexNow. `/kids`, the Kindness Challenge, and the Good News Calendar link here. Giving Tuesday and International Volunteer Day on the calendar link here too. The homepage line shows from November 30 through December 24, 2026, and then comes down. The doors stay up after that.
 
 ## Weekly Kindness Challenge
 
@@ -650,7 +680,7 @@ Edit `data/good-news-calendar.ts`. One object per observance. Do not add a date 
 - `classroom` is one short prompt for a teacher. Every observance needs one, including the ones that are not kid-friendly.
 - `takePart` is two to four free actions. No fee, no student email address, and no trip a child would take alone.
 - `infoUrl` is optional. It has to be `https` and a page from the organization that keeps the date. `infoLabel` is the link text, such as "United Nations observances". Both fields go together.
-- `hubs` links an existing hub. The ids are `veterans`, `giving`, `thanks`, `kindness`, `world-kindness`, `responders`, and `neighbor`. `world-kindness` is `/world-kindness-day`. Do not add a hub path that this repo does not already serve.
+- `hubs` links an existing hub. The ids are `veterans`, `giving`, `thanks`, `kindness`, `world-kindness`, `responders`, `neighbor`, and `advent`. `world-kindness` is `/world-kindness-day`. `advent` is `/advent/2026`. Do not add a hub path that this repo does not already serve.
 - `storyFilter: "first-responders"` keeps the same exclusion rules as `/first-responders-day`. Use it only for that observance.
 
 Skip elections, partisan dates, and observances whose point is a religious dispute. The byline stays the public masthead from `site.config.ts`.

@@ -3,6 +3,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { ballotMonths, getBallot } from "@/lib/good-neighbor-data";
 import { editionMonth } from "@/lib/good-neighbor";
 import { kidPlaces } from "@/lib/kids";
+import { ADVENT_PATH, adventIndexablePaths, getAdventCalendar } from "@/lib/advent";
 import { GIVING_TUESDAY_PATH, getGivingGuide } from "@/lib/giving-tuesday";
 import { getHubIndex, indexableHubs } from "@/lib/hubs";
 import { indexableAnnouncementDays, loadAnnouncementDays, MORNING_ANNOUNCEMENTS_PATH } from "@/lib/morning-announcements";
@@ -140,6 +141,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.6,
     },
+    ...adventIndexablePaths(getAdventCalendar(mountainDay())).map((path) => ({
+      url: absoluteUrl(path),
+      lastModified: siteLatest,
+      changeFrequency: (path === ADVENT_PATH ? "daily" : "weekly") as "daily" | "weekly",
+      priority: path === ADVENT_PATH ? 0.7 : 0.5,
+    })),
     {
       url: absoluteUrl(VETERANS_DAY_PATH),
       lastModified: veterans.latest ?? siteLatest,
