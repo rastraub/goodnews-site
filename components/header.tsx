@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Logo } from "./logo";
 import { CATEGORIES } from "@/lib/categories";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
+import { STARTERS_INDEX_PATH } from "@/lib/starter-path";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 const PRIMARY = [
@@ -25,6 +26,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
     ...(quizHref ? [{ href: quizHref, label: "Quiz" }] : []),
     { href: "/heroes", label: "Hometown Heroes" },
     { href: "/kindness-challenge", label: "Kindness" },
+    { href: STARTERS_INDEX_PATH, label: "Starters" },
     { href: "/morning-announcements", label: "Announcements" },
     { href: "/kids", label: "Kids" },
     { href: "/topics", label: "Topics" },
