@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { BreakPromo } from "@/components/break-promo";
 import { EmailSignup } from "@/components/email-signup";
 import { KindnessLinks } from "@/components/kindness-links";
 import { JsonLd } from "@/components/json-ld";
@@ -91,6 +92,7 @@ export function KidsBrowse({ page }: { page: number }) {
             segments={kidListSegments(listed)}
           />
         ) : null}
+        <BreakPromo />
         <KindnessLinks />
         {places.length ? (
           <div className="chips">

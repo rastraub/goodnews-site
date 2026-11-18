@@ -516,6 +516,27 @@ npm run next-kindness-challenge -- --write
 If a Monday inside the published window has no curated entry, the page still builds. `pickFallbackStory()` in `lib/kindness.ts` chooses a published `kidFriendly` story tagged `kindness`, skipping stories already used by curated weeks when another one is free. If no classroom story has that tag, it uses any `kidFriendly` story. The action on that page comes from a fixed set of safe prompts. It does not invent details from the story. The window runs from launch week through eight Mondays after the current week.
 
 Check the page before you commit. The challenge has to stay positive, and a teacher should be able to hand it to children about ages 6 to 12.
+
+## Good News Holiday Break Pack
+
+`/break` is the family pack for school holidays. It shows the edition that contains today's date in Denver (Mountain time), or the next edition when today falls between them. Each edition also has its own page, `/break/thanksgiving-2026` and `/break/winter-2026`. `/kindness-bingo` is the same bingo card on its own.
+
+The edition list lives in `data/break-editions.ts`. To add one, copy an entry: a kebab-case `slug`, inclusive `start` and `end` (`YYYY-MM-DD`), and the title, description, and lede. Then add the same slug to `data/break-pins.ts` with empty `pins` and `exclude` arrays. The sitemap and IndexNow pick up the new slug from that list. Do not add a second homepage banner for the pack. The site already rotates seasonal banners.
+
+Stories are chosen from published classroom stories (`kidFriendly`, with a read-aloud `kidSummary` and discussion questions). The filter also drops violence, injury, crime, politics, illness, and death, including a story that was marked for classrooms by mistake. Recent stories come first. Older classroom stories fill the pack only when the recent pool is short. A pack holds five to seven stories.
+
+Pins and excludes, per edition:
+
+```ts
+"thanksgiving-2026": { pins: ["your-story-slug"], exclude: ["leave-this-out"] },
+```
+
+A pin is the story filename without `.md`. It has to be published, dated on or before the edition, and still pass the filter. A pin cannot put a blocked story back on the page. `exclude` drops a slug from that edition. Leave both arrays empty to keep the automatic pick.
+
+Kindness Bingo acts live in `data/kindness-bingo.ts`. Each act is one short free kind thing a child can do with a grown-up. About a third set `storySlug` to a real classroom story, and the square links to it with "Inspired by". Do not invent a slug, and do not point an act at a story the break filter would reject. The card is shuffled in the browser. `?card=123` repeats that shuffle. Checked squares stay in the reader's browser. Do not add an account, a form that collects a child's name, or a server store for the card.
+
+Family activity links are the array in `data/break-activities.ts`. Add a row only when that route already exists on `main`. `href: "latest-quiz"` points at the newest Good News Quiz. Set `editions` when a link belongs on one pack only, such as Table Talk on the Thanksgiving edition.
+
 ## Spanish weekly Top 5
 
 8. Spanish edition. Do not translate a story inside the morning job, and do not call a translation API. Once a week, follow the next section. `npm run missing-spanish` lists weeks that do not have a Spanish file yet.
