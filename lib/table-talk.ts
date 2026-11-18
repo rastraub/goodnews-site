@@ -333,6 +333,19 @@ function hasDeath(text: string): boolean {
   return DEATH.test(cleaned);
 }
 
+/**
+ * Politics, crime, violence, use of force, or a shooting.
+ * Same BLOCKS list as the card filter. Illness and death stay on tableTalkBlockReason
+ * so a health story can still be read somewhere else.
+ */
+export function tableTalkHarmReason(story: TableTalkStory): string | undefined {
+  const full = fullText(story);
+  for (const rule of BLOCKS) {
+    if (rule.pattern.test(full)) return rule.id;
+  }
+  return undefined;
+}
+
 /** Why a story cannot sit on a family or classroom card, or undefined when it can. */
 export function tableTalkBlockReason(story: TableTalkStory): string | undefined {
   if (story.category === "health-tech") return "illness";
@@ -342,10 +355,7 @@ export function tableTalkBlockReason(story: TableTalkStory): string | undefined 
   if (hasDeath(lead)) return "death";
   const full = fullText(story);
   if (DISASTER.test(full) && hasDeath(full)) return "disaster-deaths";
-  for (const rule of BLOCKS) {
-    if (rule.pattern.test(full)) return rule.id;
-  }
-  return undefined;
+  return tableTalkHarmReason(story);
 }
 
 export function splitTableTalkSentences(text: string): string[] {
