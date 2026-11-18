@@ -23,7 +23,6 @@ howToHelp:
   - label: "Beaufort County"
     url: "https://www.beaufortcountysc.gov/"
     kind: thank
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true

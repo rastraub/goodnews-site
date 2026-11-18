@@ -24,7 +24,6 @@ howToHelp:
   - label: "NMDP"
     url: "https://www.nmdp.org/"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

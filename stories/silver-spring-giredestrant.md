@@ -23,7 +23,6 @@ howToHelp:
   - label: "FDA approval notice"
     url: "https://www.fda.gov/drugs/cancer-approvals/fda-approves-giredestrant-combination-everolimus-er-positive-her2-negative-esr1-mutated-locally"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

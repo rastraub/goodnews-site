@@ -24,8 +24,6 @@ howToHelp:
   - label: "Zion National Park"
     url: "https://www.nps.gov/zion/"
     kind: learn
-featured: true
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true

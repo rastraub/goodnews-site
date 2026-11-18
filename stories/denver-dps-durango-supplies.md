@@ -26,7 +26,6 @@ howToHelp:
   - label: "Denver Public Schools"
     url: "https://www.dpsk12.org/"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
