@@ -25,7 +25,6 @@ howToHelp:
     url: "https://saharaconservation.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Mongabay reported on November 17, 2026, that scimitar-horned oryx are living in Chad again. This antelope has long curved horns. It had vanished from Chad by the late 1980s and was declared extinct in the wild in 2000. A project led by Sahara Conservation returned animals to Ouadi Rimé-Ouadi Achim Wildlife Reserve. The herd grew from 25 animals in 2016 to 700, which the report called the largest herd in the world. The species is now listed as endangered, not extinct in the wild. Drought and livestock grazing the same land are still problems. The news is this herd."
 kidQuestions:
