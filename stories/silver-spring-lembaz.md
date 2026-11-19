@@ -23,7 +23,6 @@ howToHelp:
   - label: "FDA announcement on Lembaz"
     url: "https://www.fda.gov/news-events/press-announcements/fda-approves-first-drug-shown-help-patients-infantile-onset-niemann-pick-disease-type-c-live-longer"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

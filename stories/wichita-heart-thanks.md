@@ -25,7 +25,6 @@ howToHelp:
   - label: "American Heart Association on cardiac arrest"
     url: "https://www.heart.org/en/health-topics/cardiac-arrest"
     kind: learn
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true

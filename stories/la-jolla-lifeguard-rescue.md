@@ -24,8 +24,7 @@ howToHelp:
   - label: "San Diego Lifeguard Services"
     url: "https://www.sandiego.gov/lifeguards"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

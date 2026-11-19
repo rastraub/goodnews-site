@@ -23,7 +23,6 @@ howToHelp:
   - label: "American Red Cross"
     url: "https://www.redcross.org/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
