@@ -15,6 +15,10 @@ export type StoryTip = {
   sourceUrl?: string;
   pageUrl?: string;
   receivedAt: string;
+  /** Thanksgiving thank-you wall. Story tips omit these. */
+  kind?: "thanks";
+  consent?: boolean;
+  anonymous?: boolean;
 };
 
 export const TIP_LIMITS = {
@@ -89,6 +93,7 @@ export function prepareStoryTip(tip: StoryTip): StoryTip {
   const sourceUrl = cleanHttpUrl(tip.sourceUrl ?? "", TIP_LIMITS.sourceUrl);
   const pageUrl = cleanHttpUrl(tip.pageUrl ?? "", TIP_LIMITS.pageUrl);
   const region = tip.region ? sanitizeHeader(tip.region, 80) : "";
+  const thanks = tip.kind === "thanks";
   return {
     name: sanitizeHeader(tip.name, TIP_LIMITS.name),
     email: sanitizeHeader(tip.email, TIP_LIMITS.email),
@@ -99,6 +104,13 @@ export function prepareStoryTip(tip: StoryTip): StoryTip {
     sourceUrl: sourceUrl.startsWith("https://") ? sourceUrl : undefined,
     pageUrl: pageUrl || undefined,
     receivedAt: sanitizeHeader(tip.receivedAt, 40),
+    ...(thanks
+      ? {
+          kind: "thanks" as const,
+          consent: tip.consent === true,
+          anonymous: tip.anonymous === true,
+        }
+      : {}),
   };
 }
 
@@ -132,14 +144,16 @@ export function storyTipBodies(tip: StoryTip): { text: string; html: string } {
   ];
   if (clean.state) rows.push(["State", stateLine]);
   if (clean.region) rows.push(["State or country", clean.region]);
-  rows.push(
-    ["Source", shown(clean.sourceUrl)],
-    ["Page", shown(clean.pageUrl)],
-    ["Received", shown(clean.receivedAt)],
-  );
+  if (clean.kind !== "thanks" || clean.sourceUrl) rows.push(["Source", shown(clean.sourceUrl)]);
+  rows.push(["Page", shown(clean.pageUrl)], ["Received", shown(clean.receivedAt)]);
+  const tags =
+    clean.kind === "thanks"
+      ? ["kind=thanks", `consent=${clean.consent ? "yes" : "no"}`, `anonymous=${clean.anonymous ? "yes" : "no"}`]
+      : [];
   const text = [
     `Story tip for ${siteConfig.name}`,
     "",
+    ...(tags.length ? [...tags, ""] : []),
     ...rows.map(([label, value]) => `${label}: ${value}`),
     "",
     "What happened:",
@@ -153,10 +167,12 @@ export function storyTipBodies(tip: StoryTip): { text: string; html: string } {
         `<tr><th align="left">${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`,
     )
     .join("");
+  const tagHtml = tags.length ? `<p>${tags.map((tag) => escapeHtml(tag)).join("<br>")}</p>` : "";
   const html = [
     "<!DOCTYPE html>",
     "<html><body>",
     `<p>Story tip for ${escapeHtml(siteConfig.name)}</p>`,
+    tagHtml,
     `<table>${htmlRows}</table>`,
     "<h2>What happened?</h2>",
     `<pre style="white-space:pre-wrap">${escapeHtml(clean.summary)}</pre>`,

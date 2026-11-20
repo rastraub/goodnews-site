@@ -4,6 +4,7 @@ import {
   parseAmbassadorReport,
   parseAmbassadorSignup,
 } from "@/lib/ambassador-tip";
+import { asStoryTip, parseThankYou, THANK_YOU_KIND } from "@/lib/thank-you-wall";
 import { handleStorySubmission } from "@/lib/submissions";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { getStateByCode } from "@/lib/states";
@@ -43,6 +44,26 @@ async function submitAmbassador(request: Request, data: Record<string, unknown>,
   return Response.json({ ok: true });
 }
 
+async function submitThankYou(request: Request, data: Record<string, unknown>) {
+  const parsed = parseThankYou(data);
+  if ("error" in parsed) {
+    return Response.json({ ok: false, error: parsed.error }, { status: 400 });
+  }
+  const pageUrl = pageFrom(data, request);
+  try {
+    await handleStorySubmission(
+      asStoryTip(parsed, {
+        pageUrl: pageUrl || undefined,
+        receivedAt: new Date().toISOString(),
+      }),
+    );
+  } catch (error) {
+    console.error("[submit] handler failed", error);
+    return Response.json({ ok: false, error: "We couldn't save that tip. Please try again." }, { status: 500 });
+  }
+  return Response.json({ ok: true });
+}
+
 export async function POST(request: Request) {
   if (!rateLimit(clientKey(request, "submit"), 5)) {
     return Response.json({ ok: false, error: "Too many tips. Wait a minute and try again." }, { status: 429 });
@@ -67,6 +88,14 @@ export async function POST(request: Request) {
     typeField.value === AMBASSADOR_REPORT_TYPE
   ) {
     return submitAmbassador(request, data, typeField.value);
+  }
+
+  const kindField = singleLine(data.kind, 40);
+  if (kindField.tooLong) {
+    return Response.json({ ok: false, error: "That note is too long to send." }, { status: 400 });
+  }
+  if (kindField.value === THANK_YOU_KIND) {
+    return submitThankYou(request, data);
   }
 
   const name = singleLine(data.name, TIP_LIMITS.name);
