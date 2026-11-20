@@ -24,6 +24,7 @@
     "missing-spanish": "tsx scripts/missing-spanish-editions.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "gray-matter": "^4.0.3",
     "next": "^16.4.6",
     "nodemailer": "^10.1.7",
