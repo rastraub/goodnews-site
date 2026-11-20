@@ -26,7 +26,6 @@ howToHelp:
     url: "https://sunriseservicedogs.org/donate"
     kind: donate
 featured: false
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

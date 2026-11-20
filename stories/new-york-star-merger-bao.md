@@ -24,7 +24,6 @@ howToHelp:
     url: "https://science.nasa.gov/mission/webb/"
     kind: learn
 featured: false
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
