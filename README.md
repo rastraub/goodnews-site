@@ -154,6 +154,7 @@ The byline on these pages is the Tazzora Editorial Team. Vote totals never inclu
 5. Deploy. `main` (or a merged pull request) publishes the site.
 6. Add `tazzora.com` and `www.tazzora.com` in the Vercel project settings. Production currently redirects the apex to `www`, and absolute URLs in `site.config.ts` follow that host. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
 7. Optional, for Search Console and Bing HTML-tag verification: set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` (see `.env.example`) and redeploy. A production build also pings IndexNow when `VERCEL_ENV=production`.
+8. Google Analytics 4 reads `gaMeasurementId` in `site.config.ts`. Leave `NEXT_PUBLIC_GA_MEASUREMENT_ID` unset on Vercel unless you are overriding that ID. Vercel Web Analytics loads from the shared document shell (`components/site-frame.tsx`), which both root layouts render.
 
 Sitemaps and feeds:
 
