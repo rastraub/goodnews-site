@@ -49,6 +49,13 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Seasonal share link for the thank-you form. Temporary so /thanks can become a page later.
+      // Keep this pair in sync with THANK_YOU_SHORT_PATH and THANK_YOU_PATH in lib/thank-you-wall.ts.
+      {
+        source: "/thanks",
+        destination: "/submit?kind=thanks",
+        permanent: false,
+      },
       ...STATES.map((state) => ({
         source: `/state/${state.code.toLowerCase()}`,
         destination: `/state/${state.slug}`,

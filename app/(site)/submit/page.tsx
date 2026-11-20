@@ -5,14 +5,31 @@ import {
   AMBASSADORS_PATH,
   AMBASSADOR_DESCRIPTION,
   ambassadorFormMode,
+  type AmbassadorFormMode,
 } from "@/lib/ambassador-tip";
 import { pageAlternates } from "@/lib/seo";
+import { THANK_YOU_INTRO, THANK_YOU_PATH, THANK_YOU_TITLE, thankYouFormMode } from "@/lib/thank-you-wall";
 import { siteConfig } from "@/site.config";
 
-type Props = { searchParams: Promise<{ type?: string | string[] }> };
+type SubmitParams = { type?: string | string[]; kind?: string | string[] };
+type Props = { searchParams: Promise<SubmitParams> };
+type SubmitMode = AmbassadorFormMode | "thanks";
+
+function formMode(params: SubmitParams): SubmitMode {
+  const ambassador = ambassadorFormMode(params.type);
+  if (ambassador !== "story") return ambassador;
+  return thankYouFormMode(params.kind);
+}
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const mode = ambassadorFormMode((await searchParams).type);
+  const mode = formMode(await searchParams);
+  if (mode === "thanks") {
+    return {
+      title: THANK_YOU_TITLE,
+      description: THANK_YOU_INTRO,
+      alternates: pageAlternates(THANK_YOU_PATH),
+    };
+  }
   if (mode === "ambassador-signup") {
     return {
       title: "Kindness Ambassadors class signup",
@@ -37,7 +54,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 export default async function SubmitPage({ searchParams }: Props) {
-  const mode = ambassadorFormMode((await searchParams).type);
+  const mode = formMode(await searchParams);
 
   return (
     <div className="page-block">
@@ -64,6 +81,12 @@ export default async function SubmitPage({ searchParams }: Props) {
             <p className="lede">
               The note uses the same tip form as every other story, and it is emailed to {siteConfig.contactEmail}.
             </p>
+          </>
+        ) : mode === "thanks" ? (
+          <>
+            <p className="kicker">Thanksgiving</p>
+            <h1>{THANK_YOU_TITLE}</h1>
+            <p className="lede">{THANK_YOU_INTRO}</p>
           </>
         ) : (
           <>
