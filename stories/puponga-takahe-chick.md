@@ -26,7 +26,6 @@ howToHelp:
     url: "https://www.doc.govt.nz/nature/native-animals/birds/birds-a-z/takahe/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "RNZ reported on November 19, 2026, that a takahē chick is growing up at Farewell Spit, at the top of New Zealand's South Island. In May, the Department of Conservation moved eight of these threatened birds into the Onetahua project. The habitat covers 2,000 hectares inside a fence about 4 kilometres long, built to keep predators out. The chick's parents were not a pair before they arrived. The chick hatched in October and is about six weeks old. Other nests did not work out. One was washed away, and another egg did not hatch. Visitors are asked to stay on the tracks so the family can keep the chick hidden."
 kidQuestions:
