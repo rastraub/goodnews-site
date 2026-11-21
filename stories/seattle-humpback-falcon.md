@@ -24,8 +24,6 @@ howToHelp:
   - label: "Cascadia Research Collective"
     url: "https://cascadiaresearch.org/"
     kind: learn
-featured: true
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true

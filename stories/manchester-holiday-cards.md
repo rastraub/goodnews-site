@@ -24,7 +24,6 @@ howToHelp:
   - label: "USO"
     url: "https://www.uso.org/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

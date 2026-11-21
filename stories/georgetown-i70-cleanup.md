@@ -25,7 +25,6 @@ howToHelp:
   - label: "Colorado Department of Transportation"
     url: "https://www.codot.gov/"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true
