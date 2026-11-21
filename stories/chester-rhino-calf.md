@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.chesterzoo.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The BBC reported on November 19, 2026, that a greater one-horned rhino calf was born at Chester Zoo in England. The mother, Asha, is 19. She was pregnant for 15 months. Keepers say she and the calf are healthy. This is her fourth calf. The father, Beni, died earlier this year after a short illness. About 4,000 of these rhinos live in the wild in India and Nepal. Many of them live in one national park, so a disease or a change in the weather can reach a lot of them at once. This calf is one birth in a European breeding programme. It is not a count of wild rhinos."
 kidQuestions:
