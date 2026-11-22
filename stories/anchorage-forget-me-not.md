@@ -24,7 +24,6 @@ howToHelp:
   - label: "Anchorage Senior Activity Center"
     url: "https://www.anchorageseniorcenter.org/"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

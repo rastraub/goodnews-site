@@ -24,7 +24,6 @@ howToHelp:
   - label: "Carnegie Hero Fund Commission"
     url: "https://www.carnegiehero.org/"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

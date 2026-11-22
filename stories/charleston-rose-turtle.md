@@ -23,7 +23,6 @@ howToHelp:
   - label: "South Carolina Aquarium"
     url: "https://scaquarium.org/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

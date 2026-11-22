@@ -24,7 +24,6 @@ howToHelp:
   - label: "Grand County, Colorado"
     url: "https://www.co.grand.co.us/"
     kind: learn
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
