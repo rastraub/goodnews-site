@@ -25,7 +25,6 @@ howToHelp:
     url: "https://cheetah.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The Hindu reported on November 20, 2026, that a cheetah named KOMG 3 gave birth to four cubs in the wild at Kuno National Park in India. She was brought from Botswana. She is about two and a half years old and had lived in the wild for more than four months before the cubs arrived. The paper said she is the first cheetah from Botswana to give birth in India, and that this is the second wild birth since India began bringing cheetahs back in 2022. With these cubs, the project counts 62 cheetahs in India, including 43 born there. That number is the project's own count."
 kidQuestions:
