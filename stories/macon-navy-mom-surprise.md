@@ -24,8 +24,6 @@ howToHelp:
   - label: "U.S. Navy"
     url: "https://www.navy.mil/"
     kind: learn
-featured: true
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true

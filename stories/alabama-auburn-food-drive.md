@@ -25,7 +25,6 @@ howToHelp:
   - label: "University of Alabama"
     url: "https://www.ua.edu/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

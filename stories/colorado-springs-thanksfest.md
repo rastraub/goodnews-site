@@ -24,7 +24,6 @@ howToHelp:
   - label: "City of Colorado Springs"
     url: "https://coloradosprings.gov/"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

@@ -23,7 +23,6 @@ howToHelp:
   - label: "Potawatomi Zoo"
     url: "https://potawatomizoo.org/"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
