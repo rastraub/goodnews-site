@@ -6,6 +6,7 @@ import { CheerButton } from "@/components/cheer-button";
 import { LiveBadge } from "@/components/good-neighbor-results";
 import { ListenControls } from "@/components/listen-controls";
 import { JsonLd } from "@/components/json-ld";
+import { PreferredSourceLink } from "@/components/preferred-source-link";
 import { ShareButtons } from "@/components/share-buttons";
 import { StoryCard } from "@/components/story-card";
 import { EmphaticTitle, StoryBody } from "@/components/story-body";
@@ -282,6 +283,7 @@ export default async function StoryPage({ params }: Props) {
           <section className="side-card">
             <h2>Share this story</h2>
             <ShareButtons title={story.title} path={`/story/${story.slug}`} />
+            <PreferredSourceLink location="story" />
             <p className="featured-kit-link">
               <Link href={`/featured/${story.slug}`}>Featured in this story? Get your badge</Link>
             </p>

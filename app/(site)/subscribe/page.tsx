@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { pageAlternates } from "@/lib/seo";
 import { EmailSignup } from "@/components/email-signup";
+import { PreferredSourceLink } from "@/components/preferred-source-link";
 import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
@@ -25,6 +26,9 @@ export default function SubscribePage() {
         </p>
       </div>
       <EmailSignup />
+      <div className="wrap preferred-source-subscribe">
+        <PreferredSourceLink location="subscribe" />
+      </div>
     </div>
   );
 }
