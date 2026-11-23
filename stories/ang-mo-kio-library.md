@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.nlb.gov.sg/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "The Straits Times reported that Ang Mo Kio Library in Singapore opened again on November 20, 2026, inside a shopping mall. Books stand about six metres high. More than 5,500 of the books up high were pre-loved, meaning someone else read them first. The old building had been closed since August 1. The new library is next to the train station. A study room stays open from 9 in the morning until 10 at night, including holidays. A 79-year-old resident visited with his grandson, who chose comics."
 kidQuestions:
