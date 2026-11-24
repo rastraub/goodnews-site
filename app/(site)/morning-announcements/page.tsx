@@ -15,6 +15,7 @@ import { formatLongDate, mountainDay } from "@/lib/weeks";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { siteConfig } from "@/site.config";
 import { TeacherAnnouncementSignup } from "./teacher-signup";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 
 export const dynamic = "force-static";
 
@@ -84,6 +85,7 @@ export default function MorningAnnouncementsIndex() {
         <p className="link-pills">
           <Link href="/kids">Classroom stories</Link>
           <Link href="/kids/print">Story of the day</Link>
+          <Link href={LARGE_PRINT_PATH}>Large-print edition</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <a href="#how-to">How to use this</a>
         </p>

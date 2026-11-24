@@ -100,6 +100,24 @@ export function listenCardId(slug: string): string {
   return `listen-${slug}`;
 }
 
+/** Headline, place, summary, and source credit for one large-print sheet. */
+export function largePrintListenSegments(
+  stories: { slug: string; title: string; place: string; summary: string; sourceName: string }[],
+): ListenSegment[] {
+  const segments: ListenSegment[] = [];
+  for (const story of stories) {
+    const title = spokenText(story.title);
+    const place = spokenText(story.place);
+    const summary = spokenText(story.summary);
+    const source = spokenText(story.sourceName);
+    if (title) segments.push({ id: `lp-${story.slug}-title`, text: title });
+    if (place) segments.push({ id: `lp-${story.slug}-place`, text: place });
+    if (summary) segments.push({ id: `lp-${story.slug}-summary`, text: summary });
+    if (source) segments.push({ id: `lp-${story.slug}-source`, text: `Source: ${source}.` });
+  }
+  return segments;
+}
+
 /** Listed classroom stories, in order. A story without a summary is skipped. */
 export function kidListSegments(stories: { slug: string; title: string; kidSummary?: string }[]): ListenSegment[] {
   const segments: ListenSegment[] = [];
@@ -230,5 +248,14 @@ export function assertListenText(): void {
   const menu = voiceMenu(voices);
   if (menu.some((voice) => voice.lang.startsWith("fr")) || menu[0]?.voiceURI !== "samantha") {
     throw new Error("The voice menu should list English voices, with en-US first.");
+  }
+  const sheet = largePrintListenSegments([
+    { slug: "one", title: "Neighbors shared a library", place: "Boise, Idaho", summary: "A short summary.", sourceName: "Example News" },
+  ]);
+  if (
+    sheet.map((segment) => `${segment.id}:${segment.text}`).join("|") !==
+    "lp-one-title:Neighbors shared a library|lp-one-place:Boise, Idaho|lp-one-summary:A short summary.|lp-one-source:Source: Example News."
+  ) {
+    throw new Error("Large print should be read as headline, place, summary, and source.");
   }
 }

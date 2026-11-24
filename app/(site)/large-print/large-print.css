@@ -1,0 +1,272 @@
+.wrap.lp-page {
+  max-width: 8.2in;
+}
+
+.lp-page {
+  color: #1c2733;
+  font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.lp-page .crumbs {
+  font-size: 18pt;
+  color: #1c2733;
+  font-weight: 650;
+}
+
+.lp-page .crumbs a {
+  color: #1c2733;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.page-hero.lp-page h1,
+.lp-about h1,
+.lp-sheet h1 {
+  font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 28pt;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: #1c2733;
+  margin: 8pt 0 12pt;
+}
+
+.lp-sheet {
+  background: #fff;
+  color: #1c2733;
+  border: 2px solid #1c2733;
+  padding: 22pt 22pt 18pt;
+}
+
+.lp-frame {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lp-repeat {
+  display: none;
+}
+
+.lp-frame td {
+  padding: 0;
+  vertical-align: top;
+}
+
+.lp-mast,
+.lp-date {
+  margin: 0;
+  font-size: 18pt;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1c2733;
+}
+
+.lp-date {
+  font-size: 20pt;
+  margin: 0 0 10pt;
+}
+
+.lp-lead,
+.lp-about p,
+.lp-panel p,
+.lp-colophon,
+.lp-place,
+.lp-summary,
+.lp-source {
+  font-size: 18pt;
+  line-height: 1.4;
+  color: #1c2733;
+}
+
+.lp-lead {
+  margin: 0 0 12pt;
+}
+
+.lp-colophon {
+  margin: 16pt 0 0;
+  font-weight: 650;
+}
+
+.lp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12pt 18pt;
+  margin: 4pt 0 18pt;
+}
+
+.lp-actions .btn {
+  height: 56px;
+  padding: 0 22pt;
+  font-size: 18pt;
+  background: #1c2733;
+  color: #fff;
+}
+
+.lp-page .lp-listen.listen-bar button,
+.lp-page .lp-listen.listen-bar select {
+  height: 52px;
+  font-size: 18pt;
+  color: #1c2733;
+  border: 2px solid #1c2733;
+  background: #fff;
+}
+
+.lp-page .lp-listen .listen-play {
+  background: #1c2733;
+  color: #fff;
+  border-color: #1c2733;
+}
+
+.lp-page .lp-listen .listen-play.is-active {
+  background: #fff;
+  color: #1c2733;
+}
+
+.lp-page .lp-listen .listen-progress,
+.lp-page .lp-listen .listen-note {
+  font-size: 18pt;
+  font-weight: 650;
+  color: #1c2733;
+}
+
+.lp-stories {
+  list-style: decimal;
+  margin: 8pt 0 0;
+  padding-left: 1.4em;
+}
+
+.lp-stories > li {
+  margin: 0;
+  padding: 14pt 0 0;
+}
+
+.lp-stories > li + li {
+  border-top: 2px solid #1c2733;
+  margin-top: 14pt;
+}
+
+.lp-stories > li::marker {
+  font-size: 22pt;
+  font-weight: 700;
+  color: #1c2733;
+}
+
+.lp-sheet h2,
+.lp-panel h2,
+.lp-dates h2,
+.lp-about h2 {
+  font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 22pt;
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: #1c2733;
+  margin: 0 0 6pt;
+}
+
+.lp-about h2,
+.lp-panel h2,
+.lp-dates h2 {
+  margin-top: 22pt;
+}
+
+.lp-sheet a,
+.lp-panel a,
+.lp-about a,
+.lp-dates a {
+  color: #1c2733;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.lp-page a:focus-visible,
+.lp-page button:focus-visible,
+.lp-page select:focus-visible {
+  outline: 3px solid #1c2733;
+  outline-offset: 3px;
+}
+
+.lp-place,
+.lp-source {
+  font-weight: 650;
+  margin: 4pt 0;
+}
+
+.lp-summary {
+  margin: 8pt 0;
+  font-weight: 500;
+}
+
+.lp-panel,
+.lp-about,
+.lp-dates {
+  margin-top: 28pt;
+}
+
+.lp-dates ul {
+  list-style: none;
+  margin: 8pt 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10pt;
+}
+
+.lp-dates a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12pt;
+  align-items: baseline;
+  background: #fff;
+  border: 2px solid #1c2733;
+  padding: 10pt 12pt;
+  font-size: 18pt;
+  font-weight: 650;
+  line-height: 1.3;
+  color: #1c2733;
+  text-decoration: none;
+}
+
+.lp-dates a span {
+  color: #1c2733;
+}
+
+.lp-dates a[aria-current="page"] {
+  background: #1c2733;
+  color: #fff;
+}
+
+.lp-dates a[aria-current="page"] span {
+  color: #fff;
+}
+
+.lp-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12pt 20pt;
+  margin-top: 14pt;
+  font-size: 18pt;
+  font-weight: 700;
+}
+
+.lp-pager span {
+  color: #1c2733;
+}
+
+@media (max-width: 700px) {
+  .lp-sheet {
+    padding: 16pt 12pt;
+  }
+
+  .page-hero.lp-page h1,
+  .lp-about h1,
+  .lp-sheet h1 {
+    font-size: 26pt;
+  }
+
+  .lp-dates a {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

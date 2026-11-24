@@ -14,6 +14,7 @@ import { openGraphImage } from "@/lib/feed-image";
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
+import { LARGE_PRINT_PATH } from "@/lib/large-print";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 const TITLE = "Good news for kids";
@@ -73,6 +74,7 @@ export function KidsBrowse({ page }: { page: number }) {
         </p>
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
+          <Link href={LARGE_PRINT_PATH}>Large-print edition</Link>
           <Link href="/classroom">Good News Friday packs</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <Link href={GOOD_NEWS_MAP_PATH}>Good News Map</Link>
