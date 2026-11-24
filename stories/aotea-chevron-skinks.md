@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.aucklandzoo.co.nz/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "New Zealand's Department of Conservation said eleven chevron skinks went back to Aotea, also called Great Barrier Island, on November 23, 2026. People there call the lizard niho taniwha. It can grow about 30 centimetres long and now lives on only two islands. Three injured skinks left the island for Auckland Zoo between 1997 and 1999 and had young there. These eleven join ten released in July at Glenfern Sanctuary, where predators are controlled. Keepers gave them bamboo shelters and tiny radios on their tails so researchers can see whether the shelters help. Ngāti Rehua kaumātua Rodney Ngāwaka called the skink a jewel of the island."
 kidQuestions:
