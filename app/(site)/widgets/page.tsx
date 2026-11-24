@@ -26,7 +26,7 @@ export default function WidgetsPage() {
           A short list of headlines a local outlet or a community site can drop onto a page. Each headline links back to {siteConfig.name}. The widget does not use cookies, analytics, or an account.
         </p>
         <p>
-          The iframe is a small HTML page, up to {WIDGET_STORY_COUNT} stories, with no scripts inside it. The script option only inserts that same iframe. Paste either one where the list should appear. The frame is 340 pixels tall. Change the height if you want a shorter box. Part of the <Link href="/featured">featured kit</Link>.
+          The iframe is a small HTML page, up to {WIDGET_STORY_COUNT} stories, with no scripts inside it. The script option only inserts that same iframe. Paste either one where the list should appear. The frame is 340 pixels tall. Change the height if you want a shorter box. Part of the <Link href="/featured">featured kit</Link>. A team channel can use the <Link href="/workplace">workplace digest</Link> instead of a widget, and a library can print the <Link href="/libraries">Good News Shelf</Link>.
         </p>
 
         <section id="latest">

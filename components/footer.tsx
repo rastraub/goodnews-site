@@ -96,6 +96,8 @@ export function Footer() {
               <li><Link href="/membership">Membership</Link></li>
               <li><Link href="/partner">Partner with us</Link></li>
               <li><Link href="/featured">Featured on {siteConfig.name}</Link></li>
+              <li><Link href="/workplace">Workplace digest</Link></li>
+              <li><Link href="/libraries">Library shelf</Link></li>
             </ul>
           </div>
         </div>
