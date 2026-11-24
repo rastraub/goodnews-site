@@ -24,7 +24,6 @@ howToHelp:
   - label: "City of Denison"
     url: "https://www.cityofdenison.com/"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

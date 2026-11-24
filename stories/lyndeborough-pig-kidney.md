@@ -23,7 +23,6 @@ howToHelp:
   - label: "Massachusetts General Hospital"
     url: "https://www.massgeneral.org/"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

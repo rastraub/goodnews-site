@@ -24,7 +24,6 @@ howToHelp:
   - label: "Sanford Health"
     url: "https://www.sanfordhealth.org/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

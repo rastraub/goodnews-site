@@ -24,8 +24,6 @@ howToHelp:
   - label: "U.S. Postal Service"
     url: "https://www.usps.com/"
     kind: learn
-featured: true
-top5: 1
 cheers: 0
 draft: false
 editorApproved: true
