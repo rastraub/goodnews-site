@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { pageAlternates } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
@@ -16,6 +17,9 @@ export default function TermsPage() {
         <h1>Terms</h1>
         <p>
           Summaries on {siteConfig.name} are ours. The reporting belongs to the newsrooms we link. Photos belong to their photographers and are used under the license named on each story.
+        </p>
+        <p>
+          A publisher may republish the summaries for free under the <Link href="/wire">Good News Wire</Link>. The credit line there is required. The original article and the photo are not part of that permission.
         </p>
         <p>
           Nothing here is professional, medical, or legal advice. Help links go to other organizations. We do not control what they do with a donation or a signup.

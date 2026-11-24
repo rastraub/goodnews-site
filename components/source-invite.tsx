@@ -7,7 +7,7 @@ export function SourceInvite() {
       <div>
         <p className="kicker">For newsrooms</p>
         <p>
-          If {siteConfig.name} credited your reporting, you can take a badge or embed the headline widget.
+          If {siteConfig.name} credited your reporting, you can take a badge or embed the headline widget. A bulletin or newsletter can republish the summary, with credit, from the <Link href="/wire">Good News Wire</Link>.
         </p>
       </div>
       <Link className="btn btn-ink" href="/featured">
