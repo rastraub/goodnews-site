@@ -362,10 +362,27 @@ export function classroomJsonLd(options: {
   path: string;
   crumbs: Crumb[];
   resources: { name: string; path: string }[];
-  learningResourceType: "lesson plan" | "collection of lesson plans";
+  learningResourceType: "lesson plan" | "collection of lesson plans" | "activity" | "collection of activities";
+  /** Overrides the child resource type. Story links stay reading passages. */
+  itemLearningResourceType?: string;
   timeRequired?: string;
+  /** Defaults to teachers, which is the classroom pack. */
+  audienceRoles?: readonly ("teacher" | "parent")[];
 }) {
-  const itemType = options.learningResourceType === "lesson plan" ? "reading passage" : "lesson plan";
+  const itemType =
+    options.itemLearningResourceType ??
+    (options.learningResourceType === "lesson plan"
+      ? "reading passage"
+      : options.learningResourceType === "collection of lesson plans"
+        ? "lesson plan"
+        : options.learningResourceType === "activity"
+          ? "worksheet"
+          : "activity");
+  const roles = options.audienceRoles?.length ? options.audienceRoles : ["teacher"];
+  const audience =
+    roles.length === 1
+      ? { "@type": "EducationalAudience" as const, educationalRole: roles[0] }
+      : roles.map((educationalRole) => ({ "@type": "EducationalAudience" as const, educationalRole }));
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -380,10 +397,7 @@ export function classroomJsonLd(options: {
         educationalLevel: CLASSROOM_LEVEL,
         learningResourceType: options.learningResourceType,
         ...(options.timeRequired ? { timeRequired: options.timeRequired } : {}),
-        audience: {
-          "@type": "EducationalAudience",
-          educationalRole: "teacher",
-        },
+        audience,
         author: {
           "@type": "Organization",
           name: siteConfig.editor.name,
