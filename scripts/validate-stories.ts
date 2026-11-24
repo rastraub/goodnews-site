@@ -216,6 +216,28 @@ import {
   worldKindnessDayInSeason,
   worldKindnessJsonLd,
 } from "../lib/world-kindness-day";
+import {
+  YEAR_IN_REVIEW_EDITIONS,
+  YEAR_IN_REVIEW_INDEX_PATH,
+  YEAR_IN_REVIEW_LIMITS,
+  YEAR_IN_REVIEW_PREVIEW,
+  YEAR_IN_REVIEW_SCORE,
+  YEAR_IN_REVIEW_TIME_ZONE,
+  buildYearInReview,
+  emptyYearInReviewConfig,
+  formatYearInReviewGapReport,
+  getYearInReview,
+  parseYearInReviewEditorConfig,
+  storyQualifiesForYear,
+  yearInReviewBlockReason,
+  yearInReviewIndexable,
+  yearInReviewIndexPublic,
+  yearInReviewPath,
+  yearInReviewJsonLd,
+  yearInReviewPromo,
+  yearInReviewRobots,
+  type YearReviewStory,
+} from "../lib/year-in-review";
 import { editionLanguageAlternates, weekIndexLanguageAlternates } from "../lib/i18n";
 import {
   SPANISH_TRANSLATION_NOTE,
@@ -4563,6 +4585,270 @@ function assertTableTalk() {
   );
 }
 
+function yearFixture(partial: Partial<YearReviewStory> & Pick<YearReviewStory, "slug" | "date">): YearReviewStory {
+  return {
+    title: "Neighbors opened a library garden for the town",
+    dek: "Volunteers planted beds and left the gate open for anyone who wanted tomatoes.",
+    city: "Boulder",
+    country: "US",
+    state: "CO",
+    alsoStates: [],
+    category: "community",
+    tags: ["neighbors"],
+    sourceName: "A local paper",
+    sourceUrl: "https://example.com/story",
+    image: "/images/stories/example.webp",
+    imageAlt: "A garden bed beside a brick library",
+    body: "Volunteers filled the beds and left the gate open.",
+    kidFriendly: false,
+    ...partial,
+  };
+}
+
+function assertYearInReview() {
+  if (YEAR_IN_REVIEW_PREVIEW) {
+    throw new Error("YEAR_IN_REVIEW_PREVIEW must stay false so the roundup is not indexed early.");
+  }
+  if (YEAR_IN_REVIEW_TIME_ZONE !== "America/Denver") {
+    throw new Error("The year in review clock should be America/Denver.");
+  }
+  const edition = YEAR_IN_REVIEW_EDITIONS.find((item) => item.year === 2026);
+  if (!edition || edition.publishOn !== "2026-12-15" || edition.promoThrough !== "2027-01-10") {
+    throw new Error("The 2026 review should publish on December 15 and promote through January 10.");
+  }
+  const before = new Date("2026-12-15T06:59:00Z");
+  const open = new Date("2026-12-15T07:00:00Z");
+  const stillUp = new Date("2027-01-11T06:59:00Z");
+  const afterPromo = new Date("2027-01-11T07:00:00Z");
+  if (yearInReviewIndexable(2026, { now: before }) || yearInReviewPromo({ now: before })) {
+    throw new Error("The review should stay noindex, and unlinked, before December 15 Denver time.");
+  }
+  if (!yearInReviewIndexable(2026, { now: open }) || !yearInReviewPromo({ now: open })) {
+    throw new Error("The review should be indexable, with a promo link, at December 15 Denver midnight.");
+  }
+  if (!yearInReviewIndexable(2026, { now: stillUp }) || !yearInReviewPromo({ now: stillUp })) {
+    throw new Error("The promo should still show at the end of January 10 Denver time.");
+  }
+  if (!yearInReviewIndexable(2026, { now: afterPromo }) || yearInReviewPromo({ now: afterPromo })) {
+    throw new Error("After January 10 the page stays indexable and the promo links come down.");
+  }
+  if (!yearInReviewIndexable(2026, { now: before, preview: true }) || !yearInReviewPromo({ now: before, preview: true })) {
+    throw new Error("The preview flag should force the published state before December 15.");
+  }
+  if (yearInReviewRobots(2026, { now: before }).index !== false) {
+    throw new Error("Robots should be noindex before the publish date.");
+  }
+  if (yearInReviewRobots(2026, { now: open }).index !== true) {
+    throw new Error("Robots should allow indexing on the publish date.");
+  }
+  const otherSignals =
+    YEAR_IN_REVIEW_SCORE.top5First +
+    YEAR_IN_REVIEW_SCORE.worldPick +
+    YEAR_IN_REVIEW_SCORE.image +
+    YEAR_IN_REVIEW_SCORE.recencyMax +
+    YEAR_IN_REVIEW_SCORE.cheersMax;
+  if (YEAR_IN_REVIEW_SCORE.storyOfTheDay <= otherSignals) {
+    throw new Error("Story of the Day should outrank the other score signals combined.");
+  }
+
+  const featured = yearFixture({ slug: "oct-featured", date: "2026-10-02", state: "CO", featured: true });
+  const later = yearFixture({ slug: "oct-later", date: "2026-10-28", state: "CO", top5: 1 });
+  const january = yearFixture({ slug: "jan-story", date: "2026-01-20", state: "ME" });
+  const old = yearFixture({ slug: "old-story", date: "2025-12-01", state: "ME" });
+  const shooting = yearFixture({
+    slug: "co-shooting",
+    date: "2026-10-12",
+    state: "CO",
+    title: "Officers responded after a downtown shooting",
+    dek: "A shooting downtown brought officers to the block before sunrise.",
+    featured: true,
+  });
+  const world = yearFixture({
+    slug: "accra-garden",
+    date: "2026-10-18",
+    country: "GH",
+    state: undefined,
+    city: "Accra",
+    title: "Students planted a learning garden in Accra",
+    dek: "The class planted vegetables and left the beds open for the next group.",
+  });
+  const kid = yearFixture({
+    slug: "kid-garden",
+    date: "2026-10-09",
+    state: "VT",
+    tags: ["kids", "students"],
+    kidFriendly: true,
+    kidSummary:
+      "Students in Vermont planted a garden beside their school library. They water it after class and anyone in the town can pick a tomato. The beds are small. The harvest is for sharing.",
+    kidQuestions: [
+      "Why might a class plant food that other people can pick?",
+      "What is one job a student could do in a school garden?",
+    ],
+  });
+  const responder = yearFixture({
+    slug: "ems-save",
+    date: "2026-11-02",
+    state: "UT",
+    tags: ["ems", "first-responders"],
+    category: "heroes",
+    title: "Paramedics helped a hiker back to the trailhead",
+    dek: "A crew walked the hiker out and stayed until a relative arrived.",
+  });
+  const animal = yearFixture({
+    slug: "otter-release",
+    date: "2026-11-03",
+    state: "OR",
+    category: "animals",
+    tags: ["wildlife-conservation"],
+    title: "A rescued otter went back to the river",
+    dek: "Caregivers released the otter after it could swim on its own.",
+  });
+  const config = emptyYearInReviewConfig();
+  const sample = [featured, later, january, old, shooting, world, kid, responder, animal];
+  const review = buildYearInReview(sample, config, 2026);
+  if (review.pinErrors.length) throw new Error(review.pinErrors.join("; "));
+  const october = review.months.find((month) => month.key === "10");
+  if (october?.story.slug !== "oct-featured") {
+    throw new Error("Story of the Day should win its month over a later Top 5 story.");
+  }
+  if (!review.months.some((month) => month.key === "01" && month.story.slug === "jan-story")) {
+    throw new Error("A real January story should appear.");
+  }
+  if (review.months.some((month) => month.key === "02")) {
+    throw new Error("A month with no story should be omitted.");
+  }
+  if (review.stories.some((story) => story.slug === "old-story" || story.slug === "co-shooting")) {
+    throw new Error("A prior-year story or a shooting story should stay off the roundup.");
+  }
+  if (review.world[0]?.story.slug !== "accra-garden") throw new Error("The world section should keep the non-US story.");
+  if (review.kids[0]?.story.slug !== "kid-garden") throw new Error("The classroom section should keep the kid-safe story.");
+  if (!review.firstResponders.some((item) => item.story.slug === "ems-save")) {
+    throw new Error("The first responder section should keep the tagged rescue.");
+  }
+  if (!review.animals.some((item) => item.story.slug === "otter-release")) {
+    throw new Error("The animals section should keep the nature story.");
+  }
+  if (review.numbers.stories !== sample.filter((story) => storyQualifiesForYear(story, 2026, config)).length) {
+    throw new Error("The numbers block should count qualifying archive stories, not invented ones.");
+  }
+  if (review.gaps.some((slot) => slot.story)) throw new Error("A gap card should not invent a story.");
+
+  const pinned = buildYearInReview(sample, { ...config, months: { "10": "oct-later" } }, 2026);
+  if (pinned.months.find((month) => month.key === "10")?.story.slug !== "oct-later" || !pinned.months.find((month) => month.key === "10")?.pinned) {
+    throw new Error("A month pin should replace the automatic pick.");
+  }
+  const blockedPin = buildYearInReview(sample, { ...config, months: { "10": "co-shooting" }, states: { CO: "co-shooting" } }, 2026);
+  if (!blockedPin.pinErrors.some((error) => error.includes("co-shooting") && error.includes("content filter"))) {
+    throw new Error("A pin should not put a shooting story back on the roundup.");
+  }
+  if (blockedPin.stories.some((story) => story.slug === "co-shooting")) {
+    throw new Error("The blocked pin should not render.");
+  }
+  const worldPin = buildYearInReview(sample, { ...config, world: ["oct-featured"] }, 2026);
+  if (!worldPin.pinErrors.some((error) => error.includes("United States"))) {
+    throw new Error("A world pin should reject a United States story.");
+  }
+  const kidPin = buildYearInReview([featured], { ...config, kids: ["oct-featured"] }, 2026);
+  if (!kidPin.pinErrors.some((error) => error.includes("classroom filter"))) {
+    throw new Error("A kids pin should reject a story that is not classroom-ready.");
+  }
+  if (YEAR_IN_REVIEW_LIMITS.kids < 1 || YEAR_IN_REVIEW_LIMITS.firstResponders < 1 || YEAR_IN_REVIEW_LIMITS.animals < 1) {
+    throw new Error("Section limits should keep at least one automatic pick.");
+  }
+
+  for (const value of [
+    { exclude: ["Not A Slug"], months: {}, states: {}, world: [], kids: [], firstResponders: [], animals: [] },
+    { exclude: [], months: { "13": "oct-featured" }, states: {}, world: [], kids: [], firstResponders: [], animals: [] },
+    { exclude: [], months: {}, states: {}, world: ["dup", "dup"], kids: [], firstResponders: [], animals: [] },
+    { extra: true },
+  ]) {
+    let threw = false;
+    try {
+      parseYearInReviewEditorConfig(value);
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`Year in Review config should reject ${JSON.stringify(value)}`);
+  }
+  if (Object.keys(parseYearInReviewEditorConfig(emptyYearInReviewConfig())).length !== 7) {
+    throw new Error("An empty editor file should keep the seven lists.");
+  }
+
+  const live = getYearInReview(2026);
+  if (live.numbers.stories < 1 || live.months.length < 1) {
+    throw new Error("The 2026 review should render real archive stories.");
+  }
+  for (const month of live.months) {
+    if (!month.story.date.startsWith(`2026-${month.key}`)) {
+      throw new Error(`${month.story.slug} is filed under ${month.name} without a matching date.`);
+    }
+    if (yearInReviewBlockReason(month.story)) {
+      throw new Error(`${month.story.slug} is on the roundup but matches the content filter.`);
+    }
+  }
+  for (const month of live.emptyMonths) {
+    if (live.months.some((pick) => pick.key === month.key)) {
+      throw new Error(`${month.name} is both shown and listed as empty.`);
+    }
+  }
+  for (const slot of live.covered) {
+    if (!slot.story) continue;
+    if (slot.story.country !== "US") throw new Error(`${slot.story.slug} is not a US story.`);
+    if (slot.story.state !== slot.state.code && !slot.story.alsoStates.includes(slot.state.code)) {
+      throw new Error(`${slot.story.slug} is filed on ${slot.state.code} without a matching state.`);
+    }
+  }
+  const node = yearInReviewJsonLd(live)["@graph"][0] as { "@type": string[]; mainEntity: { "@type"?: string } };
+  if (!node["@type"].includes("Article") || !node["@type"].includes("CollectionPage")) {
+    throw new Error("Year in Review schema should be an Article and a CollectionPage.");
+  }
+  if (node.mainEntity["@type"] !== "ItemList") throw new Error("Year in Review schema should include an ItemList.");
+
+  const urls = sitemap().map((entry) => entry.url);
+  const yearListed = urls.some((url) => url.endsWith(yearInReviewPath(2026)));
+  const indexListed = urls.some((url) => url.endsWith(YEAR_IN_REVIEW_INDEX_PATH));
+  if (yearListed !== yearInReviewIndexable(2026) || indexListed !== yearInReviewIndexPublic()) {
+    throw new Error("The sitemap should include the year in review only after the publish date.");
+  }
+  const indexNow = fs.readFileSync(path.join(process.cwd(), "scripts/indexnow.ts"), "utf8");
+  if (!indexNow.includes("yearInReviewIndexable")) {
+    throw new Error("IndexNow should add the year in review only when it is indexable.");
+  }
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  if (!home.includes("YearInReviewBanner") || !home.includes("GivingTuesdayBanner")) {
+    throw new Error("The homepage should mount the year in review banner beside the other seasonal banners.");
+  }
+  const banner = fs.readFileSync(path.join(process.cwd(), "components/year-in-review-banner.tsx"), "utf8");
+  if (banner.includes("activeHomepageBanner")) {
+    throw new Error("The year in review banner should coexist with the single seasonal banner, not replace it.");
+  }
+  const footer = fs.readFileSync(path.join(process.cwd(), "components/footer.tsx"), "utf8");
+  if (!footer.includes("yearInReviewPromo")) throw new Error("The footer link should follow the promo window.");
+  const header = fs.readFileSync(path.join(process.cwd(), "components/header.tsx"), "utf8");
+  if (!header.includes("yearInReviewHref")) throw new Error("The nav link should be passed in only during the promo window.");
+  const page = fs.readFileSync(path.join(process.cwd(), "app/(site)/year-in-review/[year]/page.tsx"), "utf8");
+  for (const needle of [
+    "yearInReviewRobots",
+    "yearInReviewJsonLd",
+    "EmailSignup",
+    "PrintButton",
+    "ShareButtons",
+    "siteConfig.editor.name",
+    "?preview=1",
+    "/state/",
+  ]) {
+    if (!page.includes(needle)) throw new Error(`The year in review page is missing ${needle}.`);
+  }
+  if (page.includes("Jane ") || page.includes("By John")) {
+    throw new Error("The year in review page should use the public masthead, not a personal name.");
+  }
+  const docs = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!docs.includes("data/year-in-review-2026.json") || !docs.includes("year-in-review-gaps")) {
+    throw new Error("ADDING_STORIES.md should explain year in review pins and the gap report.");
+  }
+  console.log(formatYearInReviewGapReport(live));
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4598,6 +4884,7 @@ async function main() {
   assertGivingTuesday(stories);
   assertFirstRespondersDay();
   assertWorldKindnessDay();
+  assertYearInReview();
   assertKindnessChallenges();
   assertKindnessAmbassadors();
   assertSpanishEditions();

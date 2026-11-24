@@ -15,7 +15,15 @@ const PRIMARY = [
   ...CATEGORIES.map((category) => ({ href: `/category/${category.slug}`, label: category.label })),
 ];
 
-export function Header({ edition, quizHref }: { edition: string; quizHref?: string }) {
+export function Header({
+  edition,
+  quizHref,
+  yearInReviewHref,
+}: {
+  edition: string;
+  quizHref?: string;
+  yearInReviewHref?: string;
+}) {
   const pathname = usePathname();
   const [openPath, setOpenPath] = useState<string | null>(null);
   const open = openPath === pathname;
@@ -32,6 +40,7 @@ export function Header({ edition, quizHref }: { edition: string; quizHref?: stri
     { href: "/on-this-day", label: "On this day" },
     { href: CALENDAR_PATH, label: "Calendar" },
     { href: "/good-neighbor", label: "Good Neighbor" },
+    ...(yearInReviewHref ? [{ href: yearInReviewHref, label: "Year in Review" }] : []),
   ];
 
   function active(href: string) {

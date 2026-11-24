@@ -15,6 +15,7 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run validate-stories   # check story files and the rename rule
 npm run credited-outlets-report   # CSV of newsrooms credited in published stories
 npm run giving-tuesday-coverage   # states still missing a Giving Tuesday pick
+npm run year-in-review-gaps   # months and states still missing a 2026 year-in-review story
 npm run calendar-coverage   # observances in the next 60 days with fewer than 2 stories
 npm run lint
 npm run build
@@ -44,6 +45,10 @@ Story pages and classroom pages can read aloud in the browser, using the device'
 ## Good News Calendar
 
 `/calendar` lists kindness days and other positive observances for the next 12 months in America/Denver. Each date links to archive stories and, when one exists, a hub such as Veterans Day or Giving Tuesday. `/calendar/{slug}` is one observance. A page with fewer than two matching stories stays up and is left out of the sitemap. `/calendar/good-news.ics` is a static calendar file. Dates and classroom lines live in `data/good-news-calendar.ts`. See [ADDING_STORIES.md](ADDING_STORIES.md).
+
+## Good News Year in Review
+
+`/year-in-review/2026` is the year-end roundup. It can be read now and stays out of search until December 15, 2026 (America/Denver). Editor pins live in `data/year-in-review-2026.json`. See [ADDING_STORIES.md](ADDING_STORIES.md).
 
 ## Good news on this day
 

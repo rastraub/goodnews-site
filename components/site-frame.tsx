@@ -17,6 +17,7 @@ export function SiteFrame({
   skipLabel,
   edition,
   quizHref,
+  yearInReviewHref,
   children,
 }: {
   lang: "en" | "es";
@@ -24,9 +25,10 @@ export function SiteFrame({
   skipLabel: string;
   edition: string;
   quizHref?: string;
+  yearInReviewHref?: string;
   children: ReactNode;
 }) {
-  const header = <Header edition={edition} quizHref={quizHref} />;
+  const header = <Header edition={edition} quizHref={quizHref} yearInReviewHref={yearInReviewHref} />;
   const footer = <Footer />;
   return (
     <html lang={lang} className={className}>
