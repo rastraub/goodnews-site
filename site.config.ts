@@ -70,6 +70,18 @@ export const newsBreakBanner = {
 } as const;
 
 /**
+ * Smart-speaker Flash Briefing.
+ * The briefing page says this is coming soon while `published` is false.
+ * When the skill is live, set `published` to true and paste the public skill
+ * link into `skillUrl` (an https URL). Leave the link empty until it exists.
+ * Do not put a person's name here.
+ */
+export const alexaBriefing = {
+  published: false,
+  skillUrl: "",
+} as const;
+
+/**
  * TODO: Set the city and state where SBBnet, Inc. operates.
  * Do not invent a location. Leave both empty until they are known.
  * About copy and NewsMediaOrganization JSON-LD omit the place until both are non-empty.
