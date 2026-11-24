@@ -59,6 +59,7 @@ const nextConfig: NextConfig = {
         destination: `/country/${country.slug}`,
         permanent: true,
       })),
+      { source: "/advent", destination: "/advent/2026", permanent: false },
     ];
   },
   // No middleware.ts. A middleware function runs on every request, including static

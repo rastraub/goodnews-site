@@ -21,6 +21,7 @@
     "calendar-coverage": "tsx scripts/calendar-coverage-report.ts",
     "first-responders-gaps": "tsx scripts/first-responders-day-gaps.ts",
     "next-kindness-challenge": "tsx scripts/next-kindness-challenge.ts",
+    "advent-gaps": "tsx scripts/advent-gaps.ts",
     "missing-spanish": "tsx scripts/missing-spanish-editions.ts"
   },
   "dependencies": {
