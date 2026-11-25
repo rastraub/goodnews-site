@@ -26,6 +26,7 @@ import { openGraphImage } from "@/lib/feed-image";
 import { pageAlternates, storyJsonLd, storyModifiedIso, storyPublishedIso, xHandle } from "@/lib/seo";
 import { getCountry } from "@/lib/countries";
 import { explainerPath, explainersForStory } from "@/lib/explainers";
+import { StarterBox } from "@/components/starter-box";
 import { challengesForStory } from "@/lib/kindness";
 import { getOutletForStory } from "@/lib/outlets";
 import { getStory, relatedStories, storiesToPrerender, type Story } from "@/lib/stories";
@@ -205,6 +206,7 @@ export default async function StoryPage({ params }: Props) {
             </div>
           </div>
           <StoryBody markdown={story.body} />
+          <StarterBox story={story} />
           {inspired.length ? (
             <section className="classroom-box" id="kindness-challenge">
               <h2>Kindness Challenge</h2>

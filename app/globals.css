@@ -1159,3 +1159,31 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .tt-url{display:block;word-break:break-all}
   .tt-foot a{color:#000}
 }
+
+.starter-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-top:22px}
+.starter-box h2{font-family:var(--font-serif);font-size:26px;margin:4px 0 8px;font-weight:600}
+.starter-box ol{margin:0 0 10px 1.15em;display:grid;gap:6px}
+.starter-box li{line-height:1.45}
+.starter-box a,.starter-credit a,.starter-guide a{color:var(--blue-d);font-weight:700}
+.starter-thumb{width:min(100%,220px);margin:0 0 12px}
+.starter-action{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-top:16px}
+.starter-action h2{font-family:var(--font-serif);font-size:28px;margin:0 0 8px;font-weight:600}
+.starter-action h3{font-family:var(--font-sans);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);margin:14px 0 8px;font-weight:700}
+.starter-action ol{margin:0 0 0 1.2em;display:grid;gap:6px}
+.starter-action li{line-height:1.45}
+.starter-credit{color:var(--ink2);font-size:15.5px}
+.starter-meta{margin-top:10px}
+.starters-print-head{display:none}
+.kind-share h2{font-family:var(--font-serif);font-size:28px;margin:22px 0 8px;font-weight:600}
+@page starters-letter{size:letter portrait;margin:0.45in}
+@media print{
+  .starters-print-head{display:block !important}
+  .starters-sheet{page:starters-letter;max-width:none}
+  .starter-action{border:0;border-top:1pt solid #000;border-radius:0;padding:7pt 0 0;margin:0;background:#fff;break-inside:avoid;page-break-inside:avoid}
+  .starter-action h2{font-size:13pt;margin:0 0 2pt;color:#000}
+  .starter-action h3{font-size:9pt;margin:4pt 0 2pt;color:#000}
+  .starter-action p,.starter-action li,.starters-print-head p,.starters-print-head .byline{font-size:9pt;line-height:1.28;color:#000}
+  .starter-action ol{gap:1pt}
+  .starter-credit a,.starter-guide a{color:#000}
+  .starters-print-head h1{font-size:16pt;margin:0 0 4pt;color:#000}
+}

@@ -85,6 +85,7 @@ import {
 import { buildHubs, getHubIndex, indexableHubs, MAX_PRERENDERED_HUBS, MIN_CITY_INDEX_STORIES, MIN_HUB_STORIES, slugify, type HubStory } from "../lib/hubs";
 import { getStateByCode } from "../lib/states";
 import { assertKindnessHelpers, getKindnessChallenges, KINDNESS_INDEX_PATH } from "../lib/kindness";
+import { assertStarterHelpers } from "../lib/starters";
 import { getKidStories, kidPlaces, storyOfTheDay } from "../lib/kids";
 import { assertListenText } from "../lib/listen-text";
 import {
@@ -4599,6 +4600,7 @@ async function main() {
   assertFirstRespondersDay();
   assertWorldKindnessDay();
   assertKindnessChallenges();
+  assertStarterHelpers();
   assertKindnessAmbassadors();
   assertSpanishEditions();
   assertNewsBreak();

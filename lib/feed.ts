@@ -8,6 +8,7 @@ import { storyFeedImage } from "./feed-image";
 import { absoluteUrl, storyModifiedIso, storyPublishedIso } from "./seo";
 import { getPublishedStories, type Story } from "./stories";
 import { getStateByCode, STATES } from "./states";
+import { STARTERS_FEED_PATH } from "./starter-path";
 import { siteConfig } from "@/site.config";
 
 export const FEED_LIMIT = 100;
@@ -48,6 +49,7 @@ export function feedCatalog(): { heading: string; feeds: FeedLink[] }[] {
         { title: "World", path: "/world/rss.xml", blurb: "Stories from outside the United States." },
         { title: "For classrooms", path: "/kids/rss.xml", blurb: "Stories a teacher can read with a class." },
         { title: "En español", path: "/es/rss.xml", blurb: "A weekly Top 5 in Spanish. Original sources stay in English." },
+        { title: "Good News Starters", path: STARTERS_FEED_PATH, blurb: "Three free or cheap local actions for each finished week." },
       ],
     },
     {

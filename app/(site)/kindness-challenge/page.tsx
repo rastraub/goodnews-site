@@ -13,6 +13,8 @@ import {
 import { listingJsonLd, listingMeta } from "@/lib/seo";
 import { AMBASSADORS_PATH, ambassadorReportHref } from "@/lib/ambassador-tip";
 import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
+import { STARTERS_INDEX_PATH } from "@/lib/starter-path";
+import { latestStarterWeek } from "@/lib/starters";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -43,6 +45,7 @@ export default function KindnessIndexPage() {
   const challenges = getKindnessChallenges();
   const newestFirst = challenges.slice().reverse();
   const current = thisWeeksChallenge(challenges);
+  const starters = latestStarterWeek();
 
   return (
     <div className="page-block">
@@ -76,6 +79,7 @@ export default function KindnessIndexPage() {
             <Link href="/kids">Classroom stories</Link>
             <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
             <Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link>
+            <Link href={starters?.path ?? STARTERS_INDEX_PATH}>Good News Starters</Link>
             <Link href={ambassadorReportHref()}>Ambassador classes: tell us how it went</Link>
           </p>
         ) : null}
