@@ -52,7 +52,29 @@ export const siteConfig = {
     youtube: "",
     facebook: "",
   },
+  /**
+   * GA4 measurement ID. Public; it is sent to the browser.
+   * `NEXT_PUBLIC_GA_MEASUREMENT_ID` overrides this when that value is a
+   * measurement ID (`G-` plus letters and digits). Leave this empty, and
+   * leave the env var unset, to omit the gtag snippet.
+   * Production uses this default, so the Vercel env var is not required.
+   */
+  gaMeasurementId: "G-BQTQ75PLBB",
 } as const;
+
+const GA_MEASUREMENT_ID = /^G-[A-Z0-9]+$/;
+
+/**
+ * The measurement ID the page should load.
+ * An env override wins when it is a real measurement ID. Otherwise the
+ * committed `siteConfig.gaMeasurementId` is used. Empty means render no tag.
+ */
+export function gaMeasurementId(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? "";
+  if (GA_MEASUREMENT_ID.test(fromEnv)) return fromEnv;
+  const fromConfig = siteConfig.gaMeasurementId.trim();
+  return GA_MEASUREMENT_ID.test(fromConfig) ? fromConfig : "";
+}
 
 export type SiteConfig = typeof siteConfig;
 
