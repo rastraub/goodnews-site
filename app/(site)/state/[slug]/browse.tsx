@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { EmailSignup } from "@/components/email-signup";
 import { JsonLd } from "@/components/json-ld";
 import { StoryGrid } from "@/components/story-grid";
 import { StateJump } from "@/components/local-explorer";
@@ -185,6 +186,7 @@ function StateBody({ state, page }: { state: StateInfo; page: number }) {
         </aside>
       </div>
       {page === 1 ? <WorldSpotlight /> : null}
+      {page === 1 ? <EmailSignup id={`state-email-${state.code}`} defaultState={state.code} /> : null}
     </div>
   );
 }

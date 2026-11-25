@@ -15,6 +15,7 @@ import {
   type ClassroomPack,
 } from "@/lib/classroom-pack";
 import { formatStoryDate } from "@/lib/format";
+import { KUDOS_PATH } from "@/lib/kudos";
 import { openGraphImage } from "@/lib/feed-image";
 import { classroomJsonLd, listingMeta } from "@/lib/seo";
 import type { Story } from "@/lib/stories";
@@ -107,6 +108,9 @@ export default async function ClassroomPackPage({ params }: Props) {
         <section className="pack-teacher" aria-labelledby="teacher-note">
           <h2 id="teacher-note">Teacher note</h2>
           <p>{pack.teacherNote}</p>
+          <p className="no-print">
+            <Link href={KUDOS_PATH}>Good News Kudos cards</Link> are a thank-you a class can make for a helper in a story, or for someone who helps in your own community.
+          </p>
           {pack.readyCount > pack.stories.length ? (
             <p className="teacher-note no-print">
               <Link href="/kids">More classroom stories are in the kids section.</Link>
