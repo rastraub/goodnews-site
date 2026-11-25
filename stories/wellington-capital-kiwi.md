@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.capitalkiwi.co.nz/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "Mongabay reported on November 24, 2026, that wild kiwi are living in the hills around Wellington, New Zealand's capital, for the first time in more than 150 years. A project led by Māori iwi, neighbors, and landowners has moved more than 250 kiwi there since late 2022. Teams set more than 5,300 traps across about 24,000 hectares so stoats would not eat the chicks. Where those traps are working, more than 90 percent of chicks survive. Without that work, nearly all chicks die before they grow up. Counting the chicks hatched in the wild, the local group is now thought to be more than 300 birds. Monitors say the birds are laying eggs."
 kidQuestions:
