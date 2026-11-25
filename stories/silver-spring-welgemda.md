@@ -23,7 +23,6 @@ howToHelp:
   - label: "Read the FDA announcement"
     url: "https://www.fda.gov/news-events/press-announcements/fda-approves-first-treatment-limb-girdle-muscular-dystrophy-type-2ir9"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

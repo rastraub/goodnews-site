@@ -24,7 +24,6 @@ howToHelp:
   - label: "Read the News 3 report"
     url: "https://news3lv.com/news/local/miles-for-military-marks-2000th-flight-by-reuniting-marine-with-las-vegas-family"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

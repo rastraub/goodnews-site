@@ -24,8 +24,7 @@ howToHelp:
   - label: "Sunshine Kids"
     url: "https://www.sunshinekids.org/"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

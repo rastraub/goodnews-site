@@ -23,7 +23,6 @@ howToHelp:
   - label: "Read the Hawaii News Now story"
     url: "https://www.hawaiinewsnow.com/2026/11/23/lost-found-how-old-photo-albums-tossed-out-waikiki-were-reunited-with-relatives-chicago/"
     kind: learn
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true
