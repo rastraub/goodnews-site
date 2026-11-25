@@ -12,6 +12,7 @@ import { WORLD_KINDNESS_PATH } from "@/lib/world-kindness-day";
 import { newsBreakBanner, siteConfig, socialLinks } from "@/site.config";
 import { AMBASSADORS_PATH } from "@/lib/ambassador-tip";
 import { CALENDAR_PATH } from "@/lib/calendar-path";
+import { BINGO_PATH, BREAK_INDEX_PATH } from "@/lib/break-pack";
 import { GOOD_NEWS_MAP_PATH } from "@/lib/map-path";
 
 export function Footer() {
@@ -56,6 +57,8 @@ export function Footer() {
               <li><Link href="/kids">For classrooms</Link></li>
               <li><Link href="/classroom">Good News Friday</Link></li>
               <li><Link href="/kindness-challenge">Kindness Challenge</Link></li>
+              <li><Link href={BREAK_INDEX_PATH}>Holiday break pack</Link></li>
+              <li><Link href={BINGO_PATH}>Kindness Bingo</Link></li>
               <li><Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link></li>
               <li><Link href={WORLD_KINDNESS_PATH}>World Kindness Day</Link></li>
               <li><Link href="/morning-announcements">Morning announcements</Link></li>

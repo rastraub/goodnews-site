@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreakPromo } from "@/components/break-promo";
 import { EmailSignup } from "@/components/email-signup";
 import { JsonLd } from "@/components/json-ld";
 import { StoryImage } from "@/components/story-image";
@@ -79,6 +80,7 @@ export default function KindnessIndexPage() {
             <Link href={ambassadorReportHref()}>Ambassador classes: tell us how it went</Link>
           </p>
         ) : null}
+        <BreakPromo />
       </div>
       <div className="wrap" style={{ paddingTop: 28 }}>
         {current ? (
