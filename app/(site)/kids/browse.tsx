@@ -74,6 +74,7 @@ export function KidsBrowse({ page }: { page: number }) {
         <p className="link-pills">
           <Link href="/kids/print">Print the story of the day</Link>
           <Link href="/classroom">Good News Friday packs</Link>
+          <Link href="/teens">Good News for Teens</Link>
           <Link href={AMBASSADORS_PATH}>Kindness Ambassadors</Link>
           <Link href={GOOD_NEWS_MAP_PATH}>Good News Map</Link>
           {quiz ? (

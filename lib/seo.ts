@@ -413,6 +413,26 @@ export function classroomJsonLd(options: {
   };
 }
 
+/** A single page that is not a list of stories. Service-hours uses this. */
+export function webPageJsonLd(options: { name: string; description: string; path: string; crumbs: Crumb[] }) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        name: options.name,
+        description: options.description,
+        url: absoluteUrl(options.path),
+        inLanguage: "en-US",
+        isAccessibleForFree: true,
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+      },
+      breadcrumbNode(options.crumbs),
+    ],
+  };
+}
+
 export function listingJsonLd(options: {
   name: string;
   description: string;

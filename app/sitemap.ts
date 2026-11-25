@@ -15,6 +15,7 @@ import { getPublishedStories } from "@/lib/stories";
 import { STATES } from "@/lib/states";
 import { parseMonthDaySlug } from "@/lib/calendar-day";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "@/lib/classroom-pack";
+import { SERVICE_HOURS_PATH, TEENS_INDEX_PATH, teensToPrerender } from "@/lib/teens";
 import { indexesToPrerender } from "@/lib/good-news-index";
 import { allOnThisDayPaths, getOnThisDay, onThisDayLastModified, ON_THIS_DAY_INDEX_PATH, onThisDayUpdated } from "@/lib/on-this-day";
 import { quizzesToPrerender } from "@/lib/quiz";
@@ -94,6 +95,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const newestIndex = indexes[indexes.length - 1];
   const packs = packsToPrerender();
   const newestPack = packs[packs.length - 1];
+  const teenWeeks = teensToPrerender();
+  const newestTeen = teenWeeks[teenWeeks.length - 1];
   const thanks = thanksBoard(stories);
   const tableTalk = tableTalkDeck(stories);
   const tableTalkLatest = tableTalk.cards.reduce<string | undefined>((latest, card) => {
@@ -268,6 +271,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: (pack.inProgress ? "daily" : "weekly") as "daily" | "weekly",
         priority: pack.inProgress ? 0.6 : 0.5,
       })),
+    {
+      url: absoluteUrl(TEENS_INDEX_PATH),
+      lastModified: newestTeen?.latest ?? siteLatest,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    },
+    ...teenWeeks
+      .slice()
+      .reverse()
+      .map((edition) => ({
+        url: absoluteUrl(edition.path),
+        lastModified: edition.latest ?? edition.start,
+        changeFrequency: (edition.inProgress ? "daily" : "weekly") as "daily" | "weekly",
+        priority: edition.inProgress ? 0.6 : 0.5,
+      })),
+    {
+      url: absoluteUrl(SERVICE_HOURS_PATH),
+      lastModified: newestTeen?.latest ?? siteLatest,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    },
     {
       url: absoluteUrl("/quiz"),
       lastModified: newestQuiz?.latest ?? siteLatest,
