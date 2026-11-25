@@ -363,6 +363,9 @@ footer a:hover{color:#fff}
 .stack-form input{flex:1;min-width:220px}
 .error{color:#9B3B2F;font-size:14px;font-weight:600;margin:8px 0}
 .success-banner{background:#E8F5EE;color:#1C6B4A;border-radius:16px;padding:16px 18px;font-weight:600}
+.field-guard{font-weight:600;color:var(--ink2);font-size:13.5px;line-height:1.45}
+.check-line{display:flex;gap:10px;align-items:flex-start;font-weight:600;font-size:14.5px;line-height:1.45;margin:6px 0}
+.check-line input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:var(--ink)}
 
 .state-index{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .state-index a{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}

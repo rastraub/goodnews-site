@@ -3,6 +3,14 @@
 import { useState } from "react";
 import { AMBASSADOR_REPORT_TYPE, AMBASSADOR_SIGNUP_TYPE, type AmbassadorFormMode } from "@/lib/ambassador-tip";
 import { STATES } from "@/lib/states";
+import {
+  THANK_YOU_ANONYMOUS,
+  THANK_YOU_CONSENT,
+  THANK_YOU_GUARD,
+  THANK_YOU_KIND,
+  THANK_YOU_PLACEHOLDER,
+  THANK_YOU_SUMMARY_LABEL,
+} from "@/lib/thank-you-wall";
 
 const EMPTY = {
   name: "",
@@ -18,11 +26,14 @@ const EMPTY = {
   company: "",
 };
 
-export function SubmitForm({ mode = "story" }: { mode?: AmbassadorFormMode }) {
+export function SubmitForm({ mode = "story" }: { mode?: AmbassadorFormMode | "thanks" }) {
   const [fields, setFields] = useState(EMPTY);
+  const [consent, setConsent] = useState(false);
+  const [anonymous, setAnonymous] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  const ambassador = mode !== "story";
+  const ambassador = mode === "ambassador-signup" || mode === "ambassador-report";
+  const thanks = mode === "thanks";
 
   function set<K extends keyof typeof EMPTY>(key: K, value: string) {
     setFields((current) => ({ ...current, [key]: value }));
@@ -34,7 +45,20 @@ export function SubmitForm({ mode = "story" }: { mode?: AmbassadorFormMode }) {
     setMessage("");
     const pageUrl = window.location.href;
     const body =
-      mode === "ambassador-signup"
+      mode === "thanks"
+        ? {
+            kind: THANK_YOU_KIND,
+            name: fields.name,
+            email: fields.email,
+            city: fields.city,
+            state: fields.state,
+            summary: fields.summary,
+            consent,
+            anonymous,
+            company: fields.company,
+            pageUrl,
+          }
+        : mode === "ambassador-signup"
         ? {
             type: AMBASSADOR_SIGNUP_TYPE,
             name: fields.name,
@@ -82,8 +106,12 @@ export function SubmitForm({ mode = "story" }: { mode?: AmbassadorFormMode }) {
       }
       setStatus("success");
       setFields(EMPTY);
+      setConsent(false);
+      setAnonymous(false);
       setMessage(
-        mode === "ambassador-signup"
+        mode === "thanks"
+          ? "Thank you. We received your thank-you."
+          : mode === "ambassador-signup"
           ? "Thank you. We received your class signup."
           : mode === "ambassador-report"
             ? "Thank you. We received your note."
@@ -100,7 +128,13 @@ export function SubmitForm({ mode = "story" }: { mode?: AmbassadorFormMode }) {
   }
 
   const button =
-    mode === "ambassador-signup" ? "Send the class signup" : mode === "ambassador-report" ? "Send the class note" : "Submit a story";
+    mode === "thanks"
+      ? "Send my thank-you"
+      : mode === "ambassador-signup"
+        ? "Send the class signup"
+        : mode === "ambassador-report"
+          ? "Send the class note"
+          : "Submit a story";
 
   return (
     <form className="form-card" onSubmit={onSubmit}>
@@ -219,6 +253,29 @@ export function SubmitForm({ mode = "story" }: { mode?: AmbassadorFormMode }) {
               value={fields.sourceUrl}
               onChange={(event) => set("sourceUrl", event.target.value)}
             />
+          </label>
+        </>
+      ) : null}
+      {thanks ? (
+        <>
+          <label className="field">
+            <span>{THANK_YOU_SUMMARY_LABEL}</span>
+            <textarea
+              required
+              minLength={40}
+              value={fields.summary}
+              onChange={(event) => set("summary", event.target.value)}
+              placeholder={THANK_YOU_PLACEHOLDER}
+            />
+            <span className="field-guard">{THANK_YOU_GUARD}</span>
+          </label>
+          <label className="check-line">
+            <input type="checkbox" required checked={consent} onChange={(event) => setConsent(event.target.checked)} />
+            <span>{THANK_YOU_CONSENT}</span>
+          </label>
+          <label className="check-line">
+            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} />
+            <span>{THANK_YOU_ANONYMOUS}</span>
           </label>
         </>
       ) : null}

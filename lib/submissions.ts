@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { sendStoryTipEmail } from "@/lib/smtp";
+import { thankYouSubject } from "@/lib/thank-you-wall";
 import { prepareStoryTip, storyTipBodies, storyTipSubject, type StoryTip } from "@/lib/tip-mail";
 
 export type { StoryTip };
@@ -21,7 +22,7 @@ export async function handleStorySubmission(tip: StoryTip): Promise<void> {
 
   const { text, html } = storyTipBodies(clean);
   await sendStoryTipEmail({
-    subject: storyTipSubject(clean.summary),
+    subject: clean.kind === "thanks" ? thankYouSubject(clean.summary) : storyTipSubject(clean.summary),
     text,
     html,
     replyTo: clean.email,
