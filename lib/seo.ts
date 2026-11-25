@@ -413,6 +413,81 @@ export function classroomJsonLd(options: {
   };
 }
 
+/** A free bulletin pack. Not a religious text. */
+export function faithJsonLd(options: {
+  name: string;
+  description: string;
+  path: string;
+  crumbs: Crumb[];
+  items: { name: string; path: string }[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["CollectionPage", "CreativeWork"],
+        "@id": `${absoluteUrl(options.path)}#bulletin`,
+        name: options.name,
+        description: options.description,
+        url: absoluteUrl(options.path),
+        inLanguage: "en-US",
+        isAccessibleForFree: true,
+        audience: {
+          "@type": "Audience",
+          audienceType: "Newsletter editors and small-group leaders",
+        },
+        author: {
+          "@type": "Organization",
+          name: siteConfig.editor.name,
+          url: absoluteUrl("/about#masthead"),
+        },
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+        mainEntity: {
+          "@type": "ItemList",
+          numberOfItems: options.items.length,
+          itemListElement: options.items.slice(0, 40).map((item, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: item.name,
+            url: absoluteUrl(item.path),
+          })),
+        },
+      },
+      breadcrumbNode(options.crumbs),
+    ],
+  };
+}
+
+/** A page that helps a reader share the free newsletter from their own device. */
+export function giftJsonLd(options: { name: string; description: string; path: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${absoluteUrl(options.path)}#webpage`,
+        name: options.name,
+        description: options.description,
+        url: absoluteUrl(options.path),
+        inLanguage: "en-US",
+        isAccessibleForFree: true,
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+        author: {
+          "@type": "Organization",
+          name: siteConfig.editor.name,
+          url: absoluteUrl("/about#masthead"),
+        },
+      },
+      breadcrumbNode([
+        { name: "Today", path: "/" },
+        { name: options.name, path: options.path },
+      ]),
+    ],
+  };
+}
+
 export function listingJsonLd(options: {
   name: string;
   description: string;

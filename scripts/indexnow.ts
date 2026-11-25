@@ -12,6 +12,8 @@ import { isWithinHours } from "../lib/seo";
 import { getPublishedStories } from "../lib/stories";
 import { getStateByCode } from "../lib/states";
 import { CLASSROOM_INDEX_PATH, packsToPrerender } from "../lib/classroom-pack";
+import { FAITH_FEED_PATH, FAITH_INDEX_PATH, bulletinsToPrerender } from "../lib/faith";
+import { GIFT_PATH } from "../lib/gift";
 import { indexesToPrerender } from "../lib/good-news-index";
 import { allOnThisDayPaths, ON_THIS_DAY_INDEX_PATH } from "../lib/on-this-day";
 import { quizzesToPrerender } from "../lib/quiz";
@@ -31,7 +33,7 @@ import { listWebStories } from "../lib/web-stories";
 import { newsBreakBanner, siteConfig } from "../site.config";
 import { GOOD_NEWS_MAP_PATH } from "../lib/map-path";
 
-const STATIC_PATHS = ["/", newsBreakBanner.path, "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/follow-ups", "/follow-ups/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, "/kindness-challenge", AMBASSADORS_PATH, AMBASSADOR_CERTIFICATE_PATH, MORNING_ANNOUNCEMENTS_PATH, "/topics", "/featured", "/widgets", "/good-news-index", GOOD_NEWS_MAP_PATH, THANKS_PATH, TABLE_TALK_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, WORLD_KINDNESS_PATH, FIRST_RESPONDERS_DAY_PATH, CALENDAR_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes", "/es", "/es/buenas-noticias", "/es/rss.xml"];
+const STATIC_PATHS = ["/", newsBreakBanner.path, "/sitemap.xml", "/news-sitemap.xml", "/rss.xml", "/smartnews.xml", "/atom.xml", "/feeds", "/about", "/editorial-standards", "/corrections", "/contact", "/local", "/world", "/world/rss.xml", "/week", "/week/rss.xml", "/follow-ups", "/follow-ups/rss.xml", "/quiz", "/kids", "/kids/rss.xml", "/kids/print", CLASSROOM_INDEX_PATH, FAITH_INDEX_PATH, FAITH_FEED_PATH, GIFT_PATH, "/kindness-challenge", AMBASSADORS_PATH, AMBASSADOR_CERTIFICATE_PATH, MORNING_ANNOUNCEMENTS_PATH, "/topics", "/featured", "/widgets", "/good-news-index", GOOD_NEWS_MAP_PATH, THANKS_PATH, TABLE_TALK_PATH, "/sources", "/web-stories", ON_THIS_DAY_INDEX_PATH, "/giving-tuesday", VETERANS_DAY_PATH, WORLD_KINDNESS_PATH, FIRST_RESPONDERS_DAY_PATH, CALENDAR_PATH, "/good-neighbor", "/good-neighbor/winners", "/heroes", "/es", "/es/buenas-noticias", "/es/rss.xml"];
 
 async function main() {
   if (process.env.VERCEL_ENV !== "production") {
@@ -44,6 +46,7 @@ async function main() {
   for (const week of weeksToPrerender()) urls.add(`${siteConfig.url}${week.path}`);
   for (const edition of indexesToPrerender()) urls.add(`${siteConfig.url}${edition.path}`);
   for (const pack of packsToPrerender()) urls.add(`${siteConfig.url}${pack.path}`);
+  for (const bulletin of bulletinsToPrerender()) urls.add(`${siteConfig.url}${bulletin.path}`);
   for (const quiz of quizzesToPrerender()) urls.add(`${siteConfig.url}${quiz.path}`);
   for (const path of allOnThisDayPaths()) urls.add(`${siteConfig.url}${path}`);
   for (const path of indexableCalendarPaths()) urls.add(`${siteConfig.url}${path}`);

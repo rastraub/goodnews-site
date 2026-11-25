@@ -14,6 +14,10 @@ import {
   storyPermalink,
   widgetTitle,
 } from "@/lib/partner-kit";
+import { CLASSROOM_INDEX_PATH } from "@/lib/classroom-pack";
+import { FAITH_INDEX_PATH } from "@/lib/faith";
+import { GIFT_PATH } from "@/lib/gift";
+import { MORNING_ANNOUNCEMENTS_PATH } from "@/lib/morning-announcements";
 import { pageAlternates } from "@/lib/seo";
 import { getPublishedStories } from "@/lib/stories";
 import { siteConfig } from "@/site.config";
@@ -52,6 +56,7 @@ export default function FeaturedPage() {
           <a href="#embed">Embed</a>
           <a href="#share">Share text</a>
           <a href="#widget">Widget</a>
+          <a href="#kits">More free kits</a>
           <a href="#contact">Contact</a>
         </nav>
 
@@ -122,6 +127,28 @@ export default function FeaturedPage() {
           <iframe className="widget-preview" src="/embed/latest" title={widgetTitle()} loading="lazy" />
           <CopyBlock value={iframeSnippet({ place: "latest", title: widgetTitle() })} label="Copy iframe" />
           <CopyBlock value={scriptSnippet({ place: "latest", title: widgetTitle() })} label="Copy script" />
+        </section>
+
+        <section id="kits">
+          <h2>More free kits</h2>
+          <p>Other pages a newsroom, a library, a workplace, or a congregation can use. Each one is free, and each one credits the original reporting.</p>
+          <ul>
+            <li>
+              <Link href={FAITH_INDEX_PATH}>Faith community bulletins</Link>, a weekly pack for congregation newsletters and youth groups.
+            </li>
+            <li>
+              <Link href={CLASSROOM_INDEX_PATH}>Good News Friday</Link>, a printable pack for classrooms.
+            </li>
+            <li>
+              <Link href={MORNING_ANNOUNCEMENTS_PATH}>Morning announcements</Link>, a one-minute script for a school day.
+            </li>
+            <li>
+              <Link href="/widgets">News widgets</Link>, a headline list for a local site.
+            </li>
+            <li>
+              <Link href={GIFT_PATH}>Gift the daily email</Link>, a note a reader can send from their own inbox.
+            </li>
+          </ul>
         </section>
 
         <section id="contact">
