@@ -364,8 +364,14 @@ export function classroomJsonLd(options: {
   resources: { name: string; path: string }[];
   learningResourceType: "lesson plan" | "collection of lesson plans";
   timeRequired?: string;
+  /** Defaults to the classroom ages. Coach packs pass their own level. */
+  educationalLevel?: string;
+  /** Defaults to teacher. Coach packs pass coach. */
+  educationalRole?: string;
 }) {
   const itemType = options.learningResourceType === "lesson plan" ? "reading passage" : "lesson plan";
+  const level = options.educationalLevel ?? CLASSROOM_LEVEL;
+  const role = options.educationalRole ?? "teacher";
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -377,12 +383,12 @@ export function classroomJsonLd(options: {
         url: absoluteUrl(options.path),
         inLanguage: "en-US",
         isAccessibleForFree: true,
-        educationalLevel: CLASSROOM_LEVEL,
+        educationalLevel: level,
         learningResourceType: options.learningResourceType,
         ...(options.timeRequired ? { timeRequired: options.timeRequired } : {}),
         audience: {
           "@type": "EducationalAudience",
-          educationalRole: "teacher",
+          educationalRole: role,
         },
         author: {
           "@type": "Organization",
@@ -401,7 +407,7 @@ export function classroomJsonLd(options: {
               "@type": "LearningResource",
               name: resource.name,
               url: absoluteUrl(resource.path),
-              educationalLevel: CLASSROOM_LEVEL,
+              educationalLevel: level,
               learningResourceType: itemType,
               isAccessibleForFree: true,
             },

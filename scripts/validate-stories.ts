@@ -82,6 +82,26 @@ import {
   whereInTheWorld,
   type PackCandidate,
 } from "../lib/classroom-pack";
+import {
+  COACHES_INDEX_DESCRIPTION,
+  COACHES_INDEX_PATH,
+  COACHES_INDEX_TITLE,
+  COACHES_LEVEL,
+  COACHES_NOTE,
+  COACHES_PACK_MAX,
+  COACH_PROMPTS,
+  FREE_CHALLENGES,
+  buildCoachesPacks,
+  coachesBlockReason,
+  coachesPinErrors,
+  freeChallenge,
+  getCoachesPacks,
+  huddleSummary,
+  loadCoachesEditorConfig,
+  parseCoachesEditorConfig,
+  type CoachCandidate,
+} from "../lib/coaches-pack";
+import { denverDay, habitSurface, installPromptDue, markMilestone, nextStreak } from "../lib/habit";
 import { buildHubs, getHubIndex, indexableHubs, MAX_PRERENDERED_HUBS, MIN_CITY_INDEX_STORIES, MIN_HUB_STORIES, slugify, type HubStory } from "../lib/hubs";
 import { getStateByCode } from "../lib/states";
 import { assertKindnessHelpers, getKindnessChallenges, KINDNESS_INDEX_PATH } from "../lib/kindness";
@@ -4563,6 +4583,344 @@ function assertTableTalk() {
   );
 }
 
+function sampleCoachStory(partial: Partial<CoachCandidate> & Pick<CoachCandidate, "slug" | "date">): CoachCandidate {
+  return {
+    title: `Youth team story ${partial.slug}`,
+    dek: "Neighbors helped a youth team keep its season going.",
+    city: "Denver",
+    country: "US",
+    state: "CO",
+    category: "community",
+    tags: ["youth-sports", "kids"],
+    sourceName: "Local News",
+    sourceUrl: "https://example.com/youth-report",
+    image: `/images/stories/${partial.slug}.webp`,
+    imageAlt: "A photo from the coaches pack",
+    kidFriendly: true,
+    kidSummary: "A classroom summary already on the story, long enough to read aloud to a team without adding any new fact.",
+    kidQuestions: ["What did the people in this story do?", "How could a team try something kind this week?"],
+    howToHelp: [{ label: "Thank the town rec department", url: "https://example.org/thanks", kind: "thank" }],
+    ...partial,
+  };
+}
+
+function assertCoachesAndHabit() {
+  if (COACHES_INDEX_PATH !== "/coaches") throw new Error("The coaches index should live at /coaches.");
+  if (!COACHES_INDEX_TITLE.toLowerCase().includes("coaches")) {
+    throw new Error("The coaches index title should name coaches.");
+  }
+  if (!COACHES_INDEX_DESCRIPTION.toLowerCase().includes("team huddle")) {
+    throw new Error("The coaches index description should name the Team Huddle.");
+  }
+  if (!COACHES_NOTE.includes("parent volunteer") || !COACHES_NOTE.includes("Do not add a player's name")) {
+    throw new Error("The coach note should be a short how-to and should keep player names off shared posts.");
+  }
+  if (COACH_PROMPTS.length < 2 || COACH_PROMPTS.length > 3) throw new Error("Generic coach prompts should be 2 or 3 questions.");
+  if (huddleSummary(sampleCoachStory({ slug: "sum", date: "2026-10-07" })).source !== "kidSummary") {
+    throw new Error("A classroom summary should be the huddle text.");
+  }
+  const deckOnly = sampleCoachStory({ slug: "deck", date: "2026-10-07", kidSummary: undefined, kidQuestions: undefined, kidFriendly: false });
+  const deckSummary = huddleSummary(deckOnly);
+  if (deckSummary.source !== "dek" || deckSummary.text !== deckOnly.dek) {
+    throw new Error("Without a classroom summary, the deck is the huddle text, unchanged.");
+  }
+
+  const blocked: [CoachCandidate, string][] = [
+    [sampleCoachStory({ slug: "hurt", date: "2026-10-07", title: "A player was injured and then cheered on" }), "injury"],
+    [sampleCoachStory({ slug: "cpr", date: "2026-10-07", dek: "A player went into cardiac arrest at practice and later recovered." }), "injury"],
+    [sampleCoachStory({ slug: "loss", date: "2026-10-07", dek: "A coach died last winter and the team remembered him with a game." }), "death"],
+    [sampleCoachStory({ slug: "bet", date: "2026-10-07", title: "The league banned betting on youth games" }), "gambling"],
+    [sampleCoachStory({ slug: "scan", date: "2026-10-07", dek: "The club faced a scandal and then restarted its youth program." }), "scandal"],
+    [sampleCoachStory({ slug: "force", date: "2026-10-07", body: "The report mentioned use of force at the stadium before the youth game resumed." }), "use-of-force"],
+    [sampleCoachStory({ slug: "vote", date: "2026-10-07", title: "Players talked about the election" }), "politics"],
+    [sampleCoachStory({ slug: "hit", date: "2026-10-07", dek: "The story described an assault near the field and then a cleanup." }), "violence"],
+  ];
+  for (const [story, reason] of blocked) {
+    if (coachesBlockReason(story) !== reason) {
+      throw new Error(`${story.slug} should be blocked as ${reason}, got ${coachesBlockReason(story) ?? "nothing"}.`);
+    }
+  }
+  const cleared = sampleCoachStory({ slug: "safe", date: "2026-10-07", title: "No one was injured at the youth game" });
+  if (coachesBlockReason(cleared)) throw new Error("A story that says no one was injured should stay available.");
+  const phone = sampleCoachStory({
+    slug: "phone",
+    date: "2026-10-07",
+    dek: "The coach's phone died and the youth team still started on time.",
+  });
+  if (coachesBlockReason(phone)) throw new Error("A phone that died is not a death story.");
+
+  const kid = sampleCoachStory({ slug: "kid-sport", date: "2026-10-07" });
+  const olderPlain = sampleCoachStory({
+    slug: "newer-plain",
+    date: "2026-10-08",
+    kidFriendly: false,
+    kidSummary: undefined,
+    kidQuestions: undefined,
+  });
+  const pickedKid = buildCoachesPacks([olderPlain, kid], "2026-10-08")[0];
+  if (pickedKid?.stories[0]?.story.slug !== "kid-sport") {
+    throw new Error("A kid-friendly sports story should lead the huddle ahead of a newer story without classroom text.");
+  }
+  const kindness = sampleCoachStory({
+    slug: "meal",
+    date: "2026-10-08",
+    tags: ["kindness", "kids"],
+    title: "Neighbors shared a meal with students",
+    dek: "Students and neighbors sat down together.",
+  });
+  const sports = sampleCoachStory({
+    slug: "soccer",
+    date: "2026-10-07",
+    tags: ["youth-sports"],
+    kidFriendly: false,
+    kidSummary: undefined,
+    kidQuestions: undefined,
+    title: "The youth soccer team cheered for both sides",
+    dek: "Players from both teams stayed after the game to cheer.",
+  });
+  const sportsFirst = buildCoachesPacks([kindness, sports], "2026-10-08")[0];
+  if (sportsFirst?.stories[0]?.story.slug !== "soccer") {
+    throw new Error("A youth-sports story should be the huddle ahead of a general kindness story.");
+  }
+
+  const weekStories = ["one", "two", "three", "four", "five"].map((slug, index) =>
+    sampleCoachStory({ slug, date: addDays("2026-10-07", index) }),
+  );
+  const full = buildCoachesPacks(weekStories, "2026-10-11")[0];
+  if (!full || full.stories.length !== COACHES_PACK_MAX || full.archiveCount !== 0) {
+    throw new Error("A full week should stop at 5 stories from that week.");
+  }
+  const thin = buildCoachesPacks(
+    [
+      sampleCoachStory({ slug: "only", date: "2026-10-20" }),
+      sampleCoachStory({ slug: "earlier-a", date: "2026-10-07" }),
+      sampleCoachStory({ slug: "earlier-b", date: "2026-10-08" }),
+    ],
+    "2026-10-20",
+  );
+  const open = thin[thin.length - 1];
+  if (!open || open.start !== "2026-10-19" || open.stories.length < 3 || open.archiveCount < 1) {
+    throw new Error("A thin week should borrow archive stories so the page still has a huddle and more stories.");
+  }
+  if (!open.stories.some((card) => card.fromArchive) || !open.stories.some((card) => !card.fromArchive)) {
+    throw new Error("A thin week should mark archive stories and keep the story from that week.");
+  }
+  if (thin[0]?.start !== launchWeekStart()) throw new Error("Coach packs should start at launch week.");
+  const future = buildCoachesPacks([sampleCoachStory({ slug: "later", date: "2026-10-20" })], "2026-10-08");
+  if (future.length !== 1 || future[0]?.stories.length !== 0) {
+    throw new Error("A week that has not started should not be a page, and a future story should not fill the open week.");
+  }
+  const forward = buildCoachesPacks(weekStories, "2026-10-11")[0]?.stories.map((card) => card.story.slug).join(",");
+  const backward = buildCoachesPacks([...weekStories].reverse(), "2026-10-11")[0]?.stories.map((card) => card.story.slug).join(",");
+  if (!forward || forward !== backward) throw new Error("Coach selection should stay the same if the input order changes.");
+
+  const excluded = buildCoachesPacks(weekStories, "2026-10-11", { exclude: ["one"], weeks: {} })[0];
+  if (excluded?.stories.some((card) => card.story.slug === "one")) throw new Error("An excluded slug should stay off the week.");
+  const pinned = buildCoachesPacks(weekStories, "2026-10-11", {
+    exclude: [],
+    weeks: { "2026-10-05": { huddle: "five", include: ["four"] } },
+  })[0];
+  if (pinned?.stories[0]?.story.slug !== "five" || pinned.stories[1]?.story.slug !== "four") {
+    throw new Error("A pinned huddle and include list should lead the week in that order.");
+  }
+  const card = pinned?.stories[0];
+  if (!card || card.summary !== card.story.kidSummary || card.questionSource !== "story") {
+    throw new Error("Huddle text and questions should be copied from the story.");
+  }
+  if (!card.challenge.includes("Thank the town rec department")) {
+    throw new Error("A thank-you link already on the story should be the team challenge.");
+  }
+  const donated = sampleCoachStory({
+    slug: "gift",
+    date: "2026-10-07",
+    howToHelp: [{ label: "Send money to the club", url: "https://example.org/donate", kind: "donate" }],
+    kidSummary: undefined,
+    kidQuestions: undefined,
+    kidFriendly: false,
+  });
+  const donationCard = buildCoachesPacks([donated], "2026-10-08")[0]?.stories[0];
+  if (!donationCard || donationCard.challenge.includes("Send money") || !FREE_CHALLENGES.includes(donationCard.challenge as (typeof FREE_CHALLENGES)[number])) {
+    throw new Error("A donate link should not become the free team challenge.");
+  }
+  if (donationCard.challenge !== freeChallenge("gift") || donationCard.questionSource !== "prompts") {
+    throw new Error("Missing classroom questions should use the generic prompts, not new facts.");
+  }
+  if (donationCard.questions.join("|") !== COACH_PROMPTS.join("|")) {
+    throw new Error("Generic prompts should be copied as written.");
+  }
+
+  const nasty = sampleCoachStory({ slug: "nasty", date: "2026-10-07", title: `Youth team <script>alert("x")</script>` });
+  const nastyPack = buildCoachesPacks([nasty], "2026-10-08")[0];
+  if (!nastyPack || nastyPack.html.includes("<script>") || !nastyPack.html.includes("&lt;script&gt;")) {
+    throw new Error("The newsletter HTML should escape story titles.");
+  }
+  if (!nastyPack.plainText.includes(nasty.sourceName) || !nastyPack.plainText.includes(siteConfig.name) || !nastyPack.html.includes(siteConfig.name)) {
+    throw new Error("The newsletter should credit the site and the original outlet.");
+  }
+  if (!nastyPack.plainText.includes(nasty.sourceUrl) || !nastyPack.html.includes(escapeHtml(nasty.sourceUrl))) {
+    throw new Error("The newsletter should link the original report.");
+  }
+
+  const pinStory = sampleCoachStory({ slug: "pinned-hurt", date: "2026-10-07", title: "A player was injured" });
+  const pinErrors = coachesPinErrors([pinStory], { exclude: [], weeks: { "2026-10-05": { huddle: "pinned-hurt", include: [] } } });
+  if (!pinErrors.some((error) => error.includes("blocked"))) throw new Error("A blocked story cannot be pinned back on.");
+  const missing = coachesPinErrors([], { exclude: ["missing-slug"], weeks: {} });
+  if (!missing.some((error) => error.includes("missing-slug"))) throw new Error("An unknown exclude slug should fail.");
+  const late = coachesPinErrors([sampleCoachStory({ slug: "late", date: "2026-10-20" })], {
+    exclude: [],
+    weeks: { "2026-10-05": { huddle: "late", include: [] } },
+  });
+  if (!late.some((error) => error.includes("after the week"))) throw new Error("A pin dated after the week should fail.");
+  let threw = false;
+  try {
+    parseCoachesEditorConfig({ exclude: [], weeks: { "2026-10-06": {} } });
+  } catch {
+    threw = true;
+  }
+  if (!threw) throw new Error("A week key that is not a Monday should fail.");
+  const loaded = loadCoachesEditorConfig();
+  if (!Array.isArray(loaded.exclude) || typeof loaded.weeks !== "object") {
+    throw new Error("data/coaches-pack.json should load.");
+  }
+
+  const today = mountainDay();
+  const packs = getCoachesPacks();
+  const launch = launchWeekStart();
+  const current = weekStart(today);
+  const expected: string[] = [];
+  for (let cursor = launch; cursor <= current; cursor = addDays(cursor, 7)) expected.push(cursor);
+  if (packs.map((pack) => pack.start).join(",") !== expected.join(",")) {
+    throw new Error("Every Monday from launch through the open week should have a coaches page.");
+  }
+  const published = getPublishedStories();
+  for (const pack of packs) {
+    if (pack.path !== `/coaches/${pack.start}` || pack.start !== weekStart(pack.start)) {
+      throw new Error(`${pack.path} should be keyed to Monday.`);
+    }
+    if (pack.stories.length > COACHES_PACK_MAX) throw new Error(`${pack.path} has more than 5 stories.`);
+    if (pack.coachNote !== COACHES_NOTE) throw new Error(`${pack.path} is missing the coach note.`);
+    if (pack.stories[0] && pack.stories[0].role !== "huddle") throw new Error(`${pack.path} should lead with the Team Huddle.`);
+    const slugs = new Set<string>();
+    for (const item of pack.stories) {
+      if (slugs.has(item.story.slug)) throw new Error(`${pack.path} repeated ${item.story.slug}.`);
+      slugs.add(item.story.slug);
+      if (coachesBlockReason(item.story)) throw new Error(`${item.story.slug} is blocked and should not be in ${pack.path}.`);
+      const summary = huddleSummary(item.story);
+      if (item.summary !== summary.text) throw new Error(`${item.story.slug} huddle text is not the story field.`);
+      if (item.questionSource === "story") {
+        const onFile = item.story.kidQuestions ?? [];
+        for (const question of item.questions) {
+          if (!onFile.includes(question)) throw new Error(`${item.story.slug} gained a discussion question that is not on the story.`);
+        }
+      } else if (item.questions.join("|") !== COACH_PROMPTS.join("|")) {
+        throw new Error(`${item.story.slug} should use the generic prompts.`);
+      }
+      const help = (item.story.howToHelp ?? []).find((link) => link.kind === "thank" || link.kind === "volunteer");
+      if (help && !item.challenge.includes(help.label)) {
+        throw new Error(`${item.story.slug} dropped its how-to-help label.`);
+      }
+      if (!help && !FREE_CHALLENGES.includes(item.challenge as (typeof FREE_CHALLENGES)[number])) {
+        throw new Error(`${item.story.slug} challenge should be one of the free prompts.`);
+      }
+    }
+    if (!pack.plainText.includes(siteConfig.name) || !pack.html.includes(escapeHtml(siteConfig.name))) {
+      throw new Error(`${pack.path} should credit the publication.`);
+    }
+  }
+  if (published.length && packs.every((pack) => pack.stories.length === 0)) {
+    throw new Error("The coaches archive should find at least one matching story.");
+  }
+
+  const urls = sitemap().map((entry) => entry.url);
+  if (!urls.includes(absoluteUrl(COACHES_INDEX_PATH))) throw new Error("The sitemap should include /coaches.");
+  for (const pack of packs) {
+    if (!urls.includes(absoluteUrl(pack.path))) throw new Error(`The sitemap should include ${pack.path}.`);
+  }
+  const markup = JSON.stringify(
+    classroomJsonLd({
+      name: packs[0]?.title ?? COACHES_INDEX_TITLE,
+      description: COACHES_INDEX_DESCRIPTION,
+      path: packs[0]?.path ?? COACHES_INDEX_PATH,
+      crumbs: [{ name: "For coaches", path: COACHES_INDEX_PATH }],
+      resources: (packs[0]?.stories ?? []).map((card) => ({ name: card.story.title, path: `/story/${card.story.slug}` })),
+      learningResourceType: "lesson plan",
+      educationalLevel: COACHES_LEVEL,
+      educationalRole: "coach",
+      timeRequired: "PT5M",
+    }),
+  );
+  if (!markup.includes("LearningResource") || !markup.includes("coach") || !markup.includes(COACHES_LEVEL)) {
+    throw new Error("A coaches page should be a LearningResource for coaches.");
+  }
+
+  const linked = [
+    "components/footer.tsx",
+    "app/(site)/kids/browse.tsx",
+    "app/(site)/classroom/page.tsx",
+    "app/(site)/classroom/week/[start]/page.tsx",
+    "app/sitemap.ts",
+    "scripts/indexnow.ts",
+  ];
+  for (const file of linked) {
+    const text = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (!text.includes("COACHES_INDEX_PATH")) throw new Error(`${file} should link the coaches pages.`);
+  }
+  const guide = fs.readFileSync(path.join(process.cwd(), "ADDING_STORIES.md"), "utf8");
+  if (!guide.includes("data/coaches-pack.json") || !guide.includes('"huddle"')) {
+    throw new Error("ADDING_STORIES.md should explain the coaches pins file.");
+  }
+  for (const file of ["app/(site)/coaches/page.tsx", "app/(site)/coaches/[start]/page.tsx"]) {
+    const text = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+    if (text.includes("Jane ") || text.includes("By John")) throw new Error(`${file} should use the public masthead.`);
+    if (!text.includes("siteConfig.editor.name")) throw new Error(`${file} should credit the editorial team.`);
+  }
+  const home = fs.readFileSync(path.join(process.cwd(), "app/(site)/page.tsx"), "utf8");
+  if (!home.includes("StreakBadge")) throw new Error("The homepage should show the reading streak near the Top 5.");
+  if (home.includes("CoachesBanner") || home.includes("coaches-banner")) {
+    throw new Error("Coaches should not add a homepage banner.");
+  }
+
+  const sw = fs.readFileSync(path.join(process.cwd(), "public/sw.js"), "utf8");
+  for (const needle of ["passThrough", "shouldCache", "web-stories", ".xml", "/embed", "cache: \"default\""]) {
+    if (!sw.includes(needle)) throw new Error(`The service worker should keep ${needle} from being cached ahead of the network.`);
+  }
+  if (sw.includes("no-store")) throw new Error("The service worker should not bypass the HTTP cache.");
+  const manifest = fs.readFileSync(path.join(process.cwd(), "app/manifest.ts"), "utf8");
+  if (!manifest.includes("siteConfig.theme") || !manifest.includes('start_url: "/"') || !manifest.includes("SQUARE_LOGO")) {
+    throw new Error("The manifest should use the site theme, the homepage, and the square logo.");
+  }
+
+  const first = nextStreak(undefined, "2026-10-07");
+  if (first.record.count !== 1 || first.milestone) throw new Error("A first visit should be a 1-day streak.");
+  const second = nextStreak(first.record, "2026-10-08");
+  if (second.record.count !== 2 || second.milestone) throw new Error("The next Denver day should make it 2.");
+  const third = nextStreak(second.record, "2026-10-09");
+  if (third.record.count !== 3 || third.milestone !== 3) throw new Error("Day 3 should be a streak milestone.");
+  const same = nextStreak(third.record, "2026-10-09");
+  if (same.record.count !== 3 || same.milestone !== 3) throw new Error("Another visit the same day should not add a day.");
+  const marked = nextStreak(markMilestone(third.record, 3), "2026-10-09");
+  if (marked.milestone) throw new Error("A milestone should fire once.");
+  const reset = nextStreak(marked.record, "2026-10-11");
+  if (reset.record.count !== 1) throw new Error("A missed Denver day should start the streak over.");
+  const now = Date.parse("2026-11-01T12:00:00Z");
+  if (!installPromptDue(undefined, now)) throw new Error("A reader who has not seen the prompt should be eligible.");
+  if (installPromptDue(now, now + 13 * 24 * 60 * 60 * 1000)) throw new Error("The install prompt should wait 14 days.");
+  if (!installPromptDue(now, now + 14 * 24 * 60 * 60 * 1000)) throw new Error("The install prompt should be eligible again after 14 days.");
+  for (const path of ["/kids/print", "/widgets", "/embed/latest", "/web-stories/2026-10-07"]) {
+    if (habitSurface(path)) throw new Error(`${path} should not show the install prompt.`);
+  }
+  for (const path of ["/", "/coaches", "/story/example"]) {
+    if (!habitSurface(path)) throw new Error(`${path} should count as a reading visit.`);
+  }
+  const instant = new Date("2026-11-09T06:30:00Z");
+  if (denverDay(instant) !== mountainDay(instant)) {
+    throw new Error("The streak day should use the same Denver calendar as the edition week.");
+  }
+
+  const filled = packs.filter((pack) => pack.stories.length > 0).length;
+  console.log(`Coaches packs: ${packs.length} since ${launch}. Weeks with a huddle: ${filled}.`);
+}
+
 const stories = loadAllStories();
 
 async function main() {
@@ -4579,6 +4937,7 @@ async function main() {
   assertWeeks();
   assertGoodNewsIndex();
   assertClassroomPacks();
+  assertCoachesAndHabit();
   assertQuizzes();
   assertOnThisDay();
   assertPrerenderCoversArchive(stories.filter((story) => !story.draft).length);

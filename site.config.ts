@@ -19,6 +19,15 @@ export const siteConfig = {
   contactEmail: `cheers@${domain}`,
   locale: "en-US",
   /**
+   * Installed-app chrome and the generated icons.
+   * `background` is the page color. `color` is the browser theme-color.
+   */
+  theme: {
+    background: "#FFFBF4",
+    color: "#FFFBF4",
+    ink: "#1C2733",
+  },
+  /**
    * Public byline. Organization-style masthead, not a named person.
    * `blurb` is the short mission line shown with the masthead.
    */

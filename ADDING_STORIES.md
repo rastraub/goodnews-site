@@ -197,6 +197,32 @@ kidQuestions:
 - The teacher email is a separate signup on `/kids` for adults and educators. The list tag is `teachers`. Do not collect a child's name, age, school, or email. Classroom pages do not run ads.
 - A published story is also eligible for that week's Good News Quiz. Set `kidFriendly: true` when a teacher could use it in kid mode. See [docs/good-news-quiz.md](docs/good-news-quiz.md).
 
+### Good news for coaches
+
+`/coaches` lists a Team Huddle for every Monday since launch, newest first. `/coaches/2026-10-19` is one week. The date is the Monday of that week in the edition calendar, the same key as `/week`. A week with no new match still has a page. It borrows earlier stories that already cleared the filter, and it says those stories are from the archive.
+
+The huddle is a short read-aloud for a coach or a parent volunteer before practice, plus two to four more stories when the week has them. Selection looks at tags (`youth-sports`, `running`, `bikes`, `playgrounds`, `inclusion`, `trails`, and kid, student, kindness, or neighbor tags) and at words in the title and deck. `kidFriendly` stories are preferred. The page does not invent a summary, a question, or a fact. The read-aloud is `kidSummary` when the story has one, and the deck otherwise. Discussion questions are `kidQuestions` when the story has them. The team kindness challenge uses a `thank` or `volunteer` link already on the story when there is one. A donate link is not turned into the challenge.
+
+Stories that mention injuries, deaths, violence, use of force, politics, gambling or betting, or a scandal stay off the page. A pin cannot put one of those back.
+
+Editors change `data/coaches-pack.json`. Leave both lists empty and every week stays on the automatic pick.
+
+```json
+{
+  "exclude": ["a-story-slug"],
+  "weeks": {
+    "2026-10-19": {
+      "huddle": "palm-desert-adaptive-bikes",
+      "include": ["newberg-wheelchair-touchdown"]
+    }
+  }
+}
+```
+
+`exclude` drops a slug even when it would qualify. `weeks` keys are Mondays on or after launch week. `huddle` is the read-aloud for that week. `include` adds up to four more stories. A pinned story has to be published, dated on or before the Sunday of that week, and clear the content filter. It does not also have to match the automatic theme list, so an editor can keep a story the keywords missed. A bad slug, a duplicate, a Monday before launch, or a blocked story fails `npm run validate-stories` and the build.
+
+The pages are in the sitemap. A production deploy pings them through IndexNow with the other static pages. There is no homepage banner for this pack.
+
 ### Listening
 
 Story pages can read the headline, the dek, and the body aloud in the browser. The control uses the device's built-in speech. There is no audio file to add, and nothing is sent to a speech service. When a story has `kidSummary`, the page also offers a Kid version that reads the headline and that summary instead of the dek and the full body. Classroom pages (`/kids`, a state or country classroom page, the printable story of the day, and each week's classroom section) can read the listed kid summaries in order. If the browser cannot speak, the buttons are left off the page. A reader's speed and voice stay in their own browser.
