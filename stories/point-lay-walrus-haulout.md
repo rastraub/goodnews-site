@@ -23,8 +23,7 @@ howToHelp:
   - label: "The Conservation Fund"
     url: "https://www.conservationfund.org/"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

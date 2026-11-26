@@ -24,7 +24,6 @@ howToHelp:
   - label: "AdoptUSKids"
     url: "https://www.adoptuskids.org/"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

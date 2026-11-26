@@ -23,7 +23,6 @@ howToHelp:
   - label: "Learn CPR from the American Heart Association"
     url: "https://www.heart.org/"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

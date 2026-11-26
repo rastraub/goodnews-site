@@ -23,7 +23,6 @@ howToHelp:
   - label: "Read the KSL report"
     url: "https://www.ksl.com/article/51648021/couple-credits-donny-osmond-with-saving-their-house-after-smoker-fire"
     kind: learn
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true

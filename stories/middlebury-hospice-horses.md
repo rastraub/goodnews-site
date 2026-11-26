@@ -24,7 +24,6 @@ howToHelp:
   - label: "Read the WNDU story"
     url: "https://www.wndu.com/2026/11/24/hospice-patients-wish-horses-brings-morning-joy/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true
