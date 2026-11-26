@@ -25,7 +25,6 @@ howToHelp:
     url: "https://www.gov.br/icmbio/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "iG reported on November 25, 2026, that São Paulo Zoo has a Spix's macaw chick named Hope. She is the first of her species born at a Brazilian zoo. Keepers presented her on November 24. She weighed 12.4 grams when she hatched, and people had to help her out of the egg because she was turned the wrong way. Spix's macaws are extinct in the wild, which means none are known to be living free. Zoos and a government program are raising them in hopes of a future release. Hope is still being watched in a special center. Visitors can see two young males, but not this chick. The news is one hatching, not a return to the forest."
 kidQuestions:

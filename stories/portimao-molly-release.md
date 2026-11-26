@@ -28,6 +28,11 @@ featured: false
 cheers: 0
 draft: false
 editorApproved: true
+updates:
+  - date: "2026-11-25"
+    text: "The Portugal News reported that Molly's satellite tag showed about 640 kilometres in 27 days, a little more than 20 kilometres a day. She was southwest of the Algarve and heading toward Madeira. Zoomarine said her course and dives looked steady. The paper said it is too soon to call that direction a lasting route, or to know whether she will survive."
+    sourceName: "The Portugal News"
+    sourceUrl: "https://www.theportugalnews.com/news/2026-11-25/algarve-turtle-swims-640-km-after-ocean-release/1121932"
 ---
 
 A loggerhead named Molly, looked after in County Kerry since 2004, went back into the Atlantic on October 28. The Journal reported that she was lowered from a Portuguese navy ship about 12 miles off Portimão and swam off without hesitating.
