@@ -24,7 +24,6 @@ howToHelp:
   - label: "Read the WCHS story"
     url: "https://wchstv.com/news/local/one-church-thanksgiving-prepares-12000-thanksgiving-meals-for-those-in-eastern-kentucky"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

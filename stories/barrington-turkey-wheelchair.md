@@ -24,8 +24,7 @@ howToHelp:
   - label: "Read the NBC 10 story"
     url: "https://turnto10.com/news/local/custom-wheelchair-helps-rhode-island-turkey-walk-again-after-car-strike-november-24-2026"
     kind: learn
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true

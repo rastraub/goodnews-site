@@ -24,7 +24,6 @@ howToHelp:
   - label: "Read the KOAA story"
     url: "https://www.koaa.com/news/local-news/in-your-community/pueblo/hundreds-of-turkeys-handed-out-for-families-in-pueblo"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

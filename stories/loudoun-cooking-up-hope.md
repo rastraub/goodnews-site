@@ -25,7 +25,6 @@ howToHelp:
   - label: "Read the WTOP story"
     url: "https://wtop.com/virginia/2026/11/loudoun-co-students-cook-holiday-meals-for-families-living-in-hotels"
     kind: learn
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true

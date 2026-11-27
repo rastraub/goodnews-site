@@ -24,7 +24,6 @@ howToHelp:
   - label: "Read the FOX10 story"
     url: "https://www.fox10tv.com/2026/11/24/loggerhead-sea-turtles-released-into-gulf-dauphin-island/"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true
