@@ -27,7 +27,6 @@ howToHelp:
     url: "https://www.conservation.org/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "RNZ reported on November 26, 2026, that children on Totoya, a remote island in Fiji, learned from elders as well as from school. Forty-five students from the island's four villages wove food baskets, built a model of their island, and sailed on a double-hulled canoe called Uto ni Yalo. One elder was the last surviving sailor from Totoya. He named the parts of the canoe and taught the children to weave. Elders said they usually did that weaving themselves. The head teacher said lessons can also happen outside, such as measuring the playground. The pilot lasted three days. Using it in more Fiji schools is still ahead."
 kidQuestions:
