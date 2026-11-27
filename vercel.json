@@ -1,3 +1,9 @@
 {
-  "buildCommand": "next build || next build"
+  "buildCommand": "next build || next build",
+  "crons": [
+    {
+      "path": "/api/indexnow",
+      "schedule": "0 16 * * *"
+    }
+  ]
 }
