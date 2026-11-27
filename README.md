@@ -153,7 +153,7 @@ The byline on these pages is the Tazzora Editorial Team. Vote totals never inclu
 4. Add `SUBMISSION_WEBHOOK_URL` if tips should also reach a webhook. The filesystem on Vercel does not keep `inbox.jsonl`.
 5. Deploy. `main` (or a merged pull request) publishes the site.
 6. Add `tazzora.com` and `www.tazzora.com` in the Vercel project settings. Production currently redirects the apex to `www`, and absolute URLs in `site.config.ts` follow that host. The domain is registered at GoDaddy, so point those DNS records at Vercel after the project is deployed. A later rename is still just `site.config.ts`.
-7. Optional, for Search Console and Bing HTML-tag verification: set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` (see `.env.example`) and redeploy. A production build also pings IndexNow when `VERCEL_ENV=production`.
+7. Optional, for Search Console and Bing HTML-tag verification: set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` (see `.env.example`) and redeploy. Set `CRON_SECRET` as well. A production cron submits the day's new stories to IndexNow; the route refuses the request when `CRON_SECRET` is unset.
 
 Sitemaps and feeds:
 
