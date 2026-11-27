@@ -1159,3 +1159,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .tt-url{display:block;word-break:break-all}
   .tt-foot a{color:#000}
 }
+
+.preferred-source{display:grid;gap:8px;min-width:0;max-width:100%}
+.preferred-source-link{display:inline-flex;align-items:center;gap:8px;width:fit-content;max-width:100%;min-width:0;min-height:40px;height:auto;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:600;font-size:14px;line-height:1.25;white-space:normal}
+.preferred-source-link:hover{color:var(--ink)}
+.preferred-source-star{width:16px;height:16px;flex:none;color:var(--gold-d)}
+.preferred-source-help{margin:0;max-width:42ch;color:var(--muted);font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
+footer .preferred-source{margin-top:18px}
+footer .preferred-source-link,footer .preferred-source-link:hover{color:var(--ink)}
+footer .preferred-source-link:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
+footer .preferred-source-help{color:#AEB7C2}
+.preferred-source-story{margin-top:12px}
+.preferred-source-subscribe{padding:4px 0 72px}

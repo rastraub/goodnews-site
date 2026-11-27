@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./logo";
+import { PreferredSourceLink } from "./preferred-source-link";
 import { CATEGORIES } from "@/lib/categories";
 import { FIRST_RESPONDERS_DAY_PATH } from "@/lib/first-responders-day";
 import { editionYear } from "@/lib/format";
@@ -34,6 +35,7 @@ export function Footer() {
                 ))}
               </div>
             ) : null}
+            <PreferredSourceLink location="footer" />
           </div>
           <div>
             <p className="flabel">Read</p>
