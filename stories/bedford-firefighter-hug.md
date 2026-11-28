@@ -27,7 +27,6 @@ howToHelp:
   - label: "Read the NBC 5 story"
     url: "https://www.nbcdfw.com/news/local/you-dont-know-what-a-hug-can-do-drivers-praise-firefighter-who-saves-man-in-crisis/4111090/"
     kind: learn
-top5: 2
 cheers: 0
 draft: false
 editorApproved: true

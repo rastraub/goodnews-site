@@ -24,7 +24,6 @@ howToHelp:
   - label: "Read The Durango Herald story"
     url: "https://www.durangoherald.com/articles/news/community-thanksgiving-back-after-seven-years-serves-more-than-1400-meals-in-durango/"
     kind: learn
-top5: 4
 cheers: 0
 draft: false
 editorApproved: true

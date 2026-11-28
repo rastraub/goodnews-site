@@ -23,7 +23,6 @@ howToHelp:
   - label: "Read the FDA announcement"
     url: "https://www.fda.gov/drugs/news-events-human-drugs/fda-approves-first-locally-applied-treatment-reduce-surgical-site-infections-after-colorectal"
     kind: learn
-top5: 5
 cheers: 0
 draft: false
 editorApproved: true

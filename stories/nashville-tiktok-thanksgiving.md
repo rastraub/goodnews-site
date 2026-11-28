@@ -24,7 +24,6 @@ howToHelp:
   - label: "Read the WSMV story"
     url: "https://www.wsmv.com/2026/11/27/nashville-man-far-family-turns-tiktok-thanksgiving-invitations/"
     kind: learn
-top5: 3
 cheers: 0
 draft: false
 editorApproved: true

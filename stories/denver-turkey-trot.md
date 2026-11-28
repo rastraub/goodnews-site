@@ -24,8 +24,7 @@ howToHelp:
   - label: "Mile High United Way"
     url: "https://unitedwaydenver.org/"
     kind: donate
-featured: true
-top5: 1
+featured: false
 cheers: 0
 draft: false
 editorApproved: true
