@@ -27,7 +27,6 @@ howToHelp:
     url: "https://www.hokulea.com/"
     kind: learn
 featured: false
-worldPick: true
 kidFriendly: true
 kidSummary: "RNZ reported on November 27, 2026, that children in New Zealand's Far North are learning how their ancestors crossed the ocean. A festival at Aurere, on Doubtless Bay, brought sailing canoes from around the country, plus canoes from Hawaii and Vanuatu. Voyagers also came from Tahiti, Samoa, and Rarotonga. About 1,000 schoolchildren were expected, with about 1,000 other people. They can learn the stars, knots, and how to find the way using the wind and the sea. The gathering lasts six days. It is the first time this festival has been held in Northland."
 kidQuestions:
